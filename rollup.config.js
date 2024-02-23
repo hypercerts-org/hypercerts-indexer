@@ -7,8 +7,17 @@ const config = {
   output: {
     dir: "dist",
     format: "es",
+    sourcemap: true, // Source map generation must be turned on
   },
-  plugins: [nodeResolve(), typescript()],
+  plugins: [
+    nodeResolve(),
+    typescript(),
+    sentryRollupPlugin({
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      org: "hypercerts",
+      project: "hypercerts-indexer",
+    }),
+  ],
 };
 
 export default config;

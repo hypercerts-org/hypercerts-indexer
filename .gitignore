@@ -41,3 +41,6 @@ src/generated/
 
 dist
 .rollup.cache
+
+# Sentry Config File
+.env.sentry-build-plugin
