@@ -50,13 +50,3 @@ const config = {
 };
 
 export default config;
-
-// @/storage/getLastBlockIndexed (imported by "src/indexer/indexClaimsStored.ts")
-// @/storage/updateLastBlock (imported by "src/indexer/indexClaimsStored.ts")
-// @/monitoring (imported by "src/indexer/indexClaimsStored.ts")
-// @/parsing (imported by "src/indexer/indexClaimsStored.ts")
-// @/storage (imported by "src/indexer/indexClaimsStored.ts")
-
-// @/storage (imported by "src/indexer/indexClaimsStored.ts")
-// @/monitoring (imported by "src/indexer/indexClaimsStored.ts")
-// @/parsing (imported by "src/indexer/indexClaimsStored.ts")
