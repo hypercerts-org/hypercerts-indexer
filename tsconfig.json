@@ -15,8 +15,8 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "./dist",
-    "rootDirs": ["src"]
+    "outDir": "./build",
+    "rootDirs": ["src"],
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.json"],
   "exclude": ["node_modules"]
