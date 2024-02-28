@@ -23,6 +23,9 @@ Sentry.init({
       levels: ["error"],
     }),
   ],
+  enabled:
+    process.env.SENTRY_ENVIRONMENT === "production" ||
+    process.env.SENTRY_ENVIRONMENT === "staging",
   // Performance Monitoring
   tracesSampleRate: 1.0, //  Capture 100% of the transactions
   // Set sampling rate for profiling - this is relative to tracesSampleRate

@@ -35,13 +35,15 @@ const config = {
       }).map(([alias, value]) => ({
         find: new RegExp(`${alias.replace("/*", "")}`),
         replacement: path.resolve(
+          // eslint-disable-next-line no-undef
           process.cwd(),
-          `${value[0].replace("/*", "")}`
+          `${value[0].replace("/*", "")}`,
         ),
       })),
     }),
     esbuild(),
     sentryRollupPlugin({
+      // eslint-disable-next-line no-undef
       authToken: process.env.SENTRY_AUTH_TOKEN,
       org: "hypercerts",
       project: "hypercerts-indexer",

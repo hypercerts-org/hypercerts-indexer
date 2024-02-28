@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": ["es2020"],
+    "target": "esNext",
+    "lib": ["esNext"],
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,7 +16,7 @@
       "@/*": ["./src/*"]
     },
     "outDir": "./build",
-    "rootDirs": ["src"],
+    "rootDirs": ["src"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.json"],
   "exclude": ["node_modules"]

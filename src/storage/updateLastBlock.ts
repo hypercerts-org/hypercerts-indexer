@@ -1,24 +1,31 @@
 import { supabase } from "./supabaseClient";
 import { chainId } from "@/utils/constants";
-import { deployments } from "@hypercerts-org/sdk";
+import { getDeployment } from "@/utils";
+import { isAddress } from "viem";
 
-const selectedDeployment = () => {
-  switch (chainId) {
-    case "10":
-      return { ...deployments["10"], startBlock: 76066993n };
-    case "11155111":
-      return { ...deployments["11155111"], startBlock: 4421944n };
-    default:
-      throw new Error(`Unsupported chain ID: ${chainId}`);
-  }
-};
+/*
+ * This function updates the last block indexed for a given chain ID and contract address in the Supabase database.
+ *
+ * @param [blockNumber] - The block number to set as the last block indexed.
+ * @returns The last block indexed for the given chain ID and contract address.
+ *
+ * @example
+ * ```js
+ * const lastBlockIndexed = await updateLastBlock(123456n);
+ * ```
+ */
 
 export const updateLastBlock = async (blockNumber: bigint) => {
-  const deployment = selectedDeployment();
+  const deployment = getDeployment();
   const contractAddress = deployment.addresses?.HypercertMinterUUPS;
 
+  if (!contractAddress || !isAddress(contractAddress)) {
+    console.error(`Invalid contract address: ${contractAddress}`);
+    return;
+  }
+
   console.info(
-    `Setting last block ${blockNumber} for contract ${contractAddress}`
+    `Setting last block ${blockNumber} for contract ${contractAddress} on chain ${chainId} in database...`,
   );
   const { data, error } = await supabase
     .from("lastblockindexed")
@@ -32,11 +39,13 @@ export const updateLastBlock = async (blockNumber: bigint) => {
   if (error) {
     console.error(
       `Error while updating last block for contract ${contractAddress} on chain ${chainId} in database: `,
-      error
+      error,
     );
   }
 
-  console.info(`Last block updated for contract ${contractAddress} to ${blockNumber}`);
+  console.info(
+    `Last block updated for contract ${contractAddress} to ${blockNumber}`,
+  );
 
   return data;
 };
