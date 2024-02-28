@@ -1,12 +1,26 @@
 let isRunning = false;
 
+/*
+ * Utility function to run indexing method with a delay. When the method is running, it will skip the next interval.
+ *
+ * @param indexingMethod - method to run
+ * @param delay - delay in milliseconds
+ * @param args - arguments to pass to the indexing method
+ * @returns void
+ *
+ * @example
+ * ```js
+ * await runIndexing(indexingMethod, 1000, ...args);
+ * ```
+ *
+ */
 export const runIndexing = async (
-  indexingMethod: (...args: any[]) => Promise<void>,
+  indexingMethod: (...args: never[]) => Promise<void>,
   delay: number,
-  ...args: any[]
+  ...args: never[]
 ) => {
   if (isRunning) {
-    console.info("A batch is currently running. Skipping this interval.");
+    console.debug("Batch already running, skipping interval.");
     return;
   }
 

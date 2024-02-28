@@ -4,23 +4,24 @@ import { alchemyApiKey, chainId } from "@/utils/constants";
 
 const selectedNetwork = () => {
   switch (chainId) {
-    case "11155111":
+    case 11155111:
       return sepolia;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
 };
 
-const alchemyBaseUrl = () => {
+const alchemyUrl = (apiKey: string) => {
   switch (chainId) {
-    case "11155111":
-      return "https://eth-sepolia.g.alchemy.com/v2/";
+    case 11155111:
+      return `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
 };
 
+/* Returns a PublicClient instance for the configured network. */
 export const client: PublicClient = createPublicClient({
   chain: selectedNetwork(),
-  transport: http(`${alchemyBaseUrl()}${alchemyApiKey}`),
+  transport: http(alchemyUrl(alchemyApiKey)),
 });

@@ -3,47 +3,61 @@ import { parseClaimStoredEvent } from "@/parsing";
 import { storeHypercert } from "@/storage";
 import { getLastBlockIndexed } from "@/storage/getLastBlockIndexed";
 import { updateLastBlock } from "@/storage/updateLastBlock";
+import { fetchMetadataFromUri } from "@/fetching";
+
+/*
+ * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
+ * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the hypercerts in the
+ * database.
+ *
+ * @param [batchSize] - The number of logs to fetch and parse in each batch.
+ *
+ * @example
+ * ```js
+ * await indexClaimsStoredEvents({ batchSize: 1000n });
+ * ```
+ */
 
 export const indexClaimsStoredEvents = async ({ batchSize = 1000n }) => {
   const lastBlockIndexed = await getLastBlockIndexed();
-  const fromBlock = lastBlockIndexed?.[0]?.block_number
-    ? BigInt(lastBlockIndexed[0].block_number)
-    : 0n;
 
   // Get logs in batches
-  const { logs, toBlock } = await getClaimStoredLogs({
-    fromBlock,
+  const logsFound = await getClaimStoredLogs({
+    fromBlock: lastBlockIndexed?.blockNumber
+      ? BigInt(lastBlockIndexed.blockNumber)
+      : 0n,
     batchSize,
   });
 
-  // parse logs to get metadata, claimID, contractAddress and cid
-  const parsedLogs = await Promise.all(logs.map(parseClaimStoredEvent));
+  if (!logsFound) {
+    return;
+  }
 
-  // filter parsed logs that are invalid
-  const validParsedLogs = parsedLogs.flatMap((log) => {
-    if (log && log.metadata) return [log];
+  const { logs, toBlock } = logsFound;
+
+  // parse logs to get claimID, contractAddress and cid
+  const parsedEvents = logs.map(parseClaimStoredEvent).flatMap((claim) => {
+    if (claim) return [claim];
     return [];
   });
 
-  console.info(`Storing ${validParsedLogs.length} hypercerts`);
+  // fetch metadata from IPFS
+  const claimsToStore = await Promise.all(
+    parsedEvents.map(fetchMetadataFromUri),
+  );
+
+  console.info(`Storing ${claimsToStore.length} hypercerts`);
 
   // store hypercerts in the database
-  await Promise.all(
-    validParsedLogs.map((log) =>
-      storeHypercert(
-        log?.contractAddress,
-        log?.claimID,
-        log?.metadata,
-        log?.cid
-      )
-    )
-  )
+  await Promise.all(claimsToStore.map(storeHypercert))
     .catch((error) => {
       console.error("Error while storing hypercerts", error);
       return;
     })
     .then(async (storeResponse) => {
-      console.info(`Stored ${storeResponse?.length ?? 0} hypercerts`);
+      console.info(
+        `Stored ${storeResponse ? storeResponse.length : 0} hypercerts`,
+      );
       return await updateLastBlock(toBlock);
     });
 };
