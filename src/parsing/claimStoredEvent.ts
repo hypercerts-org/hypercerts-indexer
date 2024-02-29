@@ -1,4 +1,4 @@
-import { Address } from "viem";
+import { Address, isAddress } from "viem";
 import { HypercertMetadata } from "@hypercerts-org/sdk";
 
 export type ClaimData = {
@@ -24,6 +24,16 @@ export const parseClaimStoredEvent = (event: unknown) => {
     );
     return;
   }
+
+  if (!isAddress(event.address)) {
+    console.error(
+      `Invalid contract address for parsing claimStored event: `,
+      event.address,
+    );
+    return;
+  }
+
+  // TODO check on claimID uint256/bigint
 
   return {
     // @ts-expect-error args.claimID is not defined in event type
