@@ -6,6 +6,17 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:
+      PORT: ${{ variables.PORT }}
+      CHAIN_ID: ${{ variables.CHAIN_ID }}
+      BATCH_SIZE: ${{ variables.BATCH_SIZE }}
+      DELAY: ${{ variables.DELAY }}
+      SENTRY_ENVIRONMENT: ${{ variables.SENTRY_ENVIRONMENT }}
+      SUPABASE_HC_URL: ${{ variables.SUPABASE_HC_URL }}
+
+      ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      SUPABASE_HC_METADATA_API_KEY: ${{ secrets.SUPABASE_HC_METADATA_API_KEY }}
+
     permissions:
       # Required to checkout the code
       contents: read
@@ -26,4 +37,4 @@ jobs:
         # Set if: always() to also generate the report if tests are failing
         # Only works if you set `reportOnFailure: true` in your vite config as specified above
         if: always()
-        uses:  davelosert/vitest-coverage-report-action@v2
+        uses: davelosert/vitest-coverage-report-action@v2
