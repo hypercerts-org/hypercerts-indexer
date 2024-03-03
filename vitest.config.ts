@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
@@ -18,6 +18,11 @@ export default defineConfig({
         functions: 60,
         statements: 60,
       },
+      exclude: [
+        ...(configDefaults.coverage.exclude as string[]),
+        "**/database-generated.types.ts",
+        "**/database.types.ts",
+      ],
     },
   },
   resolve: {
