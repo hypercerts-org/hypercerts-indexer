@@ -1,11 +1,6 @@
 import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
 import { ClaimData } from "@/parsing/claimStoredEvent";
-import axios from "axios";
-
-type IPFSPointer = {
-  cid: string;
-  path: string;
-};
+import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -73,83 +68,4 @@ export const fetchMetadataFromUri = async (claim: ClaimData) => {
   }
 
   return { ...claim, metadata: metadata as HypercertMetadata };
-};
-
-const fetchFromIPFS = async (claim: ClaimData) => {
-  let metadata;
-  try {
-    metadata = await getFromIPFSGateways(claim.uri);
-  } catch (error) {
-    console.error(
-      `Failed to get metadata from IPFS for URI ${claim.uri} of claimID ${claim.claimID} on contract ${claim.contractAddress}`,
-      error,
-    );
-    return;
-  }
-
-  return metadata;
-};
-
-const fetchFromHTTPS = async (claim: ClaimData) => {
-  let metadata;
-  try {
-    metadata = await axios.get(claim.uri);
-  } catch (error) {
-    console.error(
-      `Failed to get metadata from URI ${claim.uri} of claimID ${claim.claimID} on contract ${claim.contractAddress}`,
-      error,
-    );
-    return;
-  }
-
-  return metadata;
-};
-
-const getFromIPFSGateways = async (
-  cidOrIpfsUri: string,
-  timeout: number = 10000,
-) => {
-  const pointer = getPointer(cidOrIpfsUri);
-
-  if (!pointer) {
-    return;
-  }
-
-  const res = await Promise.any([
-    axios.get(getDwebLinkGatewayUri(pointer), { timeout }),
-    axios.get(getNftStorageGatewayUri(pointer), { timeout }),
-    axios.get(getWeb3UpGatewayUri(pointer), { timeout }),
-  ]).catch((err) => {
-    console.error(`Failed to get ${cidOrIpfsUri} from any gateway`, err);
-  });
-
-  if (!res || !res.data) return;
-
-  return res.data;
-};
-const getPointer = (uri: string) => {
-  // Remove "ipfs://" and split CID from path
-  const split = uri.replace("ipfs://", "").split("/");
-  const cid = split.shift();
-
-  if (!cid) {
-    console.error(`No CID found in URI ${uri}`);
-    return;
-  }
-
-  const path = split.join("/");
-
-  return { cid, path } as IPFSPointer;
-};
-
-const getDwebLinkGatewayUri = (pointer: IPFSPointer) => {
-  return `https://${pointer.cid}.ipfs.dweb.link/${pointer.path}`;
-};
-
-const getNftStorageGatewayUri = (pointer: IPFSPointer) => {
-  return `https://${pointer.cid}.ipfs.nftstorage.link/${pointer.path}`;
-};
-
-const getWeb3UpGatewayUri = (pointer: IPFSPointer) => {
-  return `https://${pointer.cid}.ipfs.w3s.linke/${pointer.path}`;
 };

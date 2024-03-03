@@ -2,6 +2,7 @@ import { supabase } from "./supabaseClient";
 import { chainId } from "@/utils/constants";
 import { getDeployment } from "@/utils";
 import { isAddress } from "viem";
+import { Tables } from "@/types/database-generated.types";
 
 /*
  * This function updates the last block indexed for a given chain ID and contract address in the Supabase database.
@@ -15,7 +16,7 @@ import { isAddress } from "viem";
  * ```
  */
 
-export const updateLastBlock = async (blockNumber: bigint) => {
+export const updateLastBlockIndexed = async (blockNumber: bigint) => {
   const deployment = getDeployment();
   const contractAddress = deployment.addresses?.HypercertMinterUUPS;
 
@@ -27,20 +28,23 @@ export const updateLastBlock = async (blockNumber: bigint) => {
   console.info(
     `Setting last block ${blockNumber} for contract ${contractAddress} on chain ${chainId} in database...`,
   );
+
   const { data, error } = await supabase
     .from("lastblockindexed")
     .upsert({
-      chain_id: chainId,
-      contract_address: contractAddress?.toString(),
       block_number: blockNumber.toString(),
+      chain_id: chainId,
+      contract_address: contractAddress.toString(),
     })
-    .select();
+    .select()
+    .returns<Tables<"lastblockindexed">[]>();
 
   if (error) {
     console.error(
       `Error while updating last block for contract ${contractAddress} on chain ${chainId} in database: `,
       error,
     );
+    return;
   }
 
   console.info(

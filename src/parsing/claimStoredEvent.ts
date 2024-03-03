@@ -1,9 +1,18 @@
-import { Address } from "viem";
+import { isAddress } from "viem";
 import { HypercertMetadata } from "@hypercerts-org/sdk";
+
+type ClaimStoredEvent = {
+  address: string;
+  args: {
+    claimID: bigint;
+    uri: string;
+  };
+  [key: string]: unknown;
+};
 
 export type ClaimData = {
   claimID: bigint;
-  contractAddress: Address;
+  contractAddress: `0x${string}`;
   uri: string;
   metadata?: HypercertMetadata;
 };
@@ -15,9 +24,7 @@ export type ClaimData = {
  * @param event - The event object.
  * */
 export const parseClaimStoredEvent = (event: unknown) => {
-  // TODO checking on types
-  // @ts-expect-error args.claimID is not defined in event type
-  if (!event || !event.args || !event.args.claimID || !event.args.uri) {
+  if (!isClaimStoredEvent(event)) {
     console.error(
       `Invalid event or event args for parsing claimStored event: `,
       event,
@@ -25,12 +32,32 @@ export const parseClaimStoredEvent = (event: unknown) => {
     return;
   }
 
+  if (!isAddress(event.address)) {
+    console.error(
+      `Invalid contract address for parsing claimStored event: `,
+      event.address,
+    );
+    return;
+  }
+
+  // TODO check on claimID uint256/bigint
+
   return {
-    // @ts-expect-error args.claimID is not defined in event type
     claimID: event.args.claimID,
-    // @ts-expect-error address is not defined in event type
     contractAddress: event.address,
-    // @ts-expect-error args.uri is not defined in event type
     uri: event.args.uri,
   } as ClaimData;
 };
+
+function isClaimStoredEvent(event: unknown): event is ClaimStoredEvent {
+  return (
+    typeof event === "object" &&
+    event !== null &&
+    typeof event.args === "object" &&
+    event.args !== null &&
+    typeof event.args.claimID === "bigint" &&
+    typeof event.args.uri === "string" &&
+    typeof event.address === "string" &&
+    isAddress(event.address)
+  );
+}

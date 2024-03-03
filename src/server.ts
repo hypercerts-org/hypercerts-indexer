@@ -49,3 +49,5 @@ app.listen(port, () => {
   console.log(`Indexer listening on port ${port}`);
   runIndexing(indexClaimsStoredEvents, delay, { batchSize });
 });
+
+export { app };
