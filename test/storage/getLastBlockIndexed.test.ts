@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getLastBlockIndexed } from "@/storage/getLastBlockIndexed";
+import {
+  getLastBlockIndexed,
+  LastBlockIndexedParams,
+} from "@/storage/getLastBlockIndexed";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
 import { supabaseUrl } from "../../src/utils/constants";
@@ -7,7 +10,7 @@ import { supabaseUrl } from "../../src/utils/constants";
 describe("getLastBlockIndexed", {}, () => {
   it("returns the last block indexed", {}, async () => {
     server.use(
-      http.get(`${supabaseUrl}/rest/v1/lastblockindexed`, (req) => {
+      http.get(`${supabaseUrl}/rest/v1/lastblockindexed`, () => {
         return HttpResponse.json([
           {
             block_number: 123456,
@@ -27,7 +30,9 @@ describe("getLastBlockIndexed", {}, () => {
       chainId: "HELLO",
       contractAddress: "0x1234...5678",
     };
-    const lastBlockIndexed = await getLastBlockIndexed(invalidParams as any);
+    const lastBlockIndexed = await getLastBlockIndexed(
+      invalidParams as unknown as LastBlockIndexedParams,
+    );
 
     expect(lastBlockIndexed).toBeUndefined();
   });
@@ -37,7 +42,9 @@ describe("getLastBlockIndexed", {}, () => {
       chainId: 1,
       contractAddress: "HELLO",
     };
-    const lastBlockIndexed = await getLastBlockIndexed(invalidParams as any);
+    const lastBlockIndexed = await getLastBlockIndexed(
+      invalidParams as unkown as LastBlockIndexedPa,
+    );
 
     expect(lastBlockIndexed).toBeUndefined();
   });
@@ -46,7 +53,7 @@ describe("getLastBlockIndexed", {}, () => {
     server.use(
       http.get(
         `${supabaseUrl}/rest/v1/lastblockindexed`,
-        (req) => {
+        () => {
           return new Response(JSON.stringify([]));
         },
         { once: true },
@@ -62,11 +69,11 @@ describe("getLastBlockIndexed", {}, () => {
     server.use(
       http.get(
         `${supabaseUrl}/rest/v1/lastblockindexed`,
-        (req) => {
+        () => {
           return new Response(
             JSON.stringify([
               {
-                notBlockNuber: 1,
+                notBlockNumber: 1,
               },
             ]),
           );

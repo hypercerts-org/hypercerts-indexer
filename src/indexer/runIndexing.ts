@@ -1,3 +1,5 @@
+import { IndexerConfig } from "@/indexer/indexClaimsStored";
+
 let isRunning = false;
 
 /*
@@ -15,9 +17,9 @@ let isRunning = false;
  *
  */
 export const runIndexing = async (
-  indexingMethod: (...args: never[]) => Promise<void>,
+  indexingMethod: (config: IndexerConfig) => Promise<void>,
   delay: number,
-  ...args: never[]
+  config: IndexerConfig,
 ) => {
   if (isRunning) {
     console.debug("Batch already running, skipping interval.");
@@ -27,11 +29,11 @@ export const runIndexing = async (
   isRunning = true;
 
   try {
-    await indexingMethod(...args);
+    await indexingMethod(config);
   } catch (error) {
     console.error("Failed to index claims stored events", error);
   } finally {
     isRunning = false;
-    setTimeout(runIndexing, delay, indexingMethod, delay, ...args);
+    setTimeout(runIndexing, delay, indexingMethod, delay, config);
   }
 };

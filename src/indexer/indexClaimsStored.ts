@@ -20,7 +20,15 @@ import { fetchMetadataFromUri } from "@/fetching";
  * ```
  */
 
-export const indexClaimsStoredEvents = async ({ batchSize = 1000n }) => {
+export type IndexerConfig = {
+  batchSize?: bigint;
+};
+
+const defaultConfig = { batchSize: 1000n };
+
+export const indexClaimsStoredEvents = async ({
+  batchSize = defaultConfig.batchSize,
+}: IndexerConfig = defaultConfig) => {
   const lastBlockIndexed = await getLastBlockIndexed();
 
   // Get logs in batches

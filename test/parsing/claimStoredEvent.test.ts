@@ -18,7 +18,6 @@ describe("claimStoredEvent", {}, () => {
 
     const parsed = parseClaimStoredEvent(event);
 
-    console.log(parsed);
     expect(parsed).toEqual({
       contractAddress: address,
       uri,

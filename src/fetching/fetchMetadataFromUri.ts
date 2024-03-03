@@ -1,7 +1,6 @@
 import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
 import { ClaimData } from "@/parsing/claimStoredEvent";
 import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
-import * as console from "console";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -58,7 +57,6 @@ export const fetchMetadataFromUri = async (claim: ClaimData) => {
     return claim;
   }
 
-  console.log("metadata", metadata);
   const validation = validateMetaData(metadata);
 
   if (!validation.valid) {

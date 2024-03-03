@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { storeHypercert } from "../../src/storage";
-import { default_contractAddress } from "../setup-env";
+import { default_contractAddress } from "../handlers";
 import { mockMetadata } from "../resources/mockMetadata";
 
 describe("storeHypercert", {}, async () => {
@@ -8,7 +8,7 @@ describe("storeHypercert", {}, async () => {
     const claim = {
       contractAddress: default_contractAddress as `0x${string}`,
       claimID: 1n,
-      uri: "ipfs://metadataCID",
+      uri: "ipfs://metadataCIDstoreHypercert",
       metadata: mockMetadata,
     };
 

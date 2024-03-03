@@ -4,7 +4,7 @@ import {
   default_blockNumber,
   default_chainID,
   default_contractAddress,
-} from "../setup-env";
+} from "../handlers";
 
 describe("updateLastBlockIndexed", {}, async () => {
   it("update the last block indexed in DB", {}, async () => {
@@ -12,10 +12,13 @@ describe("updateLastBlockIndexed", {}, async () => {
       BigInt(default_blockNumber),
     );
 
+    if (!lastBlockIndexed) {
+      throw new Error("lastBlockIndexed is undefined");
+    }
+
     expect(lastBlockIndexed).toBeDefined();
     expect(lastBlockIndexed.length).toEqual(1);
 
-    // @ts-expect-error - TS doesn't know that lastBlockIndexed is an array
     const lastBlockIndexedData = lastBlockIndexed[0];
 
     expect(lastBlockIndexedData.block_number).toEqual(default_blockNumber);

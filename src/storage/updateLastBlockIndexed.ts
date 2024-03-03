@@ -37,7 +37,7 @@ export const updateLastBlockIndexed = async (blockNumber: bigint) => {
       contract_address: contractAddress.toString(),
     })
     .select()
-    .returns<Tables<"lastblockindexed">>();
+    .returns<Tables<"lastblockindexed">[]>();
 
   if (error) {
     console.error(

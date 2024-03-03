@@ -50,21 +50,17 @@ const getFromIPFSGateways = async (
 ) => {
   const pointer = getPointer(cidOrIpfsUri);
 
-  console.debug(pointer);
-
   if (!pointer) {
     return;
   }
 
-  const res = await Promise.any([
+  return await Promise.any([
     axios.get(getDwebLinkGatewayUri(pointer), { timeout }),
     axios.get(getNftStorageGatewayUri(pointer), { timeout }),
     axios.get(getWeb3UpGatewayUri(pointer), { timeout }),
   ]).catch((err) => {
     console.error(`Failed to get ${cidOrIpfsUri} from any gateway`, err);
   });
-
-  return res;
 };
 
 const getPointer = (uri: string) => {
@@ -78,8 +74,6 @@ const getPointer = (uri: string) => {
   }
 
   const path = split.join("/");
-
-  console.debug(`URI: ${cid} CID: ${cid}, Path: ${path}`);
 
   return { cid, path } as IPFSPointer;
 };
