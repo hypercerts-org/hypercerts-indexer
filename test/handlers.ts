@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { supabaseUrl } from "../.rollup.cache/Users/ken/dev/hypercerts-indexer/build/utils/constants";
+import { supabaseUrl } from "../src/utils/constants";
 
 export const default_blockNumber = 123456;
 export const default_chainID = 1337;
