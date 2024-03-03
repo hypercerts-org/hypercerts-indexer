@@ -11,7 +11,7 @@ type LastBlockIndexed = {
 
 const deployment = getDeployment();
 
-type LastBlockIndexedParams = {
+export type LastBlockIndexedParams = {
   chainId?: number;
   contractAddress?: string;
 };
