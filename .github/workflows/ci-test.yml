@@ -7,12 +7,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      PORT: ${{ variables.PORT }}
-      CHAIN_ID: ${{ variables.CHAIN_ID }}
-      BATCH_SIZE: ${{ variables.BATCH_SIZE }}
-      DELAY: ${{ variables.DELAY }}
-      SENTRY_ENVIRONMENT: ${{ variables.SENTRY_ENVIRONMENT }}
-      SUPABASE_HC_URL: ${{ variables.SUPABASE_HC_URL }}
+      PORT: ${{ vars.PORT }}
+      CHAIN_ID: ${{ vars.CHAIN_ID }}
+      BATCH_SIZE: ${{ vars.BATCH_SIZE }}
+      DELAY: ${{ vars.DELAY }}
+      SENTRY_ENVIRONMENT: ${{ vars.SENTRY_ENVIRONMENT }}
+      SUPABASE_HC_URL: ${{ vars.SUPABASE_HC_URL }}
 
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       SUPABASE_HC_METADATA_API_KEY: ${{ secrets.SUPABASE_HC_METADATA_API_KEY }}
