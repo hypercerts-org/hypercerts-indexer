@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient";
 import { chainId } from "@/utils/constants";
 import { ClaimData } from "@/parsing/claimStoredEvent";
+import { Tables } from "@/types/database-generated.types";
 
 /* 
     This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
@@ -26,12 +27,11 @@ import { ClaimData } from "@/parsing/claimStoredEvent";
 export const storeHypercert = async (claim: ClaimData) => {
   const { contractAddress, claimID, metadata, uri } = claim;
 
-  console.log(metadata?.properties);
   const { data, error } = await supabase
     .from("hypercerts")
     .upsert({
-      contract_address: contractAddress.toString(),
       chain_id: chainId,
+      contract_address: contractAddress,
       token_id: claimID.toString(),
       name: metadata?.name,
       description: metadata?.description,
@@ -48,7 +48,8 @@ export const storeHypercert = async (claim: ClaimData) => {
       cid: uri,
       properties: metadata?.properties,
     })
-    .select();
+    .select()
+    .returns<Tables<"hypercerts">>();
 
   if (error) {
     console.error(

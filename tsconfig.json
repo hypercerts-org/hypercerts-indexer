@@ -16,7 +16,10 @@
       "@/*": ["./src/*"]
     },
     "outDir": "./build",
-    "rootDirs": ["src"]
+    "rootDirs": [
+      "src"
+    ],
+    "baseUrl": "."
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.json"],
   "exclude": ["node_modules"]

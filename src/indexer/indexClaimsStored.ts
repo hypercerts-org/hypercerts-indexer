@@ -1,8 +1,10 @@
 import { getClaimStoredLogs } from "@/monitoring";
 import { parseClaimStoredEvent } from "@/parsing";
-import { storeHypercert } from "@/storage";
-import { getLastBlockIndexed } from "@/storage/getLastBlockIndexed";
-import { updateLastBlock } from "@/storage/updateLastBlock";
+import {
+  getLastBlockIndexed,
+  storeHypercert,
+  updateLastBlockIndexed,
+} from "@/storage";
 import { fetchMetadataFromUri } from "@/fetching";
 
 /*
@@ -58,6 +60,6 @@ export const indexClaimsStoredEvents = async ({ batchSize = 1000n }) => {
       console.info(
         `Stored ${storeResponse ? storeResponse.length : 0} hypercerts`,
       );
-      return await updateLastBlock(toBlock);
+      return await updateLastBlockIndexed(toBlock);
     });
 };

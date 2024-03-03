@@ -1,23 +1,82 @@
-import { describe, it, expect } from "vitest";
-import { supabase } from "../../src/storage/supabaseClient";
-import { getLastBlockIndexed } from "../../src/storage/getLastBlockIndexed";
-import sinon from "sinon";
-
-const lastblock = [
-  {
-    block_number: 123456,
-    chain_id: 420,
-    contract_address: "0x1234...5678",
-  },
-];
+import { describe, expect, it } from "vitest";
+import { getLastBlockIndexed } from "@/storage/getLastBlockIndexed";
+import { server } from "../setup-env";
+import { http, HttpResponse } from "msw";
+import { supabaseUrl } from "../../src/utils/constants";
 
 describe("getLastBlockIndexed", {}, () => {
-  const rpcStub = sinon.stub(supabase, "rest");
   it("returns the last block indexed", {}, async () => {
-    // TODO intercept call and return mocked lastBlock https://nygaard.dev/blog/testing-supabase-rtl-msw
-    rpcStub.returns(lastblock);
+    server.use(
+      http.get(`${supabaseUrl}/rest/v1/lastblockindexed`, (req) => {
+        return HttpResponse.json([
+          {
+            block_number: 123456,
+          },
+        ]);
+      }),
+    );
+
     const lastBlockIndexed = await getLastBlockIndexed();
 
-    expect(lastBlockIndexed).toEqual(lastblock[0]);
+    expect(lastBlockIndexed).toBeDefined();
+    expect(lastBlockIndexed?.blockNumber).toEqual(123456);
+  });
+
+  it("returns undefined if chain ID is invalid", {}, async () => {
+    const invalidParams = {
+      chainId: "HELLO",
+      contractAddress: "0x1234...5678",
+    };
+    const lastBlockIndexed = await getLastBlockIndexed(invalidParams as any);
+
+    expect(lastBlockIndexed).toBeUndefined();
+  });
+
+  it("returns undefined if contract address is invalid", {}, async () => {
+    const invalidParams = {
+      chainId: 1,
+      contractAddress: "HELLO",
+    };
+    const lastBlockIndexed = await getLastBlockIndexed(invalidParams as any);
+
+    expect(lastBlockIndexed).toBeUndefined();
+  });
+
+  it("returns undefined if no data was returned", {}, async () => {
+    server.use(
+      http.get(
+        `${supabaseUrl}/rest/v1/lastblockindexed`,
+        (req) => {
+          return new Response(JSON.stringify([]));
+        },
+        { once: true },
+      ),
+    );
+
+    const lastBlockIndexed = await getLastBlockIndexed();
+
+    expect(lastBlockIndexed).toBeUndefined();
+  });
+
+  it("returns undefined if no block number is found", {}, async () => {
+    server.use(
+      http.get(
+        `${supabaseUrl}/rest/v1/lastblockindexed`,
+        (req) => {
+          return new Response(
+            JSON.stringify([
+              {
+                notBlockNuber: 1,
+              },
+            ]),
+          );
+        },
+        { once: true },
+      ),
+    );
+
+    const lastBlockIndexed = await getLastBlockIndexed();
+
+    expect(lastBlockIndexed).toBeUndefined();
   });
 });

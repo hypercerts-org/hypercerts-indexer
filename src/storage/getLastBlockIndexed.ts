@@ -41,7 +41,7 @@ export const getLastBlockIndexed = async ({
   chainId = defaultParams.chainId,
   contractAddress = defaultParams.contractAddress,
 }: LastBlockIndexedParams = defaultParams) => {
-  if (!chainId) {
+  if (!chainId || !Number.isInteger(chainId)) {
     console.error(`Invalid chain ID: ${chainId}`);
     return;
   }
@@ -57,11 +57,12 @@ export const getLastBlockIndexed = async ({
     .eq("chain_id", chainId)
     .eq("contract_address", contractAddress);
 
-  if (error) {
+  if (!data) {
     console.error(
       `Error while fetching last block indexed for chain ID ${chainId} and contract ${contractAddress}`,
       error,
     );
+    return;
   }
 
   const block_number = data?.[0]?.block_number;
