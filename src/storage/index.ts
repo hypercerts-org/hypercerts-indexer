@@ -6,6 +6,7 @@ import {
 } from "@/storage/storeSupportedSchemas";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
 import { getHypercertContracts } from "@/storage/getHypercertContracts";
+import { storeHypercertContract } from "@/storage/storeHypercertContract";
 
 export {
   getHypercertContracts,
@@ -14,5 +15,5 @@ export {
   storeSupportedSchemas,
   storeSupportedSchema,
   getSupportedSchemas,
-  storeHypercertContrac,
+  storeHypercertContract,
 };
