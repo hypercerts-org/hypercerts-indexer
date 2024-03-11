@@ -1,1 +1,0 @@
-alter table if exists public.hypercerts add properties jsonb[];

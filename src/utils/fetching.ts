@@ -1,4 +1,3 @@
-import { ClaimData } from "@/parsing/claimStoredEvent";
 import axios from "axios";
 
 export type IPFSPointer = {
@@ -6,9 +5,9 @@ export type IPFSPointer = {
   path: string;
 };
 
-export const fetchFromIPFS = async (claim: ClaimData) => {
+export const fetchFromIPFS = async ({ uri }: { uri: string }) => {
   try {
-    const res = await getFromIPFSGateways(claim.uri);
+    const res = await getFromIPFSGateways(uri);
 
     if (!res || !res.data) {
       return;
@@ -16,17 +15,14 @@ export const fetchFromIPFS = async (claim: ClaimData) => {
 
     return res.data;
   } catch (error) {
-    console.error(
-      `Failed to get metadata from IPFS for URI ${claim.uri} of claimID ${claim.claimID} on contract ${claim.contractAddress}`,
-      error,
-    );
+    console.error(`Failed to get metadata from IPFS for URI ${uri}`, error);
     return;
   }
 };
 
-export const fetchFromHTTPS = async (claim: ClaimData) => {
+export const fetchFromHTTPS = async ({ uri }: { uri: string }) => {
   // URL validation
-  const url = new URL(claim.uri);
+  const url = new URL(uri);
   try {
     const res = await axios.get(url.toString());
 
@@ -36,10 +32,7 @@ export const fetchFromHTTPS = async (claim: ClaimData) => {
 
     return res.data;
   } catch (error) {
-    console.error(
-      `Failed to get metadata from URI ${claim.uri} of claimID ${claim.claimID} on contract ${claim.contractAddress}`,
-      error,
-    );
+    console.error(`Failed to get metadata from URI ${uri} `, error);
     return;
   }
 };

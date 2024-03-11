@@ -1,13 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
-
-dotenv.config();
-
-import { port, batchSize, delay } from "./utils/constants";
+import { batchSize, delay, port } from "./utils/constants";
 import { indexClaimsStoredEvents, runIndexing } from "./indexer";
 import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { captureConsoleIntegration } from "@sentry/integrations";
+import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas";
+import { indexAttestations } from "@/indexer/indexAttestations";
+
+dotenv.config();
+
+BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString());
+  return int ?? this.toString();
+};
 
 const app = express();
 
@@ -47,7 +53,12 @@ app.use(Sentry.Handlers.errorHandler());
 
 app.listen(port, () => {
   console.log(`Indexer listening on port ${port}`);
-  runIndexing(indexClaimsStoredEvents, delay, { batchSize });
+  // runIndexing(indexClaimsStoredEvents, delay, { batchSize });
+  runIndexing(
+    [indexSupportedSchemas, indexAttestations, indexClaimsStoredEvents],
+    delay,
+    { batchSize },
+  );
 });
 
 export { app };

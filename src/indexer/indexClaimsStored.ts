@@ -1,11 +1,10 @@
 import { getClaimStoredLogs } from "@/monitoring";
 import { parseClaimStoredEvent } from "@/parsing";
-import {
-  getLastBlockIndexed,
-  storeHypercert,
-  updateLastBlockIndexed,
-} from "@/storage";
+import { storeHypercertContract, storeHypercerts } from "@/storage";
 import { fetchMetadataFromUri } from "@/fetching";
+import { getDeployment } from "@/utils";
+import { getHypercertContracts } from "@/storage/getHypercertContracts";
+import { IndexerConfig } from "@/types/types";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -19,55 +18,57 @@ import { fetchMetadataFromUri } from "@/fetching";
  * await indexClaimsStoredEvents({ batchSize: 1000n });
  * ```
  */
-
-export type IndexerConfig = {
-  batchSize?: bigint;
-};
-
 const defaultConfig = { batchSize: 1000n };
 
 export const indexClaimsStoredEvents = async ({
   batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
-  const lastBlockIndexed = await getLastBlockIndexed();
+  const { chainId } = getDeployment();
+  const hypercert_contracts = await getHypercertContracts({ chainId });
 
-  // Get logs in batches
-  const logsFound = await getClaimStoredLogs({
-    fromBlock: lastBlockIndexed?.blockNumber
-      ? BigInt(lastBlockIndexed.blockNumber)
-      : 0n,
-    batchSize,
-  });
-
-  if (!logsFound) {
+  if (!hypercert_contracts || hypercert_contracts.length === 0) {
+    console.error("No hypercert contracts found");
     return;
   }
 
-  const { logs, toBlock } = logsFound;
+  await Promise.all(
+    hypercert_contracts.map(async (contract) => {
+      const { last_block_indexed } = contract;
 
-  // parse logs to get claimID, contractAddress and cid
-  const parsedEvents = logs.map(parseClaimStoredEvent).flatMap((claim) => {
-    if (claim) return [claim];
-    return [];
-  });
+      // Get logs in batches
+      const logsFound = await getClaimStoredLogs({
+        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : 0n,
+        batchSize,
+      });
 
-  // fetch metadata from IPFS
-  const claimsToStore = await Promise.all(
-    parsedEvents.map(fetchMetadataFromUri),
-  );
+      if (!logsFound) {
+        return;
+      }
 
-  console.info(`Storing ${claimsToStore.length} hypercerts`);
+      const { logs, toBlock } = logsFound;
 
-  // store hypercerts in the database
-  await Promise.all(claimsToStore.map(storeHypercert))
-    .catch((error) => {
-      console.error("Error while storing hypercerts", error);
-      return;
-    })
-    .then(async (storeResponse) => {
-      console.info(
-        `Stored ${storeResponse ? storeResponse.length : 0} hypercerts`,
+      // parse logs to get claimID, contractAddress and cid
+      // fetch metadata from IPFS
+      const parsedEvents = await Promise.all(
+        logs.map(
+          async (log) =>
+            await parseClaimStoredEvent(log).then(
+              async (hypercert) =>
+                await fetchMetadataFromUri({
+                  hypercert,
+                }),
+            ),
+        ),
       );
-      return await updateLastBlockIndexed(toBlock);
-    });
+
+      await storeHypercerts({ hypercerts: parsedEvents, contract }).then(() =>
+        storeHypercertContract({
+          contract: {
+            ...contract,
+            last_block_indexed: toBock,
+          },
+        }),
+      );
+    }),
+  );
 };

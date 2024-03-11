@@ -34,84 +34,177 @@ export interface Database {
   };
   public: {
     Tables: {
-      hypercerts: {
+      attestations: {
+        Row: {
+          attestation: Json;
+          attestation_uid: string;
+          attester_address: string;
+          block_timestamp: number;
+          chain_id: number | null;
+          contract_address: string | null;
+          decoded_attestation: Json;
+          id: string;
+          recipient_address: string;
+          supported_schemas_id: string;
+          token_id: number | null;
+        };
+        Insert: {
+          attestation: Json;
+          attestation_uid: string;
+          attester_address: string;
+          block_timestamp: number;
+          chain_id?: number | null;
+          contract_address?: string | null;
+          decoded_attestation: Json;
+          id?: string;
+          recipient_address: string;
+          supported_schemas_id: string;
+          token_id?: number | null;
+        };
+        Update: {
+          attestation?: Json;
+          attestation_uid?: string;
+          attester_address?: string;
+          block_timestamp?: number;
+          chain_id?: number | null;
+          contract_address?: string | null;
+          decoded_attestation?: Json;
+          id?: string;
+          recipient_address?: string;
+          supported_schemas_id?: string;
+          token_id?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "attestations_supported_schemas_id_fkey";
+            columns: ["supported_schemas_id"];
+            isOneToOne: false;
+            referencedRelation: "supported_schemas";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      hypercert_contracts: {
         Row: {
           chain_id: number;
-          cid: string | null;
           contract_address: string;
+          id: string;
+          last_block_indexed: number | null;
+        };
+        Insert: {
+          chain_id: number;
+          contract_address: string;
+          id?: string;
+          last_block_indexed?: number | null;
+        };
+        Update: {
+          chain_id?: number;
+          contract_address?: string;
+          id?: string;
+          last_block_indexed?: number | null;
+        };
+        Relationships: [];
+      };
+      hypercerts: {
+        Row: {
+          block_timestamp: number;
+          claim_id: number;
           contributors: string[] | null;
           description: string | null;
           external_url: string | null;
-          id: string | null;
+          hypercert_contracts_id: string;
+          id: string;
           image: string | null;
           impact_scope: string[] | null;
           impact_timeframe_from: number | null;
           impact_timeframe_to: number | null;
           name: string | null;
-          properties: Json[] | null;
+          properties: Json | null;
           rights: string[] | null;
-          token_id: number;
+          uri: string | null;
           work_scope: string[] | null;
           work_timeframe_from: number | null;
           work_timeframe_to: number | null;
+          name_description: Record<string, unknown> | null;
+          work_impact_scopes: Record<string, unknown> | null;
         };
         Insert: {
-          chain_id: number;
-          cid?: string | null;
-          contract_address: string;
+          block_timestamp: number;
+          claim_id: number;
           contributors?: string[] | null;
           description?: string | null;
           external_url?: string | null;
-          id?: string | null;
+          hypercert_contracts_id: string;
+          id?: string;
           image?: string | null;
           impact_scope?: string[] | null;
           impact_timeframe_from?: number | null;
           impact_timeframe_to?: number | null;
           name?: string | null;
-          properties?: Json[] | null;
+          properties?: Json | null;
           rights?: string[] | null;
-          token_id: number;
+          uri?: string | null;
           work_scope?: string[] | null;
           work_timeframe_from?: number | null;
           work_timeframe_to?: number | null;
         };
         Update: {
-          chain_id?: number;
-          cid?: string | null;
-          contract_address?: string;
+          block_timestamp?: number;
+          claim_id?: number;
           contributors?: string[] | null;
           description?: string | null;
           external_url?: string | null;
-          id?: string | null;
+          hypercert_contracts_id?: string;
+          id?: string;
           image?: string | null;
           impact_scope?: string[] | null;
           impact_timeframe_from?: number | null;
           impact_timeframe_to?: number | null;
           name?: string | null;
-          properties?: Json[] | null;
+          properties?: Json | null;
           rights?: string[] | null;
-          token_id?: number;
+          uri?: string | null;
           work_scope?: string[] | null;
           work_timeframe_from?: number | null;
           work_timeframe_to?: number | null;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "hypercerts_hypercert_contracts_id_fkey";
+            columns: ["hypercert_contracts_id"];
+            isOneToOne: false;
+            referencedRelation: "hypercert_contracts";
+            referencedColumns: ["id"];
+          },
+        ];
       };
-      lastblockindexed: {
+      supported_schemas: {
         Row: {
-          block_number: number | null;
           chain_id: number;
-          contract_address: string;
+          eas_schema_id: string;
+          id: string;
+          last_block_indexed: number | null;
+          resolver: string | null;
+          revocable: boolean | null;
+          schema: string | null;
         };
         Insert: {
-          block_number?: number | null;
           chain_id: number;
-          contract_address: string;
+          eas_schema_id: string;
+          id?: string;
+          last_block_indexed?: number | null;
+          resolver?: string | null;
+          revocable?: boolean | null;
+          schema?: string | null;
         };
         Update: {
-          block_number?: number | null;
           chain_id?: number;
-          contract_address?: string;
+          eas_schema_id?: string;
+          id?: string;
+          last_block_indexed?: number | null;
+          resolver?: string | null;
+          revocable?: boolean | null;
+          schema?: string | null;
         };
         Relationships: [];
       };
@@ -120,7 +213,18 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      name_description: {
+        Args: {
+          "": unknown;
+        };
+        Returns: Record<string, unknown>;
+      };
+      work_impact_scopes: {
+        Args: {
+          "": unknown;
+        };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: {
       [_ in never]: never;
