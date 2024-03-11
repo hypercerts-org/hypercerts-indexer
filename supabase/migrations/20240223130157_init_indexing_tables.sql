@@ -30,6 +30,8 @@ create table hypercerts
     UNIQUE (hypercert_contracts_id, claim_id)
 );
 
+comment on table public.hypercerts is e'@graphql({"totalCount": {"enabled": true}})';
+
 
 create table supported_schemas
 (
@@ -58,3 +60,5 @@ create table attestations
     block_timestamp      numeric(78, 0) not null,
     UNIQUE (supported_schemas_id, attestation_uid)
 );
+
+comment on table public.attestations is e'@graphql({"totalCount": {"enabled": true}})';
