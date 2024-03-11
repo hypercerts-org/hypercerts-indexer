@@ -65,7 +65,7 @@ export const indexClaimsStoredEvents = async ({
         storeHypercertContract({
           contract: {
             ...contract,
-            last_block_indexed: toBock,
+            last_block_indexed: toBlock,
           },
         }),
       );

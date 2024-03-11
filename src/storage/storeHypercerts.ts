@@ -1,4 +1,4 @@
-import { supabase } from "../clients/supabaseClient";
+import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 
 /* 
@@ -38,6 +38,7 @@ export const storeHypercerts = async ({
     .filter((data) => data !== undefined)
     .map((hypercert) => ({
       ...hypercert,
+      claim_id: hypercert.claim_id?.toString(),
       hypercert_contracts_id: contract.id,
     }));
 
