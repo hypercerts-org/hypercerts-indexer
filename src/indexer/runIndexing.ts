@@ -17,7 +17,7 @@ let isRunning = false;
  *
  */
 export const runIndexing = async (
-  indexingMethod: (config: IndexerConfig) => Promise<void>,
+  indexingMethods: ((config: IndexerConfig) => Promise<void>)[],
   delay: number,
   config: IndexerConfig,
 ) => {
@@ -29,11 +29,13 @@ export const runIndexing = async (
   isRunning = true;
 
   try {
-    await indexingMethod(config);
+    for (const indexingMethod of indexingMethods) {
+      await indexingMethod(config);
+    }
   } catch (error) {
     console.error("Failed to index claims stored events", error);
   } finally {
     isRunning = false;
-    setTimeout(runIndexing, delay, indexingMethod, delay, config);
+    setTimeout(runIndexing, delay, indexingMethods, delay, config);
   }
 };

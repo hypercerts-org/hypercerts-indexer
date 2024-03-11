@@ -1,4 +1,4 @@
-import { client } from "@/monitoring/evmClient";
+import { client } from "@/clients/evmClient";
 import { parseAbiItem } from "viem";
 import { getDeployment } from "@/utils/getDeployment";
 

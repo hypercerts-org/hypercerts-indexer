@@ -1,6 +1,6 @@
-import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
-import { ClaimData } from "@/parsing/claimStoredEvent";
+import { validateMetaData } from "@hypercerts-org/sdk";
 import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
+import { Tables } from "@/types/database.types";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -23,49 +23,72 @@ import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
  * const metadata = await fetchMetadataFromUri(claim);
  * ```
  */
-export const fetchMetadataFromUri = async (claim: ClaimData) => {
-  const { uri, claimID, contractAddress } = claim;
+export const fetchMetadataFromUri = async ({
+  hypercert,
+}: {
+  hypercert?: Partial<Tables<"hypercerts">>;
+}) => {
+  if (!hypercert) {
+    console.error("Invalid hypercert data for fetching metadata", hypercert);
+    return;
+  }
+  const { uri, claim_id } = hypercert;
 
   if (!uri) {
-    console.error(
-      `Could not get URI for claimID ${claimID} on contract ${contractAddress} `,
-    );
-    return claim;
+    console.error(`Could not get URI for claimID ${claim_id}`);
+    return;
   }
 
   let metadata;
 
   // Try from IPFS
   if (uri.startsWith("ipfs://")) {
-    metadata = await fetchFromIPFS(claim);
+    metadata = await fetchFromIPFS({ uri });
   }
 
   // Try from HTTPS
   if (uri.startsWith("https://")) {
-    metadata = await fetchFromHTTPS(claim);
+    metadata = await fetchFromHTTPS({ uri });
   }
 
   // If nothing found yet, try from IPFS as CID
   if (!metadata) {
-    metadata = await fetchFromIPFS(claim);
+    metadata = await fetchFromIPFS({ uri });
   }
 
   if (!metadata) {
     console.error(
-      `No metadata found on IPFS for URI ${uri} of claimID ${claimID} on contract ${contractAddress}`,
+      `No metadata found on IPFS for URI ${uri} of claimID ${claim_id}`,
     );
-    return claim;
+    return;
   }
 
   const validation = validateMetaData(metadata);
 
   if (!validation.valid) {
     console.error(
-      `Invalid metadata for URI ${uri} of claimID ${claimID} on contract ${contractAddress}:`,
+      `Invalid metadata for URI ${uri} of claimID ${claim_id}`,
       validation.errors,
     );
-    return claim;
+    return;
   }
 
-  return { ...claim, metadata: metadata as HypercertMetadata };
+  const _hypercert = hypercert;
+
+  _hypercert.name = metadata.name;
+  _hypercert.description = metadata.description;
+  _hypercert.external_url = metadata.external_url;
+  _hypercert.image = metadata.image;
+  _hypercert.properties = metadata.properties;
+  _hypercert.contributors = metadata.hypercert.contributors.value;
+  _hypercert.impact_scope = metadata.hypercert.impact_scope.value;
+  _hypercert.impact_timeframe_from =
+    metadata.hypercert.impact_timeframe.value[0];
+  _hypercert.impact_timeframe_to = metadata.hypercert.impact_timeframe.value[1];
+  _hypercert.work_scope = metadata.hypercert.work_scope.value;
+  _hypercert.work_timeframe_from = metadata.hypercert.work_timeframe.value[0];
+  _hypercert.work_timeframe_to = metadata.hypercert.work_timeframe.value[1];
+  _hypercert.rights = metadata.hypercert.rights.value;
+
+  return _hypercert;
 };

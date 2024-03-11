@@ -1,3 +1,5 @@
 import { parseClaimStoredEvent } from "./claimStoredEvent";
+import { decodeAttestationData } from "@/parsing/attestationData";
+import { parseAttestedEvent } from "@/parsing/attestedEvent";
 
-export { parseClaimStoredEvent };
+export { decodeAttestationData, parseClaimStoredEvent, parseAttestedEvent };

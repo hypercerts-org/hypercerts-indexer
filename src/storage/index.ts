@@ -1,5 +1,18 @@
-import { storeHypercert } from "./storeHypercert";
-import { getLastBlockIndexed } from "@/storage/getLastBlockIndexed";
-import { updateLastBlockIndexed } from "@/storage/updateLastBlockIndexed";
+import { storeHypercerts } from "@/storage/storeHypercerts";
+import { storeAttestations } from "@/storage/storeAttestations";
+import {
+  storeSupportedSchema,
+  storeSupportedSchemas,
+} from "@/storage/storeSupportedSchemas";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
+import { getHypercertContracts } from "@/storage/getHypercertContracts";
 
-export { storeHypercert, getLastBlockIndexed, updateLastBlockIndexed };
+export {
+  getHypercertContracts,
+  storeAttestations,
+  storeHypercerts,
+  storeSupportedSchemas,
+  storeSupportedSchema,
+  getSupportedSchemas,
+  storeHypercertContrac,
+};

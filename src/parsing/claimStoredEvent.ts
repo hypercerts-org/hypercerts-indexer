@@ -1,5 +1,6 @@
 import { isAddress } from "viem";
-import { HypercertMetadata } from "@hypercerts-org/sdk";
+import { Tables } from "@/types/database.types";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 
 type ClaimStoredEvent = {
   address: string;
@@ -7,14 +8,8 @@ type ClaimStoredEvent = {
     claimID: bigint;
     uri: string;
   };
+  blockNumber: bigint;
   [key: string]: unknown;
-};
-
-export type ClaimData = {
-  claimID: bigint;
-  contractAddress: `0x${string}`;
-  uri: string;
-  metadata?: HypercertMetadata;
 };
 
 /*
@@ -23,7 +18,7 @@ export type ClaimData = {
  *
  * @param event - The event object.
  * */
-export const parseClaimStoredEvent = (event: unknown) => {
+export const parseClaimStoredEvent = async (event: unknown) => {
   if (!isClaimStoredEvent(event)) {
     console.error(
       `Invalid event or event args for parsing claimStored event: `,
@@ -32,7 +27,9 @@ export const parseClaimStoredEvent = (event: unknown) => {
     return;
   }
 
-  if (!isAddress(event.address)) {
+  const { args, address } = event;
+
+  if (!isAddress(address)) {
     console.error(
       `Invalid contract address for parsing claimStored event: `,
       event.address,
@@ -40,24 +37,25 @@ export const parseClaimStoredEvent = (event: unknown) => {
     return;
   }
 
-  // TODO check on claimID uint256/bigint
+  const row: Partial<Tables<"hypercerts">> = {};
 
-  return {
-    claimID: event.args.claimID,
-    contractAddress: event.address,
-    uri: event.args.uri,
-  } as ClaimData;
+  row.claim_id = args.claimID;
+  row.uri = args.uri;
+  row.block_timestamp = await getBlockTimestamp(event.blockNumber);
+
+  return row;
 };
 
 function isClaimStoredEvent(event: unknown): event is ClaimStoredEvent {
   return (
     typeof event === "object" &&
     event !== null &&
-    typeof event.args === "object" &&
-    event.args !== null &&
+    event?.args !== null &&
+    typeof event?.args === "object" &&
     typeof event.args.claimID === "bigint" &&
     typeof event.args.uri === "string" &&
     typeof event.address === "string" &&
-    isAddress(event.address)
+    isAddress(event.address) &&
+    typeof event.blockNumber === "bigint"
   );
 }
