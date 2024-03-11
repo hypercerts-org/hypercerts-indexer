@@ -29,7 +29,7 @@ export const getDeployment = (): Partial<Deployment> & {
         startBlock: 4421944n,
         easAddress: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
         schemaRegistryAddress: "0x0a7E2Ff54e76B8E6659aedc9103FB21c038050D0",
-        chainI,
+        chainId,
       };
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
