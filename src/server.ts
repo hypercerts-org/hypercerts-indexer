@@ -1,7 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import { batchSize, delay, port } from "./utils/constants";
-import { runIndexing } from "./indexer";
+import { indexSupportedSchemas, runIndexing } from "./indexer";
 import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { captureConsoleIntegration } from "@sentry/integrations";
@@ -52,9 +52,11 @@ app.use(Sentry.Handlers.errorHandler());
 
 app.listen(port, () => {
   console.log(`Indexer listening on port ${port}`);
-  // const indexingMethods = [indexSupportedSchemas, indexAttestations, indexClaimsStoredEvents];
-
-  const indexingMethods = [indexAttestations];
+  const indexingMethods = [
+    indexSupportedSchemas,
+    indexAttestations,
+    indexClaimsStoredEvent,
+  ];
 
   runIndexing(indexingMethods, delay, { batchSize });
 });
