@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { captureConsoleIntegration } from "@sentry/integrations";
 import { indexAttestations } from "@/indexer/indexAttestations";
+import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored";
 
 dotenv.config();
 
@@ -55,7 +56,7 @@ app.listen(port, () => {
   const indexingMethods = [
     indexSupportedSchemas,
     indexAttestations,
-    indexClaimsStoredEvent,
+    indexClaimsStoredEvents,
   ];
 
   runIndexing(indexingMethods, delay, { batchSize });
