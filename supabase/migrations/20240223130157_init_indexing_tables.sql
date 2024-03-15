@@ -32,7 +32,6 @@ create table hypercerts
 
 comment on table public.hypercerts is e'@graphql({"totalCount": {"enabled": true}})';
 
-
 create table supported_schemas
 (
     id                 uuid primary key default gen_random_uuid(),
