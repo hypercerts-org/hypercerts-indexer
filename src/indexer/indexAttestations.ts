@@ -57,6 +57,13 @@ export const indexAttestations = async ({
           "No logs found for supported schemas",
           schemasToIndex.map((schema) => schema?.id),
         );
+
+        await storeSupportedSchema({
+          supportedSchema: {
+            ...schema,
+            last_block_indexed: attestedEvents.toBlock,
+          },
+        });
         return;
       }
 
