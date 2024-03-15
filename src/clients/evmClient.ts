@@ -1,9 +1,11 @@
-import { createPublicClient, http, PublicClient } from "viem";
-import { sepolia } from "viem/chains";
+import { createPublicClient, http } from "viem";
+import { baseSepolia, sepolia } from "viem/chains";
 import { alchemyApiKey, chainId } from "@/utils/constants";
 
 const selectedNetwork = () => {
   switch (chainId) {
+    case 84532:
+      return baseSepolia;
     case 11155111:
       return sepolia;
     default:
@@ -13,6 +15,8 @@ const selectedNetwork = () => {
 
 const alchemyUrl = (apiKey: string) => {
   switch (chainId) {
+    case 84532:
+      return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
     case 11155111:
       return `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`;
     default:
@@ -21,7 +25,7 @@ const alchemyUrl = (apiKey: string) => {
 };
 
 /* Returns a PublicClient instance for the configured network. */
-export const client: PublicClient = createPublicClient({
+export const client = createPublicClient({
   chain: selectedNetwork(),
   transport: http(alchemyUrl(alchemyApiKey)),
 });

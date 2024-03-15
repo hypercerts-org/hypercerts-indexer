@@ -53,7 +53,6 @@ app.use(Sentry.Handlers.errorHandler());
 
 app.listen(port, () => {
   console.log(`Indexer listening on port ${port}`);
-  // runIndexing(indexClaimsStoredEvents, delay, { batchSize });
   runIndexing(
     [indexSupportedSchemas, indexAttestations, indexClaimsStoredEvents],
     delay,
