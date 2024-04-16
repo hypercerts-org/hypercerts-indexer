@@ -72,7 +72,7 @@ export const indexClaimsStoredEvents = async ({
       ).then(() =>
         updateLastBlockIndexedContractEvents({
           contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBloc,
+          lastBlockIndexed: toBlock,
         }),
       );
     }),
