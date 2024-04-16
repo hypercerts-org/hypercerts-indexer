@@ -64,7 +64,7 @@ export const storeTransferSingle = async ({
       }
 
       console.debug(
-        `[StoreTransferSingle] Transferred ${token.token_id} units to ${token.owner_address}},
+        `[StoreTransferSingle] Transferred ${token.token_id} units to ${token.owner_address}}`,
       );
 
       results.push(data);
