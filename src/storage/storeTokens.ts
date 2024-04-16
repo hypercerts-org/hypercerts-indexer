@@ -36,7 +36,7 @@ export const storeTransferSingle = async ({
     return;
   }
 
-  console.debug(`[StoreTransferSingle] Storing ${tokens.legth} tokens`);
+  console.debug(`[StoreTransferSingle] Storing ${tokens.length} tokens`);
 
   const results = []; // Array to store the results
 
@@ -54,7 +54,7 @@ export const storeTransferSingle = async ({
 
       const { data, error } = await supabase.rpc(
         "upsert_hypercert_token",
-        _toke,
+        _token,
       );
 
       if (error) {
@@ -71,11 +71,13 @@ export const storeTransferSingle = async ({
     } catch (error) {
       if (error instanceof Error) {
         console.error(
-          `[StoreTransferSingle] Error while storing hypercert: ${error.message}`,
+          `[StoreTransferSingle] Error while storing transfer: ${error.message}`,
+          error,
         );
       } else {
         console.error(
-          `[StoreTransferSingle] An unknown error occurred: ${JSON.stringify(error)}`,
+          `[StoreTransferSingle] An unknown error occurred while storing the token.`,
+          error,
         );
       }
     }
