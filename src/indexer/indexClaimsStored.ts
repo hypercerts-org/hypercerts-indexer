@@ -26,7 +26,7 @@ const defaultConfig = {
 
 export const indexClaimsStoredEvents = async ({
   batchSize = defaultConfig.batchSize,
-  eventName = defaultConfig.eventNam,
+  eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const contractsWithEvents = await getContractEventsForChain({
@@ -34,7 +34,7 @@ export const indexClaimsStoredEvents = async ({
     eventName,
   });
 
-  if (!contractsWithEvents || contracsWithEvents.length === 0) {
+  if (!contractsWithEvents || contractsWithEvents.length === 0) {
     return;
   }
 
@@ -66,13 +66,13 @@ export const indexClaimsStoredEvents = async ({
           async (claim) =>
             await storeClaim({
               claim,
-              contract: { id: contractEvent.contract_id ,
-            },
-        ,
+              contract: { id: contractEvent.contract_id },
+            }),
+        ),
       ).then(() =>
         updateLastBlockIndexedContractEvents({
           contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBloc,
+          lastBlockIndexed: toBlock,
         }),
       );
     }),
