@@ -1,4 +1,4 @@
-import { Hex, isAddress } from "viem";
+import { isAddress } from "viem";
 import { Tables } from "@/types/database.types";
 import { getDeployment } from "@/utils";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
@@ -8,8 +8,8 @@ type AttestedEvent = {
   args: {
     recipient: `0x${string}`;
     attester: `0x${string}`;
-    uid: Hex;
-    schema: Hex;
+    uid: string;
+    schema: string;
   };
   blockNumber: bigint;
   [key: string]: unknown;
@@ -66,19 +66,19 @@ export const parseAttestedEvent = async (log: unknown) => {
 };
 
 function isAttestedEvent(event: unknown): event is AttestedEvent {
+  const e = event as Partial<AttestedEvent>;
+
   return (
-    typeof event === "object" &&
-    event !== null &&
-    typeof event.args === "object" &&
-    event.args !== null &&
-    typeof event.args.recipient === "string" &&
-    isAddress(event.args.recipient) &&
-    typeof event.args.attester === "string" &&
-    isAddress(event.args.attester) &&
-    typeof event.args.uid === "string" &&
-    typeof event.args.schema === "string" &&
-    typeof event.address === "string" &&
-    isAddress(event.address) &&
-    typeof event.blockNumber === "bigint"
+    typeof e === "object" &&
+    e !== null &&
+    typeof e.args === "object" &&
+    e.args !== null &&
+    isAddress(e.args.recipient) &&
+    isAddress(e.args.attester) &&
+    typeof e.args.uid === "string" &&
+    typeof e.args.schema === "string" &&
+    typeof e.address === "string" &&
+    isAddress(e.address) &&
+    typeof e.blockNumber === "bigint"
   );
 }
