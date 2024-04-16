@@ -1,10 +1,10 @@
-import { parseClaimStoredEvent } from "@/parsing";
+import { IndexerConfig, NewAllowList } from "@/types/types";
 import { getDeployment } from "@/utils";
-import { IndexerConfig, NewClaim } from "@/types/types";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
+import { getLogsForContractEvents } from "@/monitoring";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { storeClaim } from "@/storage/storeClaim";
+import { parseAllowListCreated } from "@/parsing/allowListCreatedEvent";
+import { storeHypercertAllowList } from "@/storage/storeHypercertAllowList";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -21,12 +21,12 @@ import { storeClaim } from "@/storage/storeClaim";
 
 const defaultConfig = {
   batchSize: 10000n,
-  eventName: "ClaimStored",
+  eventName: "AllowlistCreated",
 };
 
-export const indexClaimsStoredEvents = async ({
+export const indexAllowListCreated = async ({
   batchSize = defaultConfig.batchSize,
-  eventName = defaultConfig.eventNam,
+  eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const contractsWithEvents = await getContractEventsForChain({
@@ -34,7 +34,7 @@ export const indexClaimsStoredEvents = async ({
     eventName,
   });
 
-  if (!contractsWithEvents || contracsWithEvents.length === 0) {
+  if (!contractsWithEvents || contractsWithEvents.length === 0) {
     return;
   }
 
@@ -56,23 +56,31 @@ export const indexClaimsStoredEvents = async ({
       const { logs, toBlock } = logsFound;
 
       // parse logs to get claimID, contractAddress and cid
-      const claims = (
-        await Promise.all(logs.map(parseClaimStoredEvent))
-      ).filter((claim): claim is NewClaim => claim !== null);
+      const allowLists = (
+        await Promise.all(logs.map(parseAllowListCreated))
+      ).filter(
+        (allowList): allowList is NewAllowList =>
+          allowList !== null && allowList !== undefined,
+      );
+
+      const allowListData = allowLists.map((allowList) => ({
+        p_token_id: allowList.token_id.toString(),
+        p_contract_id: contractEvent.contract_id,
+        p_root: allowList.root,
+      }));
 
       // TODO - flip so claims are passed as array
       await Promise.all(
-        claims.map(
-          async (claim) =>
-            await storeClaim({
-              claim,
-              contract: { id: contractEvent.contract_id ,
-            },
-        ,
+        allowListData.map(
+          async (allowList) =>
+            await storeHypercertAllowList({
+              allowListPointer: allowList,
+            }),
+        ),
       ).then(() =>
         updateLastBlockIndexedContractEvents({
           contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBloc,
+          lastBlockIndexed: toBlock,
         }),
       );
     }),

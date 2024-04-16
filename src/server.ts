@@ -1,15 +1,22 @@
 import express from "express";
 import dotenv from "dotenv";
-import { batchSize, delay, port } from "./utils/constants";
+import { delay, port } from "./utils/constants";
 import { indexSupportedSchemas, runIndexing } from "./indexer";
 import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { captureConsoleIntegration } from "@sentry/integrations";
 import { indexAttestations } from "@/indexer/indexAttestations";
 import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored";
+import { indexTransferSingleEvents } from "@/indexer/indexTokenTransfers";
+import { indexUnitTransfers } from "@/indexer/indexUnitTransfers";
+import { indexMetadata } from "@/indexer/indexMetadata";
+import { indexAllowListCreated } from "@/indexer/indexAllowlistCreated";
+import { indexAllowListEntries } from "@/indexer/indexAllowlistEntries";
+import { indexAllowListData } from "@/indexer/indexAllowlistData";
 
 dotenv.config();
 
+// @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
   const int = Number.parseInt(this.toString());
   return int ?? this.toString();
@@ -51,15 +58,21 @@ app.get("/heartbeat", (req, res) => {
 // The error handler must be registered before any other error middleware and after all controllers
 app.use(Sentry.Handlers.errorHandler());
 
-app.listen(port, () => {
+app.listen(port, async () => {
   console.log(`Indexer listening on port ${port}`);
   const indexingMethods = [
     indexSupportedSchemas,
-    indexAttestations,
     indexClaimsStoredEvents,
+    indexTransferSingleEvents,
+    indexUnitTransfers,
+    indexMetadata,
+    indexAllowListCreated,
+    indexAllowListData,
+    indexAllowListEntries,
+    indexAttestations,
   ];
 
-  runIndexing(indexingMethods, delay, { batchSize });
+  await runIndexing(indexingMethods, delay);
 });
 
 export { app };

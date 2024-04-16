@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { updateLastBlockIndexed } from "../../src/storage";
 import {
   default_blockNumber,
   default_chainID,

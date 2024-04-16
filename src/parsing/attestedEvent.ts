@@ -15,6 +15,14 @@ type AttestedEvent = {
   [key: string]: unknown;
 };
 
+export type ParsedAttestedEvent = Pick<
+  Tables<"attestations">,
+  | "attester_address"
+  | "recipient_address"
+  | "attestation_uid"
+  | "block_timestamp"
+>;
+
 /*
  * Helper method to get the recipient, attester, attestation UID and schema ID from the event. Will return undefined when the event is
  * missing data.
@@ -47,14 +55,14 @@ export const parseAttestedEvent = async (log: unknown) => {
     return;
   }
 
-  const row: Partial<Tables<"attestations">> = {};
+  const res: ParsedAttestedEvent = {
+    attester_address: args.attester,
+    recipient_address: args.recipient,
+    attestation_uid: args.uid,
+    block_timestamp: await getBlockTimestamp(log.blockNumber),
+  };
 
-  row.attester_address = args.attester;
-  row.recipient_address = args.recipient;
-  row.attestation_uid = args.uid;
-  row.block_timestamp = await getBlockTimestamp(log.blockNumber);
-
-  return row;
+  return res;
 };
 
 function isAttestedEvent(event: unknown): event is AttestedEvent {

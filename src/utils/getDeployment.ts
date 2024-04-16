@@ -1,6 +1,5 @@
 import { chainId } from "@/utils/constants";
 import { Deployment, deployments } from "@hypercerts-org/sdk";
-
 /*
  * This function returns the deployment for the current chain ID.
  *

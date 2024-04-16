@@ -1,4 +1,4 @@
-import { getClaimStoredLogs } from "./hypercerts";
+import { getLogsForContractEvents } from "./hypercerts";
 import { getAttestationsForSchema } from "./eas";
 
-export { getClaimStoredLogs, getAttestationsForSchema };
+export { getAttestationsForSchema, getLogsForContractEvents };

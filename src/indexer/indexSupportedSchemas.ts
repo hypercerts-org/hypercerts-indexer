@@ -1,6 +1,9 @@
-import { getSupportedSchemas, storeSupportedSchema } from "@/storage";
-import { fetchSchemaData } from "@/fetching";
 import { getDeployment } from "@/utils";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
+import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
+import { IndexerConfig } from "@/types/types";
+import { fetchSchemaData } from "@/fetching/fetchSchemaData";
+import { Tables } from "@/types/database.types";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -15,18 +18,18 @@ import { getDeployment } from "@/utils";
  * ```
  */
 
-export type IndexerConfig = {
-  batchSize?: bigint;
+const defaultConfig = {
+  batchSize: 5n,
 };
 
-export const indexSupportedSchemas = async (
-  config?: Partial<IndexerConfig>,
-) => {
+export const indexSupportedSchemas = async ({
+  batchSize = defaultConfig.batchSiz,
+}: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const supportedSchemas = await getSupportedSchemas({ chainId });
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
-    console.error("No supported schemas found");
+    console.error("[IndexSupportedSchema] No supported schemas found");
     return;
   }
 
@@ -34,13 +37,20 @@ export const indexSupportedSchemas = async (
     (schema) => !schema.schema || !schema.resolver || !schema.revocable,
   );
 
-  await Promise.all(
-    incompleteSchemas.map((schema) =>
-      fetchSchemaData({ schema }).then((supportedSchema) =>
-        storeSupportedSchema({ supportedSchema }),
-      ),
-    ),
-  ).catch((error) => {
-    console.error("Error while fetching and updating schema data", error);
+  const schemaData = (
+    await Promise.all(
+      incompleteSchemas.map((schema) => fetchSchemaData({ schema })),
+    )
+  ).filter(
+    (schema): schema is Tables<"supported_schemas"> =>
+      schema !== null && schema !== undefined,
+  );
+
+  const res = await storeSupportedSchemas({
+    supportedSchemas: schemaData,
   });
+
+  if (!res) {
+    console.error("[IndexSupportedSchema] Failed to store supported schemas");
+  }
 };
