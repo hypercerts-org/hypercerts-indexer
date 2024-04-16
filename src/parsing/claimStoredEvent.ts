@@ -42,7 +42,7 @@ export const parseClaimStoredEvent = async (event: unknown) => {
     uri: args.uri,
     block_timestamp: await getBlockTimestamp(event.blockNumber),
     units: args.totalUnits,
-    contract_address: addres,
+    contract_address: address,
   };
 
   return claim;

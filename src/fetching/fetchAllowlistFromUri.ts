@@ -60,10 +60,7 @@ export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
 
   // If response object is already a OZ Merkle tree, return it as is
   try {
-    const tree = StandardMerkleTree.load<[string, bigint]>(
-      JSON.parse(fetchResult),
-    );
-    return tree;
+    return StandardMerkleTree.load<[string, bigint]>(JSON.parse(fetchResult));
   } catch (error) {
     console.error(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
