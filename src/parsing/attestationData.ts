@@ -1,15 +1,14 @@
-import { decodeAbiParameters } from "viem";
+import { decodeAbiParameters, isAddress } from "viem";
 import { Tables } from "@/types/database.types";
 import { isAttestation } from "@/fetching/fetchAttestationData";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi";
-import * as console from "console";
 
 /*
  * Helper method to get the attestation content from the encoded data
  *
  * @param attestation - The attestation object.
  *
- * @returns {AttestationData} - The provided attestaion object extended with the decoded attestation data.
+ * @returns {AttestationData} - The provided attestation object extended with the decoded attestation data.
  * */
 export const decodeAttestationData = ({
   attestation,
@@ -44,10 +43,13 @@ export const decodeAttestationData = ({
 
   const keys = abiFromSchema[0].outputs.map((output) => output.name);
   const values = decodedAttestation;
-  const decodedAttestationObject = keys.reduce((acc, key, index) => {
-    acc[key] = values[index];
-    return acc;
-  }, {});
+  const decodedAttestationObject: Record<string, unknown> = keys.reduce(
+    (acc: Record<string, unknown>, key, index) => {
+      acc[key] = values[index];
+      return acc;
+    },
+    {},
+  );
 
   if (!decodedAttestationObject) {
     console.error("Attestation data could not be parsed", attestation);
@@ -57,15 +59,31 @@ export const decodeAttestationData = ({
   const _attestation = attestation;
   _attestation.decoded_attestation = JSON.stringify(decodedAttestationObject);
   if (decodedAttestationObject?.chain_id)
-    _attestation.chain_id = decodedAttestationObject.chain_id;
+    _attestation.chain_id = mapUnknownToBigInt(
+      decodedAttestationObject.chain_i,
+    )?.toString();
 
   if (
     decodedAttestationObject?.contract_address &&
     decodedAttestationObject?.token_id
   ) {
-    _attestation.contract_address = decodedAttestationObject.contract_address;
-    _attestation.token_id = decodedAttestationObject.token_id;
+    _attestation.contract_address =
+      typeof decodedAttestationObject?.contract_address === "string" &&
+      isAddress(decodedAttestationObject?.contract_address)
+        ? decodedAttestationObject.contract_address
+        : null;
+
+    _attestation.token_id = mapUnknownToBigInt(
+      decodedAttestationObject.token_id,
+    )?.toString();
   }
 
   return _attestation;
+};
+
+const mapUnknownToBigInt = (value: unknown) => {
+  if (typeof value === "bigint") return value;
+  if (typeof value === "number") return BigInt(value);
+  if (typeof value === "string") return BigInt(value);
+  return null;
 };

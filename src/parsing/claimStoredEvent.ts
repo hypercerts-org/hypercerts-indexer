@@ -1,20 +1,23 @@
-import { isAddress } from "viem";
-import { Tables } from "@/types/database.types";
+import { Hex, isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
+import { NewClaim } from "@/types/types";
+import { client } from "@/clients/evmClient";
 
 type ClaimStoredEvent = {
   address: string;
   args: {
     claimID: bigint;
     uri: string;
+    totalUnits: bigint;
   };
   blockNumber: bigint;
+  transactionHash: Hex;
   [key: string]: unknown;
 };
 
 /*
- * Helper method to get the claimID, contract address and URI from the event. Will return undefined when the event is
- * missing claimID or URI.
+ * Helper method to get the claimID, contract address, URI, and units from the event. Will return undefined when the event is
+ * missing values.
  *
  * @param event - The event object.
  * */
@@ -27,35 +30,38 @@ export const parseClaimStoredEvent = async (event: unknown) => {
     return;
   }
 
-  const { args, address } = event;
+  const { args, address, transactionHash } = event;
 
-  if (!isAddress(address)) {
-    console.error(
-      `Invalid contract address for parsing claimStored event: `,
-      event.address,
-    );
-    return;
-  }
+  const transaction = await client.getTransaction({
+    hash: transactionHash,
+  });
 
-  const row: Partial<Tables<"hypercerts">> = {};
+  const claim: NewClaim = {
+    creator_address: transaction.from,
+    token_id: args.claimID,
+    uri: args.uri,
+    block_timestamp: await getBlockTimestamp(event.blockNumber),
+    units: args.totalUnits,
+    contract_address: addres,
+  };
 
-  row.claim_id = args.claimID;
-  row.uri = args.uri;
-  row.block_timestamp = await getBlockTimestamp(event.blockNumber);
-
-  return row;
+  return claim;
 };
 
 function isClaimStoredEvent(event: unknown): event is ClaimStoredEvent {
+  const e = event as Partial<ClaimStoredEvent>;
+
   return (
-    typeof event === "object" &&
-    event !== null &&
-    event?.args !== null &&
-    typeof event?.args === "object" &&
-    typeof event.args.claimID === "bigint" &&
-    typeof event.args.uri === "string" &&
-    typeof event.address === "string" &&
-    isAddress(event.address) &&
-    typeof event.blockNumber === "bigint"
+    typeof e === "object" &&
+    e !== null &&
+    e?.args !== null &&
+    typeof e?.args === "object" &&
+    e?.args?.claimID !== null &&
+    e?.args?.uri !== null &&
+    e?.args?.totalUnits !== null &&
+    typeof e.address === "string" &&
+    isAddress(e.address) &&
+    typeof e.blockNumber === "bigint" &&
+    e.transactionHash !== null
   );
 }

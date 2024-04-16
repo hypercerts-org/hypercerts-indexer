@@ -1,13 +1,13 @@
 import { getAttestationsForSchema } from "@/monitoring";
-import {
-  getSupportedSchemas,
-  storeAttestations,
-  storeSupportedSchema,
-} from "@/storage";
-import { fetchAttestationData } from "@/fetching";
 import { getDeployment } from "@/utils";
 import { decodeAttestationData, parseAttestedEvent } from "@/parsing";
 import { Tables } from "@/types/database.types";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
+import { IndexerConfig } from "@/types/types";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
+import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
+import { storeAttestations } from "@/storage/storeAttestations";
+import { fetchAttestationData } from "@/fetching/fetchAttestationData";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -21,10 +21,6 @@ import { Tables } from "@/types/database.types";
  * await indexClaimsStoredEvents({ batchSize: 1000n });
  * ```
  */
-
-export type IndexerConfig = {
-  batchSize?: bigint;
-};
 
 const defaultConfig = { batchSize: 1000n };
 
@@ -52,24 +48,32 @@ export const indexAttestations = async ({
         batchSize,
       });
 
-      if (!attestedEvents?.logs || attestedEvents.logs.length === 0) {
+      if (!attestedEvents) {
+        return;
+      }
+
+      const { logs, toBlock } = attestedEvents;
+
+      if (!logs || logs.length === 0) {
         console.info(
           "No logs found for supported schemas",
           schemasToIndex.map((schema) => schema?.id),
         );
 
-        await storeSupportedSchema({
-          supportedSchema: {
-            ...schema,
-            last_block_indexed: attestedEvents.toBlock,
-          },
+        await storeSupportedSchemas({
+          supportedSchemas: [
+            {
+              ...schema,
+              last_block_indexed: toBlock,
+            },
+          ],
         });
         return;
       }
 
-      const parsedEvents = await Promise.all(
-        attestedEvents.logs.map(parseAttestedEvent),
-      );
+      const parsedEvents = (
+        await Promise.all(logs.map(parseAttestedEvent))
+      ).filter((attestation) => attestation !== null) as ParsedAttestedEvent[];
 
       const parsedAttestations = await Promise.all(
         parsedEvents.map(
@@ -91,11 +95,13 @@ export const indexAttestations = async ({
       });
 
       if (result) {
-        await storeSupportedSchema({
-          supportedSchema: {
-            ...schema,
-            last_block_indexed: attestedEvents.toBlock,
-          },
+        await storeSupportedSchemas({
+          supportedSchemas: [
+            {
+              ...schema,
+              last_block_indexed: attestedEvents.toBlock,
+            },
+          ],
         });
       }
     }),

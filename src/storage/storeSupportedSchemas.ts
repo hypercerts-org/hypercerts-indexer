@@ -20,61 +20,35 @@ import { Tables } from "@/types/database.types";
     const storedData = await storeSchemaRecord(record); 
     ```
  */
+
+interface StoreSupportedSchemas {
+  supportedSchemas?: Tables<"supported_schemas">[];
+}
+
 export const storeSupportedSchemas = async ({
   supportedSchemas,
-}: {
-  supportedSchemas?: Tables<"supported_schemas">[];
-}) => {
+}: StoreSupportedSchemas) => {
   if (!supportedSchemas) {
-    console.error("No schema data provided");
+    console.error("[StoreSupportedSchema] No schema data provided");
     return;
   }
 
   const { data, error } = await supabase
     .from("supported_schemas")
     .upsert(supportedSchemas)
-    .select()
-    .returns<Tables<"supported_schemas">[]>();
+    .select();
 
   if (error) {
     console.error(
-      `Error while inserting schema ${supportedSchemas.map((schema) => schema.id)} into the database`,
+      `[StoreSupportedSchema] Error while inserting schema ${supportedSchemas.map((schema) => schema.id)} into the database`,
       error,
     );
     return;
   }
 
   console.debug(
-    `Inserted schemas ${supportedSchemas.map((schema) => schema.id)} into the database`,
+    `[StoreSupportedSchema] Inserted schemas ${supportedSchemas.map((schema) => schema.id)} into the database`,
   );
 
-  return data;
-};
-
-export const storeSupportedSchema = async ({
-  supportedSchema,
-}: {
-  supportedSchema?: Tables<"supported_schemas">;
-}) => {
-  if (!supportedSchema) {
-    console.error("No schema data provided");
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("supported_schemas")
-    .upsert(supportedSchema)
-    .select()
-    .returns<Tables<"supported_schemas">[]>();
-
-  if (error) {
-    console.error(
-      `Error while inserting schema ${supportedSchema.id} into the database`,
-      error,
-    );
-    return;
-  }
-
-  console.info(`Inserted schema ${supportedSchema.id} into the database`);
   return data;
 };

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { storeHypercert } from "../../src/storage";
 import { default_contractAddress } from "../handlers";
 import { mockMetadata } from "../resources/mockMetadata";
 
@@ -12,7 +11,7 @@ describe("storeHypercert", {}, async () => {
       metadata: mockMetadata,
     };
 
-    const storedClaim = await storeHypercert(claim);
+    const storedClaim = await storeClaim(claim);
 
     expect(storedClaim).toBeDefined();
 

@@ -2,7 +2,7 @@ import { getDeployment } from "@/utils";
 import { client } from "@/clients/evmClient";
 import easAbi from "@/abis/eas.json";
 import { Address, Hex, isAddress } from "viem";
-import { Tables } from "@/types/database-generated.types";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 
 //https://github.com/ethereum-attestation-service/eas-sdk/blob/master/src/eas.ts#L87
 export interface Attestation {
@@ -37,11 +37,14 @@ export interface Attestation {
  * const attestation = await fetchAttestationData(easData);
  * ```
  */
+
+interface FetchAttestationData {
+  attestation?: ParsedAttestedEvent;
+}
+
 export const fetchAttestationData = async ({
   attestation,
-}: {
-  attestation?: Partial<Tables<"attestations">>;
-}) => {
+}: FetchAttestationData) => {
   const { easAddress } = getDeployment();
   if (!attestation || !attestation.attestation_uid) {
     console.error(`Could not find UID for attestation`, attestation);
@@ -62,11 +65,7 @@ export const fetchAttestationData = async ({
       return;
     }
 
-    const _attestation = attestation;
-
-    _attestation.attestation = JSON.stringify(_attestationData);
-
-    return _attestation;
+    return { ...attestation, attestation: JSON.stringify(_attestationData) };
   } catch (e) {
     console.error(
       `Error fetching attestation data for UID ${attestation_uid} on contract ${easAddress}:`,
