@@ -445,9 +445,9 @@ export type Database = {
           allow_list_root: string
         }[]
       }
-      get_attestations_by_claim_id: {
+      get_attestations_for_claim: {
         Args: {
-          p_claim_id: string
+          claim_id: string
         }
         Returns: {
           id: string
@@ -463,7 +463,7 @@ export type Database = {
           block_timestamp: number
         }[]
       }
-      get_attested_hypercerts: {
+      get_attested_claims: {
         Args: Record<PropertyKey, never>
         Returns: {
           id: string
@@ -504,7 +504,7 @@ export type Database = {
           value: number | null
         }
       }
-      get_unattested_hypercerts: {
+      get_unattested_claims: {
         Args: Record<PropertyKey, never>
         Returns: {
           id: string

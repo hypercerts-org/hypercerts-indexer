@@ -3,6 +3,7 @@ import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
 import { IndexerConfig } from "@/types/types";
 import { fetchSchemaData } from "@/fetching/fetchSchemaData";
 import { Tables } from "@/types/database.types";
+import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -47,7 +48,7 @@ export const indexSupportedSchemas = async ({
         schema !== null && schema !== undefined,
     );
 
-    const res = await storeSupporedSchemas({
+    const res = await storeSupportedSchemas({
       supportedSchemas: schemaData,
     });
 
