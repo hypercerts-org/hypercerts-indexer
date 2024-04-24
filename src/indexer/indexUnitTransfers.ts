@@ -90,7 +90,7 @@ export const indexUnitTransfers = async ({
     );
 
   // store the claim and fraction tokens
-  await storeUnitTransfer({
+  return await storeUnitTransfer({
     transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({

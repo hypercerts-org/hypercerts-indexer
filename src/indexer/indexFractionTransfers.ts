@@ -61,7 +61,7 @@ export const indexTransferSingleEvents = async ({
       }
 
       const { logs, toBlock } = logsFound;
-      console.log(`[IndexTokenTransfers] Found ${logs.length} logs`);
+      console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
 
       // Validate and parse logs
       const tokensToStore = (
@@ -96,7 +96,7 @@ export const indexTransferSingleEvents = async ({
     );
 
   // store the fraction tokens
-  await storeTransferSingleFraction({
+  return await storeTransferSingleFraction({
     transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({

@@ -85,7 +85,7 @@ export const indexClaimsStoredEvents = async ({
     );
   // .map(({ claims }) => claims !== null && claims !== undefined);
 
-  await storeClaim({
+  return await storeClaim({
     claims,
   }).then(() =>
     updateLastBlockIndexedContractEvents({

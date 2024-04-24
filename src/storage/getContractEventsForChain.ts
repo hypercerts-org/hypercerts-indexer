@@ -20,7 +20,7 @@ export const getContractEventsForChain = async ({
     p_event: eventName,
   });
 
-  if (!data) {
+  if (!data || error) {
     console.error(
       `[GetContractEvents] Error while fetching supported contracts for ${eventName} on chain ${chainId}`,
       error,

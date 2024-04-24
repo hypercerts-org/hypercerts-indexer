@@ -51,22 +51,5 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
 
   console.debug(`[StoreClaim] Storing ${claims.length} claims`);
 
-  try {
-    const { data, error } = await supabase.from("claims").upsert(_claims);
-
-    if (error) {
-      console.error(`[StoreClaim] Error while storing claims.`, error);
-      return;
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(`[StoreClaim] Error while storing claims.`, error);
-    } else {
-      console.error(
-        `[StoreClaim] An unknown error occurred: ${JSON.stringify(error)}`,
-      );
-    }
-  }
+  await supabase.from("claims").upsert(_claims).throwOnError();
 };

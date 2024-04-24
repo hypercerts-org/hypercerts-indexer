@@ -10,7 +10,7 @@ import { indexTransferSingleEvents } from "@/indexer/indexFractionTransfers";
 import { indexUnitTransfers } from "@/indexer/indexUnitTransfers";
 import { indexMetadata } from "@/indexer/indexMetadata";
 import { indexAllowListCreated } from "@/indexer/indexAllowlistCreated";
-import { indexAllowListEntries } from "@/indexer/indexAllowlistEntries";
+import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords";
 import { indexAllowListData } from "@/indexer/indexAllowlistData";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas";
 import { runIndexing } from "@/indexer/runIndexing";
@@ -75,7 +75,7 @@ app.listen(port, async () => {
     indexMetadata,
     indexAllowListCreated,
     indexAllowListData,
-    indexAllowListEntries,
+    indexAllowlistRecords,
     indexAttestations,
   ];
 

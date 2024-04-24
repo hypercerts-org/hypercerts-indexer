@@ -22,7 +22,7 @@ export const runIndexing = async (
   config?: IndexerConfig,
 ) => {
   if (isRunning) {
-    console.debug("Batch already running, skipping interval.");
+    console.debug("[runIndexing] Batch already running, skipping interval.");
     return;
   }
 
@@ -33,7 +33,7 @@ export const runIndexing = async (
       await indexingMethod({});
     }
   } catch (error) {
-    console.error("Failed to index claims stored events", error);
+    console.error("[runIndexing] Failed to index events", error);
   } finally {
     isRunning = false;
     setTimeout(runIndexing, delay, indexingMethods, delay, config);

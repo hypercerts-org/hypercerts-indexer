@@ -66,38 +66,13 @@ export const storeUnitTransfer = async ({
         p_units_transferred: transfer.units.toString(),
       };
 
-      console.log(_transfer);
-
       return _transfer;
     }),
   );
 
-  try {
-    const { data, error } = await supabase.rpc("transfer_units_batch", {
+  await supabase
+    .rpc("transfer_units_batch", {
       p_transfers: _transfers,
-    });
-
-    if (error) {
-      console.error(
-        `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
-      );
-      return;
-    }
-
-    console.debug(
-      `[StoreUnitTransfer] Processed ${transfers.length} unit transfers.`,
-    );
-
-    return data;
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(
-        `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
-      );
-    } else {
-      console.error(
-        `[StoreUnitTransfer] An unknown error occurred: ${JSON.stringify(error)}`,
-      );
-    }
-  }
+    })
+    .throwOnError();
 };

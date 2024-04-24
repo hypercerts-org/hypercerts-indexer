@@ -20,5 +20,6 @@ export const getMissingAllowListUris = async () => {
   console.debug(
     `[GetMissingAllowListUris] Found ${data.length} missing allow list URIs`,
   );
+
   return data;
 };

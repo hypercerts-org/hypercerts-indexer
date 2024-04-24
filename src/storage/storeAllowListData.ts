@@ -1,5 +1,6 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
+import _ from "lodash";
 
 interface StoreAllowListData {
   allowListData: Partial<Tables<"allow_list_data">>[];
@@ -8,18 +9,19 @@ interface StoreAllowListData {
 export const storeAllowListData = async ({
   allowListData,
 }: StoreAllowListData) => {
-  const { data, error } = await supabase
-    .from("allow_list_data")
-    .upsert(allowListData);
+  const uniqueAllowListData = _.uniqBy(allowListData, "root");
 
-  if (error) {
-    console.error(
-      `[StoreAllowListData] Error while storing allow list datasets`,
-      error,
-    );
-    console.debug(allowListData);
+  if (uniqueAllowListData.length === 0) {
+    console.debug("[StoreAllowListData] No allow list data to store");
     return;
   }
 
-  return data;
+  console.debug(
+    `[StoreAllowListData] Storing allow list data: ${uniqueAllowListData.length} entries`,
+  );
+
+  await supabase
+    .from("allow_list_data")
+    .upsert(uniqueAllowListData)
+    .throwOnError();
 };

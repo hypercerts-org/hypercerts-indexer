@@ -27,12 +27,15 @@ export const indexMetadata = async ({
   const missingUris = await getMissingMetadataUris();
 
   if (!missingUris || missingUris.length === 0) {
+    console.debug("[IndexMetadata] No missing metadata URIs found");
     return;
   }
 
   const _size = Number(batchSize);
 
-  console.log(`[IndexMetadata] Processing ${missingUris.length} metadata URIs`);
+  console.debug(
+    `[IndexMetadata] Processing ${missingUris.length} metadata URIs`,
+  );
 
   // Process metadata in batches
   for (let i = 0; i < missingUris.length; i += _size) {
