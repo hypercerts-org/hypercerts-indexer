@@ -100,6 +100,6 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
     allowListData: batch.map((allowList) => ({
       id: allowList.id,
       parsed: true
-    }))
+    })),
   });
 };

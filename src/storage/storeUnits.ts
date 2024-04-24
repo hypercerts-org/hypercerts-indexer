@@ -74,7 +74,7 @@ export const storeUnitTransfer = async ({
 
   try {
     const { data, error } = await supabase.rpc("transfer_units_batch", {
-      p_transfers: _transfrs,
+      p_transfers: _transfers,
     });
 
     if (error) {

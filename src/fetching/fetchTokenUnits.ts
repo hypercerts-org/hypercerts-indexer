@@ -12,17 +12,15 @@ export const fetchTokenUnits = async ({
   tokenId,
   blockNumber,
 }: FetchTokenUnits) => {
-  const res = await client.readContract({
+  return await client.readContract({
     address: contractAddress,
     abi: [
       parseAbiItem(
         "function unitsOf(uint256 tokenID) view returns(uint256 units)",
       ),
     ],
-    functionName: "uitsOf",
+    functionName: "unitsOf",
     args: [tokenId],
     blockNumber,
   });
-
-  return res;
 };

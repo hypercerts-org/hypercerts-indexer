@@ -72,26 +72,24 @@ export const indexClaimsStoredEvents = async ({
         claims,
         contractEventUpdate: {
           id: contractEvent.id,
-          last_block_indexed: toBlok,
-       },
+          last_block_indexed: toBlock,
+        },
       };
     }),
   );
 
   const claims = results
     .flatMap((result) => (result?.claims ? result.claims : undefined))
-    .filter(
-      (claim): claim is NewClaim => claim !== null && claim !== undefind,
-    );
+    .filter((claim): claim is NewClaim => claim !== null && claim !== undefine);
   // .map(({ claims }) => claims !== null && claims !== undefined);
 
   await storeClaim({
-    clais,
-  }).then(() =>
+    claims,
+  }).then(( =>
     updateLastBlockIndexedContractEvents({
       contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : ],
-     ),
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
     }),
   );
 };

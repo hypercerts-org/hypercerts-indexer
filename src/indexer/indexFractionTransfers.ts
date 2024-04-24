@@ -75,7 +75,7 @@ export const indexTransferSingleEvents = async ({
 
       const transfers = tokensToStore.map((transfer) => ({
         ...transfer,
-        contracts_id: contractEvent.contract_i,
+        contracts_id: contractEvent.contract_id,
       }));
 
       return {
@@ -83,7 +83,7 @@ export const indexTransferSingleEvents = async ({
         contractEventUpdate: {
           id: contractEvent.id,
           last_block_indexed: toBloc,
-        ,
+        },
       };
     }),
   );
@@ -92,17 +92,17 @@ export const indexTransferSingleEvents = async ({
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter(
       (transfer): transfer is NewTransfer =>
-        transfer !== null && transfer !== undefine,
+        transfer !== null && transfer !== undefined,
     );
 
   // store the fraction tokens
   await storeTransferSingleFraction({
-    transfer,
+    transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({
       contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [,
-      ,
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
     }),
   );
 };

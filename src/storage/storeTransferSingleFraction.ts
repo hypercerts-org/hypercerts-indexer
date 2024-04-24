@@ -36,7 +36,7 @@ export const storeTransferSingleFraction = async ({
   );
 
   const tokens = await Promise.all(
-    tansfers.map(async (transfer) => {
+    transfers.map(async (transfer) => {
       const { data: claim, error: claimError } = await supabase.rpc(
         "get_or_create_claim",
         {
@@ -45,15 +45,15 @@ export const storeTransferSingleFraction = async ({
         },
       );
 
-      if (claimError || !caim) {
-       console.error(
+      if (claimError || !claim) {
+        console.error(
           `[StoreTransferSingleFraction] Error while getting or creating claim.`,
           claimError,
         );
         return;
       }
 
-      retur {
+      return {
         claims_id: claim.id,
         token_id: transfer.token_id.toString(),
         creation_block_timestamp: transfer.block_timestamp,
@@ -71,7 +71,7 @@ export const storeTransferSingleFraction = async ({
     if (error) {
       console.error(
         `[StoreTransferSingleFraction] Error while storing transfer: ${error.message}`,
-        error
+        error,
       );
     }
 
@@ -80,12 +80,12 @@ export const storeTransferSingleFraction = async ({
     if (error instanceof Error) {
       console.error(
         `[StoreTransferSingleFraction] Error while storing transfer: ${error.message}`,
-        error
+        erro,
       );
     } else {
       console.error(
         `[StoreTransferSingleFraction] An unknown error occurred while storing the token.`,
-        error
+        error,
       );
     }
   }

@@ -81,6 +81,6 @@ const processAllowListBatch = async (
   );
 
   await storeAllowListData({
-    allowListDat,
+    allowListData,
   });
 };

@@ -74,8 +74,8 @@ export const indexAllowListCreated = async ({
         allowListData,
         contractEventUpdate: {
           id: contractEvent.id,
-          last_block_indexed: toBloc,
-        ,
+          last_block_indexed: toBlock,
+        },
       };
     }),
   );
@@ -83,10 +83,10 @@ export const indexAllowListCreated = async ({
   // TODO better typings
   const allowListPointers = results
     .flatMap((result) =>
-      result?.allowListData ? result.allowListData : undefine,
+      result?.allowListData ? result.allowListData : undefined,
     )
     .filter(
-      (al) => al !== null && al !== undefine,
+      (al) => al !== null && al !== undefined,
     ) as Database["public"]["CompositeTypes"]["allow_list_data_type"][];
 
   await storeHypercertAllowList({
@@ -95,9 +95,9 @@ export const indexAllowListCreated = async ({
     .then(() =>
       updateLastBlockIndexedContractEvents({
         contract_events: results.flatMap((res) =>
-          res?.contractEventUpdate ? [res.contractEventUpdate] : [,
-        ,
-      },
+          res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+        ),
+      }),
     )
     .catch((error) => console.error(error));
 };
