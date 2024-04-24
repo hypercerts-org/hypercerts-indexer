@@ -10,12 +10,12 @@ export const alchemyApiKey = assertExists(
 export const port = Number(assertExists(process.env.PORT, "Port"));
 
 export const supabaseApiKey = assertExists(
-  process.env.SUPABASE_HC_METADATA_API_KEY,
+  process.env.SUPABASE_ANON_API_KEY,
   "Supabase API key",
 );
 
 export const supabaseUrl = assertExists(
-  process.env.SUPABASE_HC_URL,
+  process.env.SUPABASE_DB_URL,
   "Supabase URL",
 );
 
