@@ -38,21 +38,18 @@ export type Database = {
         Row: {
           data: Json | null
           id: string
-          parsed: boolean | null
           root: string | null
           uri: string | null
         }
         Insert: {
           data?: Json | null
           id?: string
-          parsed?: boolean | null
           root?: string | null
           uri?: string | null
         }
         Update: {
           data?: Json | null
           id?: string
-          parsed?: boolean | null
           root?: string | null
           uri?: string | null
         }
@@ -317,16 +314,19 @@ export type Database = {
           allow_list_data_id: string
           claims_id: string
           id: string
+          parsed: boolean | null
         }
         Insert: {
           allow_list_data_id: string
           claims_id: string
           id?: string
+          parsed?: boolean | null
         }
         Update: {
           allow_list_data_id?: string
           claims_id?: string
           id?: string
+          parsed?: boolean | null
         }
         Relationships: [
           {

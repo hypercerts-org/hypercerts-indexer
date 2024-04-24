@@ -60,7 +60,7 @@ export const indexAttestations = async ({
           schemasToIndex.map((schema) => schema?.id),
         );
 
-        await storeSupportedSchemas({
+        return await storeSupportedSchemas({
           supportedSchemas: [
             {
               ...schema,
@@ -68,12 +68,14 @@ export const indexAttestations = async ({
             },
           ],
         });
-        return;
       }
 
       const parsedEvents = (
         await Promise.all(logs.map(parseAttestedEvent))
-      ).filter((attestation) => attestation !== null) as ParsedAttestedEvent[];
+      ).filter(
+        (attestation): attestation is ParsedAttestedEvent =>
+          attestation !== null,
+      );
 
       const attestations = (
         await Promise.all(
@@ -88,21 +90,20 @@ export const indexAttestations = async ({
           attestation !== null,
       );
 
-      const result = await storeAttestations({
+      return await storeAttestations({
         attestations,
         schema,
-      });
-
-      if (result) {
-        await storeSupportedSchemas({
-          supportedSchemas: [
-            {
-              ...schema,
-              last_block_indexed: attestedEvents.toBlock,
-            },
-          ],
-        });
-      }
+      }).then(
+        async () =>
+          await storeSupportedSchemas({
+            supportedSchemas: [
+              {
+                ...schema,
+                last_block_indexed: attestedEvents.toBlock,
+              },
+            ],
+          }),
+      );
     }),
   ).catch((error) => {
     console.error(

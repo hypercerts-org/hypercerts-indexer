@@ -71,12 +71,11 @@ const processAllowListBatch = async (
           data: JSON.stringify(allowList.dump()),
           root: missingList.allow_list_root,
           uri: missingList.allow_list_uri,
-          parsed: false,
-        } as Partial<Tables<"allow_list_data">>;
+        } as Tables<"allow_list_data">;
       }),
     )
   ).filter(
-    (data): data is Partial<Tables<"allow_list_data">> =>
+    (data): data is Tables<"allow_list_data"> =>
       data !== null && data !== undefined,
   );
 

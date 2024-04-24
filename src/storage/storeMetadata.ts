@@ -28,7 +28,7 @@ interface StoreMetadata {
 }
 
 export const storeMetadata = async ({ metadata }: StoreMetadata) => {
-  if (!metadata) {
+  if (!metadata || metadata.length === 0) {
     console.error("[StoreMetadata] No data or contract provided");
     return;
   }
@@ -37,28 +37,8 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
 
   //TODO validations
 
-  try {
-    const { data, error } = await supabase
-      .from("metadata")
-      .upsert(metadata)
-      .select();
-
-    if (error) {
-      console.error(
-        `[StoreMetadata] Error while storing metadata: ${error.message}`,
-      );
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(
-        `[StoreMetadata] Error while storing metadata: ${error.message}`,
-      );
-    } else {
-      console.error(
-        `[StoreMetadata] An unknown error occurred: ${JSON.stringify(error)}`,
-      );
-    }
-  }
+  await supabase
+    .from("metadata")
+    .upsert(metadata, { onConflict: "uri", ignoreDuplicates: true })
+    .throwOnError();
 };

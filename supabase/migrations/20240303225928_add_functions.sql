@@ -78,10 +78,10 @@ CREATE OR REPLACE FUNCTION transfer_units_batch(p_transfers transfer_units_type[
 AS
 $$
 DECLARE
-    transfer       transfer_units_type;
+    transfer         transfer_units_type;
     from_token_units numeric(78, 0);
     to_token_units   numeric(78, 0);
-    p_contracts_id uuid;
+    p_contracts_id   uuid;
 BEGIN
     FOREACH transfer IN ARRAY p_transfers
         LOOP
@@ -238,8 +238,23 @@ BEGIN
                 RETURNING id INTO claim_id;
             END IF;
 
-            -- Insert a new row into allow_list_data and get the id
-            INSERT INTO allow_list_data (root) VALUES (input.root) RETURNING id INTO new_allow_list_id;
+            -- Try to insert a new row into allow_list_data
+            WITH ins AS (
+                INSERT INTO allow_list_data (root)
+                    VALUES (input.root)
+                    ON CONFLICT (root) DO NOTHING
+                    RETURNING id)
+
+            -- If insertion was successful, get the new ID
+            SELECT id
+            FROM ins
+            UNION ALL
+            -- If insertion failed due to conflict, get the existing ID
+            SELECT id
+            FROM allow_list_data
+            WHERE root = input.root
+            LIMIT 1
+            INTO new_allow_list_id;
 
             -- Insert a new row into hypercert_allow_lists
             INSERT INTO hypercert_allow_lists (claims_id, allow_list_data_id)
@@ -248,3 +263,23 @@ BEGIN
         END LOOP;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_allow_list_data_parsed()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Update the parsed column in the allow_list_data table
+    UPDATE hypercert_allow_lists
+    SET parsed = TRUE
+    WHERE id = NEW.hc_allow_list_id;
+
+    -- Return the new row to indicate success
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_parsed
+    AFTER INSERT OR UPDATE
+    ON allow_list_records
+    FOR EACH ROW
+EXECUTE FUNCTION update_allow_list_data_parsed();

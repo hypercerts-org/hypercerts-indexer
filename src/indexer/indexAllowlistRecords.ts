@@ -22,27 +22,28 @@ import { Tables } from "@/types/database.types";
  */
 
 const defaultConfig = {
-  batchSize: 5n,
+  batchSize: 2n,
 };
 
-export const indexAllowListEntries = async ({
+export const indexAllowlistRecords = async ({
   batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
   const unparsedAllowLists = await getUnparsedAllowLists();
 
   if (!unparsedAllowLists || unparsedAllowLists.length === 0) {
-    console.debug("[IndexAllowListEntries] No unparsed allow lists found");
+    console.debug("[IndexAllowlistRecords] No unparsed allow lists found");
     return;
   }
 
   const _size = Number(batchSize);
 
   console.debug(
-    `[IndexAllowListEntries] Processing ${unparsedAllowLists.length} allow lists`,
+    `[IndexAllowlistRecords] Processing ${unparsedAllowLists.length} allow lists`,
   );
 
   // Process metadata in batches
   for (let i = 0; i < unparsedAllowLists.length; i += _size) {
+    console.debug(`[IndexAllowlistRecords] Processing batch ${i} - ${i + 1}`);
     const batch = unparsedAllowLists.slice(i, i + _size);
 
     await processAllowListEntriesBatch(batch);
@@ -52,21 +53,28 @@ export const indexAllowListEntries = async ({
 const processAllowListEntriesBatch = async (batch: AllowList[]) => {
   const rows = await Promise.all(
     batch.map(async (allowList) => {
-      if (!allowList.allow_list_data || !allowList.allow_list_data[0].data) {
+      //TODO fix typing of data
+      if (!allowList.allow_list_data) {
         console.warn(
-          `[IndexAllowListEntries] Missing data for allow list ${allowList.id}`,
+          `[IndexAllowlistRecords] Missing data for allow list ${allowList.id}`,
+          allowList,
+        );
+        return;
+      } else if (!allowList.allow_list_data.data) {
+        console.warn(
+          `[IndexAllowlistRecords] Missing data for allow list ${allowList.id}`,
           allowList,
         );
         return;
       }
 
       const tree = StandardMerkleTree.load(
-        JSON.parse(<string>allowList.allow_list_data[0].data),
+        JSON.parse(<string>allowList.allow_list_data.data),
       );
 
       if (!tree) {
         console.error(
-          "[IndexAllowListEntries] Failed to load tree from data",
+          "[IndexAllowlistRecords] Failed to load tree from data",
           allowList,
         );
         return;
@@ -92,17 +100,12 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
       (r): r is Tables<"allow_list_records"> => r !== null && r !== undefined,
     );
 
-  const data = await storeAllowListRecords({ allowListRecords });
-
-  if (!data) {
-    console.error(`[IndexAllowListEntries] Failed to store allow list records`);
-    return;
+  try {
+    await storeAllowListRecords({ allowListRecords });
+  } catch (error) {
+    console.error(
+      "[IndexAllowlistRecords] Error while storing allow list records",
+      error,
+    );
   }
-
-  await storeAllowListData({
-    allowListData: batch.map((allowList) => ({
-      id: allowList.id,
-      parsed: true,
-    })),
-  });
 };

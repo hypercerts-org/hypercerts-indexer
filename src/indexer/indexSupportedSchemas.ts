@@ -48,12 +48,8 @@ export const indexSupportedSchemas = async ({
         schema !== null && schema !== undefined,
     );
 
-    const res = await storeSupportedSchemas({
+    await storeSupportedSchemas({
       supportedSchemas: schemaData,
     });
-
-    if (!res) {
-      console.error("[IndexSupportedSchema] Failed to store supported schemas");
-    }
   }
 };

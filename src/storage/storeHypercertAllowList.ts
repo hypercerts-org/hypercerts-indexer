@@ -8,19 +8,16 @@ interface StoreHypercertAllowList {
 export const storeHypercertAllowList = async ({
   batchToStore,
 }: StoreHypercertAllowList) => {
-  const { data, error } = await supabase.rpc(
-    "store_allow_list_data_and_hypercert_allow_list_batch",
-    { p_allow_list_data: batchToStore },
-  );
-
-  if (error) {
-    console.error(
-      `[StoreHypercertAllowList] Error while storing hypercert and allow list.`,
-      error,
+  if (batchToStore.length === 0) {
+    console.debug(
+      "[StoreHypercertAllowList] No hypercert and allow list data to store",
     );
-    console.debug(batchToStore);
     return;
   }
 
-  return data;
+  await supabase
+    .rpc("store_allow_list_data_and_hypercert_allow_list_batch", {
+      p_allow_list_data: batchToStore,
+    })
+    .throwOnError();
 };

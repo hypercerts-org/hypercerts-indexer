@@ -1,6 +1,7 @@
 import { supabase } from "@/clients/supabaseClient";
 import { NewTransfer } from "@/types/types";
 import { getClaimTokenId } from "@/utils/tokenIds";
+import _ from "lodash";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -65,28 +66,13 @@ export const storeTransferSingleFraction = async ({
     }),
   );
 
-  try {
-    const { data, error } = await supabase.from("fractions").upsert(tokens);
+  const sortedUniqueTokens = _(tokens)
+    .orderBy(["last_block_update_timestamp"], ["desc"])
+    .uniqBy(["claims_id", "token_id"])
+    .value();
 
-    if (error) {
-      console.error(
-        `[StoreTransferSingleFraction] Error while storing transfer: ${error.message}`,
-        error,
-      );
-    }
-
-    return data;
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error(
-        `[StoreTransferSingleFraction] Error while storing transfer: ${error.message}`,
-        erro,
-      );
-    } else {
-      console.error(
-        `[StoreTransferSingleFraction] An unknown error occurred while storing the token.`,
-        error,
-      );
-    }
-  }
+  await supabase
+    .from("fractions")
+    .upsert(sortedUniqueTokens, { onConflict: "claims_id, token_id" })
+    .throwOnError();
 };

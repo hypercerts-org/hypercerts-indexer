@@ -124,12 +124,11 @@ comment on table public.attestations is e'@graphql({"totalCount": {"enabled": tr
 
 create table allow_list_data
 (
-    id     uuid primary key default gen_random_uuid(),
-    uri    text,
-    root   text,
-    data   jsonb,
-    parsed bool,
-    UNIQUE (uri, root)
+    id   uuid primary key default gen_random_uuid(),
+    uri  text,
+    root text,
+    data jsonb,
+    UNIQUE (root)
 );
 
 CREATE INDEX idx_allow_list_data_uri ON allow_list_data (uri);
@@ -142,6 +141,7 @@ create table hypercert_allow_lists
     id                 uuid primary key default gen_random_uuid(),
     claims_id          uuid not null references claims (id),
     allow_list_data_id uuid not null references allow_list_data (id),
+    parsed             bool,
     UNIQUE (claims_id, allow_list_data_id)
 );
 

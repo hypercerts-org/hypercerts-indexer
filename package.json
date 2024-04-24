@@ -58,6 +58,7 @@
     "@sentry/profiling-node": "^7.102.1",
     "@supabase/postgrest-js": "^1.15.1",
     "@supabase/supabase-js": "^2.39.7",
+    "@types/lodash": "^4.17.0",
     "axios": "^1.6.7",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",

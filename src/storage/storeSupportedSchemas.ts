@@ -33,22 +33,8 @@ export const storeSupportedSchemas = async ({
     return;
   }
 
-  const { data, error } = await supabase
+  await supabase
     .from("supported_schemas")
     .upsert(supportedSchemas)
-    .select();
-
-  if (error) {
-    console.error(
-      `[StoreSupportedSchema] Error while inserting schema ${supportedSchemas.map((schema) => schema.id)} into the database`,
-      error,
-    );
-    return;
-  }
-
-  console.debug(
-    `[StoreSupportedSchema] Inserted schemas ${supportedSchemas.map((schema) => schema.id)} into the database`,
-  );
-
-  return data;
+    .throwOnError();
 };
