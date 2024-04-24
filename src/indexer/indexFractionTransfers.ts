@@ -82,7 +82,7 @@ export const indexTransferSingleEvents = async ({
         transfers,
         contractEventUpdate: {
           id: contractEvent.id,
-          last_block_indexed: toBloc,
+          last_block_indexed: toBlock,
         },
       };
     }),

@@ -90,7 +90,7 @@ export const indexAllowListCreated = async ({
     ) as Database["public"]["CompositeTypes"]["allow_list_data_type"][];
 
   await storeHypercertAllowList({
-    batchToStore: allowListPointer,
+    batchToStore: allowListPointers,
   })
     .then(() =>
       updateLastBlockIndexedContractEvents({

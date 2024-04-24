@@ -80,12 +80,14 @@ export const indexClaimsStoredEvents = async ({
 
   const claims = results
     .flatMap((result) => (result?.claims ? result.claims : undefined))
-    .filter((claim): claim is NewClaim => claim !== null && claim !== undefine);
+    .filter(
+      (claim): claim is NewClaim => claim !== null && claim !== undefined,
+    );
   // .map(({ claims }) => claims !== null && claims !== undefined);
 
   await storeClaim({
     claims,
-  }).then(( =>
+  }).then(() =>
     updateLastBlockIndexedContractEvents({
       contract_events: results.flatMap((res) =>
         res?.contractEventUpdate ? [res.contractEventUpdate] : [],

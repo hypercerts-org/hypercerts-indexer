@@ -85,7 +85,7 @@ export const storeUnitTransfer = async ({
     }
 
     console.debug(
-      `[StoreUnitTransfer] Processed ${transfers.length} unit transfers.,
+      `[StoreUnitTransfer] Processed ${transfers.length} unit transfers.`,
     );
 
     return data;

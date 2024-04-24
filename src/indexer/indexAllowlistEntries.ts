@@ -1,6 +1,9 @@
 import { IndexerConfig } from "@/types/types";
 import { storeAllowListData } from "@/storage/storeAllowListData";
-import { AllowList, getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists";
+import {
+  AllowList,
+  getUnparsedAllowLists,
+} from "@/storage/getUnparsedAllowLists";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { storeAllowListRecords } from "@/storage/storeAllowListRecords";
 import { Tables } from "@/types/database.types";
@@ -58,13 +61,13 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
       }
 
       const tree = StandardMerkleTree.load(
-        JSON.parse(<string>allowList.allow_list_data[0].data,
+        JSON.parse(<string>allowList.allow_list_data[0].data),
       );
 
       if (!tree) {
         console.error(
           "[IndexAllowListEntries] Failed to load tree from data",
-          allowList
+          allowList,
         );
         return;
       }
@@ -75,7 +78,7 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
           hc_allow_list_id: allowList.id,
           user_address: v[0],
           entry: i,
-          units: v[1]
+          units: v[1],
         });
       }
 
@@ -86,7 +89,7 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
   const allowListRecords = rows
     .flat()
     .filter(
-      (r): r is Tables<"allow_list_records"> => r !== null && r !== undefined
+      (r): r is Tables<"allow_list_records"> => r !== null && r !== undefined,
     );
 
   const data = await storeAllowListRecords({ allowListRecords });
@@ -99,7 +102,7 @@ const processAllowListEntriesBatch = async (batch: AllowList[]) => {
   await storeAllowListData({
     allowListData: batch.map((allowList) => ({
       id: allowList.id,
-      parsed: true
+      parsed: true,
     })),
   });
 };
