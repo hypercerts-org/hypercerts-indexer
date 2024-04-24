@@ -12,7 +12,7 @@ export const getSupportedSchemas = async ({ chainId }: { chainId: number }) => {
     .eq("chain_id", chainId);
 
   if (!data) {
-    console.error(
+    console.debug(
       `[GetSupportedSchema] Error while fetching supported EAS schema for chain ID ${chainId}`,
       error,
     );

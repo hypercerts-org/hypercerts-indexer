@@ -1,28 +1,28 @@
 import { supabase } from "@/clients/supabaseClient";
+import { Tables } from "@/types/database.types";
 
 interface UpdateLastBlockIndexedContractEvents {
-  contractEventsId: string;
-  lastBlockIndexed: bigint;
+  contract_events: Pick<
+    Tables<"contract_events">,
+    "id" | "last_block_indexed"
+  >[];
 }
 
 export const updateLastBlockIndexedContractEvents = async ({
-  contractEventsId,
-  lastBlockIndexed,
+  contract_events,
 }: UpdateLastBlockIndexedContractEvents) => {
-  const { data, error } = await supabase
-    .from("contract_events")
-    .update({
-      last_block_indexed: lastBlockIndexed.toString(),
-    })
-    .eq("id", contractEventsId);
+  for (const contract_event of contract_events) {
+    const { error } = await supabase
+      .from("contract_events")
+      .update({ last_block_indexed: contract_event.last_block_indexed })
+      .eq("id", contract_event.id);
 
-  if (error) {
-    console.error(
-      `[UpdateLastBlockIndexedEvents] Error while updating last block indexed for contract events with ID ${contractEventsId}`,
-      error,
-    );
-    return;
+    if (error) {
+      console.error(
+        `[UpdateLastBlockIndexedEvents] Error while updating last block indexed for contract event with id ${contract_event.id}`,
+        error,
+      );
+      return;
+    }
   }
-
-  return data;
 };

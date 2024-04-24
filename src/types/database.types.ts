@@ -8,40 +8,43 @@ export type Database = MergeDeep<
   DatabaseGenerated,
   {
     public: {
+      CompositeTypes: {
+        allow_list_data_type: {
+          contract_id: string | null;
+          token_id: bigint | string | null;
+          root: string | null;
+        };
+        transfer_units_type: {
+          claim_id: string | null;
+          from_token_id: bigint | string | null;
+          to_token_id: bigint | string | null;
+          block_timestamp: number | null;
+          units_transferred: bigint | string | null;
+        };
+      };
       Functions: {
-        store_allow_list_data_and_hypercert_allow_list: {
+        get_or_create_claim: {
           Args: {
-            p_token_id: bigint | number | string;
+            p_token_id: bigint | string;
+          };
+          Returns: {
+            token_id: bigint | string;
           };
         };
         store_claim: {
           Args: {
-            p_token_id: bigint | number | string;
+            p_token_id: bigint | string;
             p_block_timestamp: bigint | number | string;
-            p_units: bigint | number | string;
+            p_units: bigint | string;
           };
         };
-        transfer_units: {
+        upsert_fraction: {
           Args: {
-            p_from_token_id: bigint | number | string;
-            p_to_token_id: bigint | number | string;
-            p_block_timestamp: bigint | number | string;
-            p_units_transferred: bigint | number | string;
-          };
-        };
-        upsert_hypercert_token: {
-          Args: {
-            p_token_id: bigint | number | string;
+            p_token_id: bigint | string;
             p_creation_block_timestamp: bigint | number | string;
             p_last_block_update_timestamp: bigint | number | string;
-            p_value: bigint | number | string;
+            p_value: bigint | string;
           };
-        };
-      };
-      update_owner_address: {
-        Args: {
-          p_last_block_update_timestamp: bigint | number | string;
-          p_token_id: bigint | number | string;
         };
       };
       Tables: {
@@ -95,7 +98,35 @@ export type Database = MergeDeep<
             block_timestamp: bigint | number | string;
           };
         };
-        hypercert_tokens: {
+        claims: {
+          Row: {
+            value: bigint | number | string | null | undefined;
+            units: bigint | number | string | null | undefined;
+            token_id: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            last_block_update_timestamp: bigint | number | string;
+          };
+          Insert: {
+            value: bigint | number | string | null | undefined;
+            units: bigint | number | string | null | undefined;
+            token_id: bigint | number | string;
+            creation_block_timestamp:
+              | bigint
+              | number
+              | string
+              | null
+              | undefined;
+            last_block_update_timestamp: bigint | number | string;
+          };
+          Update: {
+            value: bigint | number | string | null | undefined;
+            units: bigint | number | string | null | undefined;
+            token_id: bigint | number | string;
+            creation_block_timestamp: bigint | number | string | null;
+            last_block_update_timestamp: bigint | number | string;
+          };
+        };
+        fractions: {
           Row: {
             value: bigint | number | string | null | undefined;
             units: bigint | number | string | null | undefined;

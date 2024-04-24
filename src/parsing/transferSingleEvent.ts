@@ -1,6 +1,7 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 import { NewTransfer } from "@/types/types";
+import { isClaimToken } from "@/utils/tokenIds";
 
 type TransferSingleEvent = {
   address: string;
@@ -13,16 +14,6 @@ type TransferSingleEvent = {
   };
   blockNumber: bigint;
   [key: string]: unknown;
-};
-
-// A token is a claim token ID if the .
-
-const MASK_128_BITS = BigInt(
-  "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000000000000000000000",
-);
-
-export const isClaimToken = (tokenId: bigint) => {
-  return (tokenId & MASK_128_BITS) === tokenId;
 };
 
 /*
@@ -45,6 +36,7 @@ export const parseTransferSingle = async (event: unknown) => {
   const row: Partial<NewTransfer> = {
     token_id: args.id,
     block_timestamp: await getBlockTimestamp(event.blockNumber),
+    block_number: event.blockNumber,
     value: args.value,
     owner_address: args.to,
     type: isClaimToken(args.id) ? "claim" : "fraction",

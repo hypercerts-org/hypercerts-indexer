@@ -31,7 +31,7 @@ export const indexAttestations = async ({
   const supportedSchemas = await getSupportedSchemas({ chainId });
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
-    console.error("No supported schemas found");
+    console.debug("[IndexAttestations] No supported schemas found");
     return;
   }
 
@@ -55,8 +55,8 @@ export const indexAttestations = async ({
       const { logs, toBlock } = attestedEvents;
 
       if (!logs || logs.length === 0) {
-        console.info(
-          "No logs found for supported schemas",
+        console.debug(
+          "[IndexAttestations] No logs found for supported schemas",
           schemasToIndex.map((schema) => schema?.id),
         );
 
@@ -75,22 +75,21 @@ export const indexAttestations = async ({
         await Promise.all(logs.map(parseAttestedEvent))
       ).filter((attestation) => attestation !== null) as ParsedAttestedEvent[];
 
-      const parsedAttestations = await Promise.all(
-        parsedEvents.map(
-          async (parsedEvent) =>
-            await fetchAttestationData({ attestation: parsedEvent }).then(
+      const attestations = (
+        await Promise.all(
+          parsedEvents.map(async (parsedEvent) =>
+            fetchAttestationData({ attestation: parsedEvent }).then(
               (attestation) => decodeAttestationData({ attestation, schema }),
             ),
-        ),
-      );
-
-      const filteredAttestations = parsedAttestations.filter(
+          ),
+        )
+      ).filter(
         (attestation): attestation is Tables<"attestations"> =>
           attestation !== null,
       );
 
       const result = await storeAttestations({
-        attestations: filteredAttestations,
+        attestations,
         schema,
       });
 
@@ -106,7 +105,10 @@ export const indexAttestations = async ({
       }
     }),
   ).catch((error) => {
-    console.error("Error while fetching and updating attestation data", error);
+    console.error(
+      "[IndexAttestations] Error while fetching and updating attestation data",
+      error,
+    );
     return;
   });
 };

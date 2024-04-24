@@ -1,6 +1,5 @@
 import { getDeployment } from "@/utils";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
-import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
 import { IndexerConfig } from "@/types/types";
 import { fetchSchemaData } from "@/fetching/fetchSchemaData";
 import { Tables } from "@/types/database.types";
@@ -23,7 +22,7 @@ const defaultConfig = {
 };
 
 export const indexSupportedSchemas = async ({
-  batchSize = defaultConfig.batchSiz,
+  batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const supportedSchemas = await getSupportedSchemas({ chainId });
@@ -37,20 +36,23 @@ export const indexSupportedSchemas = async ({
     (schema) => !schema.schema || !schema.resolver || !schema.revocable,
   );
 
-  const schemaData = (
-    await Promise.all(
-      incompleteSchemas.map((schema) => fetchSchemaData({ schema })),
-    )
-  ).filter(
-    (schema): schema is Tables<"supported_schemas"> =>
-      schema !== null && schema !== undefined,
-  );
+  const _size = Number(batchSize);
 
-  const res = await storeSupportedSchemas({
-    supportedSchemas: schemaData,
-  });
+  for (let i = 0; i < incompleteSchemas.length; i += _size) {
+    const batch = incompleteSchemas.slice(i, i + _size);
+    const schemaData = (
+      await Promise.all(batch.map((schema) => fetchSchemaData({ schema })))
+    ).filter(
+      (schema): schema is Tables<"supported_schemas"> =>
+        schema !== null && schema !== undefined,
+    );
 
-  if (!res) {
-    console.error("[IndexSupportedSchema] Failed to store supported schemas");
+    const res = await storeSupporedSchemas({
+      supportedSchemas: schemaData,
+    });
+
+    if (!res) {
+      console.error("[IndexSupportedSchema] Failed to store supported schemas");
+    }
   }
 };

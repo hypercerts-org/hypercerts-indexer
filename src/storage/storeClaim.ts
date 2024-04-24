@@ -1,5 +1,5 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Database, Tables } from "@/types/database.types";
+import { Tables } from "@/types/database.types";
 import { NewClaim } from "@/types/types";
 
 /* 
@@ -25,57 +25,44 @@ import { NewClaim } from "@/types/types";
  */
 
 interface StoreClaim {
-  claim?: Partial<NewClaim>;
+  claims?: NewClaim[];
   contract?: Pick<Tables<"contracts">, "id">;
 }
 
-export const storeClaim = async ({ claim, contract }: StoreClaim) => {
-  if (!claim || !contract) {
-    console.error("[StoreClaim] No data or contract provided");
+export const storeClaim = async ({ claims }: StoreClaim) => {
+  if (!claims) {
+    console.debug("[StoreClaim] No data or contract provided");
     return;
   }
 
   // TODO validations
-  if (
-    !claim.creator_address ||
-    !claim.token_id ||
-    !claim.block_timestamp ||
-    !claim.units ||
-    !claim.uri
-  ) {
-    console.error("[StoreClaim] Invalid claim data: ", claim);
-    return;
-  }
 
-  const hypercert_token: Database["public"]["Functions"]["store_claim"]["Args"] =
-    {
-      p_creator: claim.creator_address,
-      p_contracts_id: contract.id,
-      p_token_id: claim.token_id.toString(),
-      p_block_timestamp: claim.block_timestamp.toString(),
-      p_type: "claim",
-      p_units: claim.units.toString(),
-      p_uri: claim.uri,
-    };
+  const _claims = claims.map((claim) => ({
+    owner_address: claim.creator_address,
+    contracts_id: claim.contract_id,
+    token_id: claim.token_id.toString(),
+    creation_block_timestamp: claim.block_timestamp.toString(),
+    last_block_update_timestamp: claim.block_timestamp.toString(),
+    type: "claim" as const,
+    units: claim.units.toString(),
+    uri: claim.uri,
+    value: 1,
+  }));
 
-  console.log(
-    `[StoreClaim] Storing claim ${hypercert_token.p_token_id}: `,
-    hypercert_token,
-  );
+  console.debug(`[StoreClaim] Storing ${claims.length} claims`);
 
   try {
-    const { data, error } = await supabase.rpc("store_claim", hypercert_token);
+    const { data, error } = await supabase.from("claims").upsert(_claims);
 
     if (error) {
-      throw new Error(
-        `[StoreClaim] Error while storing claim: ${error.message}`,
-      );
+      console.error(`[StoreClaim] Error while storing claims.`, error);
+      return;
     }
 
     return data;
   } catch (error) {
     if (error instanceof Error) {
-      console.error(`[StoreClaim] Error while storing claim: ${error.message}`);
+      console.error(`[StoreClaim] Error while storing claims.`, error);
     } else {
       console.error(
         `[StoreClaim] An unknown error occurred: ${JSON.stringify(error)}`,

@@ -36,7 +36,7 @@ export const parseClaimStoredEvent = async (event: unknown) => {
     hash: transactionHash,
   });
 
-  const claim: NewClaim = {
+  const claim: Partial<NewClaim> = {
     creator_address: transaction.from,
     token_id: args.claimID,
     uri: args.uri,

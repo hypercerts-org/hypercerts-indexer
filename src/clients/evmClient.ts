@@ -26,6 +26,12 @@ const alchemyUrl = (apiKey: string) => {
 
 /* Returns a PublicClient instance for the configured network. */
 export const client = createPublicClient({
+  cacheTime: 10_000,
   chain: selectedNetwork(),
   transport: http(alchemyUrl(alchemyApiKey)),
+  batch: {
+    multicall: {
+      wait: 32,
+    },
+  },
 });

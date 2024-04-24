@@ -1,23 +1,30 @@
 import express from "express";
 import dotenv from "dotenv";
 import { delay, port } from "./utils/constants";
-import { indexSupportedSchemas, runIndexing } from "./indexer";
 import * as Sentry from "@sentry/node";
 import { ProfilingIntegration } from "@sentry/profiling-node";
 import { captureConsoleIntegration } from "@sentry/integrations";
 import { indexAttestations } from "@/indexer/indexAttestations";
 import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored";
-import { indexTransferSingleEvents } from "@/indexer/indexTokenTransfers";
+import { indexTransferSingleEvents } from "@/indexer/indexFractionTransfers";
 import { indexUnitTransfers } from "@/indexer/indexUnitTransfers";
 import { indexMetadata } from "@/indexer/indexMetadata";
 import { indexAllowListCreated } from "@/indexer/indexAllowlistCreated";
 import { indexAllowListEntries } from "@/indexer/indexAllowlistEntries";
 import { indexAllowListData } from "@/indexer/indexAllowlistData";
+import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas";
+import { runIndexing } from "@/indexer/runIndexing";
 
 dotenv.config();
 
 // @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
+  const int = Number.parseInt(this.toString());
+  return int ?? this.toString();
+};
+
+// @ts-expect-error BigInt is not supported by JSON
+BigInt.prototype.fromJSON = function () {
   const int = Number.parseInt(this.toString());
   return int ?? this.toString();
 };

@@ -13,7 +13,7 @@ export const getMissingAllowListUris = async () => {
   }
 
   if (!data) {
-    console.error("[GetMissingAllowListUris] No data returned from database");
+    console.debug("[GetMissingAllowListUris] No data returned from database");
     return;
   }
 

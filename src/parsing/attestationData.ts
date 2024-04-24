@@ -60,7 +60,7 @@ export const decodeAttestationData = ({
   _attestation.decoded_attestation = JSON.stringify(decodedAttestationObject);
   if (decodedAttestationObject?.chain_id)
     _attestation.chain_id = mapUnknownToBigInt(
-      decodedAttestationObject.chain_i,
+      decodedAttestationObject.chain_id,
     )?.toString();
 
   if (

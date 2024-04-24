@@ -2,22 +2,23 @@ import { supabase } from "@/clients/supabaseClient";
 import { Database } from "@/types/database.types";
 
 interface StoreHypercertAllowList {
-  allowListPointer: Database["public"]["Functions"]["store_allow_list_data_and_hypercert_allow_list"]["Args"];
+  batchToStore: Database["public"]["CompositeTypes"]["allow_list_data_type"][];
 }
 
 export const storeHypercertAllowList = async ({
-  allowListPointer,
+  batchToStore,
 }: StoreHypercertAllowList) => {
   const { data, error } = await supabase.rpc(
-    "store_allow_list_data_and_hypercert_allow_list",
-    allowListPointer,
+    "store_allow_list_data_and_hypercert_allow_list_batch",
+    { p_allow_list_data: batchToStore },
   );
 
   if (error) {
     console.error(
-      `[StoreHypercertAllowList] Error while storing hypercert allow list with root ${allowListPointer.p_root}.`,
+      `[StoreHypercertAllowList] Error while storing hypercert and allow list.`,
       error,
     );
+    console.debug(batchToStore);
     return;
   }
 
