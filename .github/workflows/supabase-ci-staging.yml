@@ -25,7 +25,7 @@ jobs:
       - name: Verify generated types are checked in
         run: |
           supabase gen types typescript --local > src/types/database-generated.types.ts
-          if ! git diff --ignore-space-at-eol --exit-code --quiet types.gen.ts; then
+          if ! git diff --ignore-space-at-eol --exit-code --quiet ./src/types/database-generated.types.ts; then
             echo "Detected uncommitted changes after build. See status below:"
             git diff
             exit 1
