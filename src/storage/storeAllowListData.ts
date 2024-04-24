@@ -2,7 +2,7 @@ import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 
 interface StoreAllowListData {
-  allowListData: Tables<"allow_list_data">;
+  allowListData: Partial<Tables<"allow_list_data">>[];
 }
 
 export const storeAllowListData = async ({
@@ -14,9 +14,10 @@ export const storeAllowListData = async ({
 
   if (error) {
     console.error(
-      `[StoreAllowListData] Error while storing allow list with root ${allowListData.root} from ${allowListData.uri}.`,
+      `[StoreAllowListData] Error while storing allow list datasets`,
       error,
     );
+    console.debug(allowListData);
     return;
   }
 

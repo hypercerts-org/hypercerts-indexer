@@ -1,7 +1,7 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 import { NewUnitTransfer } from "@/types/types";
-import * as console from "console";
+import { getClaimTokenId } from "@/utils/tokenIds";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -40,40 +40,64 @@ export const storeUnitTransfer = async ({
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
-  const results = []; // Array to store the results
+  const _transfers = await Promise.all(
+    transfers.map(async (transfer) => {
+      const { data: claim, error: claimError } = await supabase.rpc(
+        "get_or_create_claim",
+        {
+          p_token_id: getClaimTokenId(transfer.to_token_id).toString(),
+          p_contracts_id: contract.id,
+        },
+      );
 
-  for (const transfer of transfers) {
-    try {
-      const { data, error } = await supabase.rpc("transfer_units", {
-        p_contracts_id: contract.id,
-        p_from_token_id: transfer.from_token_id.toString(),
-        p_to_token_id: transfer.to_token_id.toString(),
-        p_block_timestamp: transfer.block_timestamp.toString(),
-        p_units_transferred: transfer.units.toString(),
-      });
-
-      if (error) {
+      if (claimError || !claim) {
         console.error(
-          `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
+          `[StoreUnitTransfer] Error while getting or creating claim.`,
+          claimError,
         );
         return;
       }
 
-      console.debug(
-        `[StoreUnitTransfer] Transferred ${transfer.units.toString()} units from token ${transfer.from_token_id.toString()} to token ${transfer.to_token_id.toString()}`,
-      );
+      const _transfer = {
+        p_claim_id: claim.id,
+        p_from_token_id: transfer.from_token_id.toString(),
+        p_to_token_id: transfer.to_token_id.toString(),
+        p_block_timestamp: transfer.block_timestamp.toString(),
+        p_units_transferred: transfer.units.toString(),
+      };
 
-      results.push(data); // Add the result to the results array
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(
-          `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
-        );
-      } else {
-        console.error(
-          `[StoreUnitTransfer] An unknown error occurred: ${JSON.stringify(error)}`,
-        );
-      }
+      console.log(_transfer);
+
+      return _transfer;
+    }),
+  );
+
+  try {
+    const { data, error } = await supabase.rpc("transfer_units_batch", {
+      p_transfers: _transfrs,
+    });
+
+    if (error) {
+      console.error(
+        `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
+      );
+      return;
+    }
+
+    console.debug(
+      `[StoreUnitTransfer] Processed ${transfers.length} unit transfers.,
+    );
+
+    return data;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(
+        `[StoreUnitTransfer] Error while transferring units: ${error.message}`,
+      );
+    } else {
+      console.error(
+        `[StoreUnitTransfer] An unknown error occurred: ${JSON.stringify(error)}`,
+      );
     }
   }
 };

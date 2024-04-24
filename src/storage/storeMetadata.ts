@@ -44,7 +44,7 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
       .select();
 
     if (error) {
-      throw new Error(
+      console.error(
         `[StoreMetadata] Error while storing metadata: ${error.message}`,
       );
     }

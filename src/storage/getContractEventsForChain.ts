@@ -1,9 +1,10 @@
 import { supabase } from "@/clients/supabaseClient";
+import { Database } from "@/types/database.types";
 
-interface ContractEvents {
+export type ContractEvents = {
   eventName: string;
   chainId: number;
-}
+};
 
 export const getContractEventsForChain = async ({
   chainId,
@@ -31,5 +32,5 @@ export const getContractEventsForChain = async ({
     `[GetContractEvents] Found ${data.length} contracts for ${eventName} on chain ${chainId}`,
   );
 
-  return data;
+  return data as Database["public"]["Functions"]["search_contract_events"]["Returns"];
 };

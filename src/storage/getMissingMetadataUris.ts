@@ -12,7 +12,7 @@ export const getMissingMetadataUris = async () => {
   }
 
   if (!data) {
-    console.error("[getMissingMetadataUris] No data returned from database");
+    console.debug("[getMissingMetadataUris] No data returned from database");
     return;
   }
 
@@ -22,7 +22,7 @@ export const getMissingMetadataUris = async () => {
     )
     .map(({ missing_uri }) => missing_uri);
 
-  console.log(
+  console.debug(
     `[getMissingMetadataUris] Found ${parsed.length} missing metadata URIs`,
   );
   return parsed;

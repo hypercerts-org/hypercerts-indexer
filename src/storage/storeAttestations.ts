@@ -41,20 +41,19 @@ export const storeAttestations = async ({
 
   if (_attestations.length === 0) return;
 
-  console.log(`Storing ${_attestations.length} attestations`);
+  console.debug(`Storing ${_attestations.length} attestations`);
 
   const { data, error } = await supabase
     .from("attestations")
     .upsert(_attestations)
-    .select()
-    .returns<Tables<"attestations">[]>();
+    .select();
 
   if (error) {
     console.error(`Error while storing attestations`, error);
     return;
   }
 
-  console.info(`Stored ${data?.length} attestations`);
+  console.debug(`Stored ${data?.length} attestations`);
 
   return data;
 };

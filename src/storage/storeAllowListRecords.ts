@@ -2,7 +2,7 @@ import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 
 interface StoreAllowListRecords {
-  allowListRecords: Omit<Tables<"allow_list_records">, "id">[];
+  allowListRecords: Partial<Tables<"allow_list_records">>[];
 }
 
 export const storeAllowListRecords = async ({

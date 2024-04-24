@@ -38,8 +38,8 @@ export const indexClaimsStoredEvents = async ({
     return;
   }
 
-  await Promise.all(
-    contractsWithEvents.map(async (contractEvent) => {
+  const results = await Promise.all(
+    contractsWithEvents.flatMap(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
 
       // Get logs in batches
@@ -56,25 +56,42 @@ export const indexClaimsStoredEvents = async ({
       const { logs, toBlock } = logsFound;
 
       // parse logs to get claimID, contractAddress and cid
-      const claims = (
+      const parsedEvents = (
         await Promise.all(logs.map(parseClaimStoredEvent))
-      ).filter((claim): claim is NewClaim => claim !== null);
-
-      // TODO - flip so claims are passed as array
-      await Promise.all(
-        claims.map(
-          async (claim) =>
-            await storeClaim({
-              claim,
-              contract: { id: contractEvent.contract_id },
-            }),
-        ),
-      ).then(() =>
-        updateLastBlockIndexedContractEvents({
-          contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBlock,
-        }),
+      ).filter(
+        (claim): claim is Partial<NewClaim> =>
+          claim !== null && claim !== undefined,
       );
+
+      const claims = parsedEvents.map((claim) => ({
+        ...claim,
+        contract_id: contractEvent.contract_id,
+      }));
+
+      return {
+        claims,
+        contractEventUpdate: {
+          id: contractEvent.id,
+          last_block_indexed: toBlok,
+       },
+      };
+    }),
+  );
+
+  const claims = results
+    .flatMap((result) => (result?.claims ? result.claims : undefined))
+    .filter(
+      (claim): claim is NewClaim => claim !== null && claim !== undefind,
+    );
+  // .map(({ claims }) => claims !== null && claims !== undefined);
+
+  await storeClaim({
+    clais,
+  }).then(() =>
+    updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : ],
+     ),
     }),
   );
 };

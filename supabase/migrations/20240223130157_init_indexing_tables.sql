@@ -26,7 +26,7 @@ create table contract_events
 
 create type token_type as enum ('claim', 'fraction');
 
-create table hypercert_tokens
+create table claims
 (
     id                          uuid primary key default gen_random_uuid(),
     contracts_id                uuid           not null references contracts (id),
@@ -42,9 +42,30 @@ create table hypercert_tokens
     UNIQUE (contracts_id, token_id)
 );
 
-create index idx_contract_tokens on hypercert_tokens (contracts_id);
+create index idx_claims_hypercert_id on claims (hypercert_id);
+create index idx_claims_uri ON claims (uri);
 
-comment on table public.hypercert_tokens is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.claims is e'@graphql({"totalCount": {"enabled": true}})';
+
+create table fractions
+(
+    id                          uuid primary key default gen_random_uuid(),
+    claims_id                   uuid           not null references claims (id),
+    token_id                    numeric(78, 0) not null,
+    hypercert_id                text,
+    creation_block_timestamp    numeric(78, 0),
+    last_block_update_timestamp numeric(78, 0),
+    owner_address               text,
+    value                       numeric(78, 0),
+    units                       numeric(78, 0),
+    type                        token_type,
+    UNIQUE (claims_id, token_id)
+);
+
+create index idx_fractions_claim_id on fractions (claims_id);
+create index idx_fractions_owner_address on fractions (owner_address);
+
+comment on table public.fractions is e'@graphql({"totalCount": {"enabled": true}})';
 
 create table metadata
 (
@@ -69,8 +90,7 @@ create table metadata
 
 comment on table public.metadata is e'@graphql({"totalCount": {"enabled": true}})';
 
-CREATE INDEX idx_hypercert_tokens_uri ON hypercert_tokens (uri);
-CREATE INDEX idx_metadata_uri ON metadata (uri);
+create index idx_metadata_uri ON metadata (uri);
 
 create table supported_schemas
 (
@@ -102,7 +122,6 @@ create table attestations
 
 comment on table public.attestations is e'@graphql({"totalCount": {"enabled": true}})';
 
-
 create table allow_list_data
 (
     id     uuid primary key default gen_random_uuid(),
@@ -110,7 +129,7 @@ create table allow_list_data
     root   text,
     data   jsonb,
     parsed bool,
-    UNIQUE (root)
+    UNIQUE (uri, root)
 );
 
 CREATE INDEX idx_allow_list_data_uri ON allow_list_data (uri);
@@ -118,21 +137,25 @@ CREATE INDEX idx_metadata_allow_list_uri ON metadata (allow_list_uri);
 
 comment on table public.allow_list_data is e'@graphql({"totalCount": {"enabled": true}})';
 
-create table allow_list_records
-(
-    id            uuid primary key default gen_random_uuid(),
-    allow_list_id uuid           not null references allow_list_data (id),
-    user_address  text           not null,
-    units         numeric(78, 0) not null,
-    entry         numeric(78, 0) not null,
-    UNIQUE (allow_list_id, user_address, units, entry)
-);
-
 create table hypercert_allow_lists
 (
-    id                  uuid primary key default gen_random_uuid(),
-    hypercert_tokens_id uuid not null references hypercert_tokens (id),
-    allow_list_id       uuid not null references allow_list_data (id),
-    UNIQUE (hypercert_tokens_id, allow_list_id)
+    id                 uuid primary key default gen_random_uuid(),
+    claims_id          uuid not null references claims (id),
+    allow_list_data_id uuid not null references allow_list_data (id),
+    UNIQUE (claims_id, allow_list_data_id)
 );
+
+comment on table public.hypercert_allow_lists is e'@graphql({"totalCount": {"enabled": true}})';
+
+create table allow_list_records
+(
+    id               uuid primary key default gen_random_uuid(),
+    hc_allow_list_id uuid           not null references hypercert_allow_lists (id),
+    user_address     text           not null,
+    units            numeric(78, 0) not null,
+    entry            numeric(78, 0) not null,
+    UNIQUE (hc_allow_list_id, user_address, units, entry)
+);
+
+comment on table public.allow_list_records is e'@graphql({"totalCount": {"enabled": true}})';
 

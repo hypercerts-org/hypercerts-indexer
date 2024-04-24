@@ -41,7 +41,7 @@ export const indexUnitTransfers = async ({
     return;
   }
 
-  await Promise.all(
+  const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
 
@@ -63,20 +63,40 @@ export const indexUnitTransfers = async ({
       const { logs, toBlock } = logsFound;
 
       // Validate and parse logs
-      const transfers = (
+      const parsedEvents = (
         await Promise.all(logs.map(parseValueTransfer))
       ).filter((transfer): transfer is NewUnitTransfer => transfer !== null);
 
-      // store the claim and fraction tokens
-      await storeUnitTransfer({
+      const transfers = parsedEvents.map((transfer) => ({
+        ...transfer,
+        contracts_id: contractEvent.contract_id,
+      }));
+
+      return {
         transfers,
-        contract: { id: contractEvent.contract_id },
-      }).then(() =>
-        updateLastBlockIndexedContractEvents({
-          contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBlock,
-        }),
-      );
+        contractEventUpdate: {
+          id: contractEvent.id,
+          last_block_indexed: toBlock,
+        },
+      };
+    }),
+  );
+
+  const transfers = results
+    .flatMap((result) => (result?.transfers ? result.transfers : undefined))
+    .filter(
+      (transfer): transfer is NewUnitTransfer =>
+        transfer !== null && transfer !== undefined,
+    );
+
+  // store the claim and fraction tokens
+  await storeUnitTransfer({
+    transfers,
+  }).then(() =>
+    updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
     }),
   );
 };

@@ -1,7 +1,7 @@
 import { parseTransferSingle } from "@/parsing";
 import { getDeployment } from "@/utils";
 import { IndexerConfig, NewTransfer } from "@/types/types";
-import { storeTransferSingle } from "@/storage/storeTokens";
+import { storeTransferSingleFraction } from "@/storage/storeTransferSingleFraction";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts";
@@ -41,7 +41,7 @@ export const indexTransferSingleEvents = async ({
     return;
   }
 
-  await Promise.all(
+  const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
 
@@ -66,21 +66,43 @@ export const indexTransferSingleEvents = async ({
       // Validate and parse logs
       const tokensToStore = (
         await Promise.all(logs.map(parseTransferSingle))
-      ).filter((transfer): transfer is NewTransfer => transfer !== null);
+      ).filter(
+        (transfer): transfer is NewTransfer =>
+          transfer !== null &&
+          transfer !== undefined &&
+          transfer.type === "fraction",
+      );
 
-      console.log(
-        `[IndexTokenTransfers] Storing ${tokensToStore.length} tokens`,
-      );
-      // store the claim and fraction tokens
-      await storeTransferSingle({
-        tokens: tokensToStore,
-        contract: { id: contractEvent.contract_id },
-      }).then(() =>
-        updateLastBlockIndexedContractEvents({
-          contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBlock,
-        }),
-      );
+      const transfers = tokensToStore.map((transfer) => ({
+        ...transfer,
+        contracts_id: contractEvent.contract_i,
+      }));
+
+      return {
+        transfers,
+        contractEventUpdate: {
+          id: contractEvent.id,
+          last_block_indexed: toBloc,
+        ,
+      };
+    }),
+  );
+
+  const transfers = results
+    .flatMap((result) => (result?.transfers ? result.transfers : undefined))
+    .filter(
+      (transfer): transfer is NewTransfer =>
+        transfer !== null && transfer !== undefine,
+    );
+
+  // store the fraction tokens
+  await storeTransferSingleFraction({
+    transfer,
+  }).then(() =>
+    updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [,
+      ,
     }),
   );
 };

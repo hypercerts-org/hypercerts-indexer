@@ -5,6 +5,7 @@ import { getLogsForContractEvents } from "@/monitoring";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { parseAllowListCreated } from "@/parsing/allowListCreatedEvent";
 import { storeHypercertAllowList } from "@/storage/storeHypercertAllowList";
+import { Database } from "@/types/database.types";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -38,7 +39,7 @@ export const indexAllowListCreated = async ({
     return;
   }
 
-  await Promise.all(
+  const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
 
@@ -64,25 +65,39 @@ export const indexAllowListCreated = async ({
       );
 
       const allowListData = allowLists.map((allowList) => ({
-        p_token_id: allowList.token_id.toString(),
-        p_contract_id: contractEvent.contract_id,
-        p_root: allowList.root,
+        token_id: allowList.token_id.toString(),
+        contract_id: contractEvent.contract_id,
+        root: allowList.root,
       }));
 
-      // TODO - flip so claims are passed as array
-      await Promise.all(
-        allowListData.map(
-          async (allowList) =>
-            await storeHypercertAllowList({
-              allowListPointer: allowList,
-            }),
-        ),
-      ).then(() =>
-        updateLastBlockIndexedContractEvents({
-          contractEventsId: contractEvent.id,
-          lastBlockIndexed: toBlock,
-        }),
-      );
+      return {
+        allowListData,
+        contractEventUpdate: {
+          id: contractEvent.id,
+          last_block_indexed: toBloc,
+        ,
+      };
     }),
   );
+
+  // TODO better typings
+  const allowListPointers = results
+    .flatMap((result) =>
+      result?.allowListData ? result.allowListData : undefine,
+    )
+    .filter(
+      (al) => al !== null && al !== undefine,
+    ) as Database["public"]["CompositeTypes"]["allow_list_data_type"][];
+
+  await storeHypercertAllowList({
+    batchToStore: allowListPointer,
+  })
+    .then(() =>
+      updateLastBlockIndexedContractEvents({
+        contract_events: results.flatMap((res) =>
+          res?.contractEventUpdate ? [res.contractEventUpdate] : [,
+        ,
+      },
+    )
+    .catch((error) => console.error(error));
 };
