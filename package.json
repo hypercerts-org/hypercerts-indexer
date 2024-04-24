@@ -66,5 +66,6 @@
     "luxon": "^3.4.4",
     "type-fest": "^4.10.3",
     "viem": "^2.9.19"
-  }
+  },
+  "packageManager": "pnpm@9.0.4"
 }
