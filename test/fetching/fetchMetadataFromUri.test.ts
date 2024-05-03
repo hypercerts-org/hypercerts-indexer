@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fetchMetadataFromUri } from "@/fetching";
+import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
 import { mockMetadata } from "../resources/mockMetadata";
@@ -23,11 +23,11 @@ describe("Fetch metadata from URI", () => {
     const response = await fetchMetadataFromUri(claim);
 
     expect(response).toBeDefined();
-    expect(response?.metadata).toBeDefined();
-    expect(response?.metadata).toEqual(mockMetadata);
-    expect(response?.claimID).toEqual(claim.claimID);
-    expect(response?.contractAddress).toEqual(claim.contractAddress);
-    expect(response?.uri).toEqual(claim.uri);
+    expect(response?.image).toEqual(mockMetadata.image);
+    expect(response?.name).toEqual(mockMetadata.name);
+    expect(response?.description).toEqual(mockMetadata.description);
+    expect(response?.properties).toEqual(mockMetadata.properties);
+    expect(response?.external_url).toEqual(mockMetadata.external_url);
   });
 
   it("should fetch metadata from HTTPS", async () => {
@@ -46,11 +46,11 @@ describe("Fetch metadata from URI", () => {
     const response = await fetchMetadataFromUri(claim);
 
     expect(response).toBeDefined();
-    expect(response.metadata).toBeDefined();
-    expect(response.metadata).toEqual(mockMetadata);
-    expect(response.claimID).toEqual(claim.claimID);
-    expect(response.contractAddress).toEqual(claim.contractAddress);
-    expect(response.uri).toEqual(claim.uri);
+    expect(response?.image).toEqual(mockMetadata.image);
+    expect(response?.name).toEqual(mockMetadata.name);
+    expect(response?.description).toEqual(mockMetadata.description);
+    expect(response?.properties).toEqual(mockMetadata.properties);
+    expect(response?.external_url).toEqual(mockMetadata.external_url);
   });
 
   it("should fetch metadata with only CID", async () => {
@@ -69,16 +69,16 @@ describe("Fetch metadata from URI", () => {
     const response = await fetchMetadataFromUri(claim);
 
     expect(response).toBeDefined();
-    expect(response.metadata).toBeDefined();
-    expect(response.metadata).toEqual(mockMetadata);
-    expect(response.claimID).toEqual(claim.claimID);
-    expect(response.contractAddress).toEqual(claim.contractAddress);
-    expect(response.uri).toEqual(claim.uri);
+    expect(response?.image).toEqual(mockMetadata.image);
+    expect(response?.name).toEqual(mockMetadata.name);
+    expect(response?.description).toEqual(mockMetadata.description);
+    expect(response?.properties).toEqual(mockMetadata.properties);
+    expect(response?.external_url).toEqual(mockMetadata.external_url);
   });
 
   it("should return undefined if no metadata is found", async () => {
     server.use(
-      http.get(`ipfs.*.link`, () => {
+      http.get(`https://*.ipfs.*.link`, () => {
         return HttpResponse.json({ data: "not metadata" });
       }),
     );
@@ -91,10 +91,6 @@ describe("Fetch metadata from URI", () => {
 
     const response = await fetchMetadataFromUri(claim);
 
-    expect(response).toBeDefined();
-    expect(response.metadata).toBeUndefined();
-    expect(response.claimID).toEqual(claim.claimID);
-    expect(response.contractAddress).toEqual(claim.contractAddress);
-    expect(response.uri).toEqual(claim.uri);
+    expect(response).toBeUndefined();
   });
 });
