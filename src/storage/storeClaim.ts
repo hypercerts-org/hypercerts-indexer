@@ -1,6 +1,7 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 import { NewClaim } from "@/types/types";
+import { isAddress } from "viem";
 
 /* 
     This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
@@ -36,6 +37,14 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
   }
 
   // TODO validations
+  if (claims.some((claim) => !isAddress(claim.creator_address))) {
+    const erroneousClaim = claims.find(
+      (claim) => !isAddress(claim.creator_address),
+    );
+    throw new Error(
+      `[StoreClaim] Invalid creator address ${erroneousClaim?.token_id}`,
+    );
+  }
 
   const _claims = claims.map((claim) => ({
     owner_address: claim.creator_address,
