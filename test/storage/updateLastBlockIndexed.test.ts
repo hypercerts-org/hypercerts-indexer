@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  default_blockNumber,
-  default_chainID,
-  default_contractAddress,
-} from "../handlers";
+import { default_blockNumber } from "../handlers";
 import { updateLastBlockIndexedContractEvents } from "../../src/storage/updateLastBlockIndexedContractEvents";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";

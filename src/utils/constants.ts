@@ -24,3 +24,5 @@ export const batchSize = BigInt(
 );
 
 export const delay = Number(assertExists(process.env.DELAY, "Delay"));
+
+export const alchemyUrl = "https://eth-sepolia.g.alchemy.com/v2";
