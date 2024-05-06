@@ -5,6 +5,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: test
 
     env:
       PORT: ${{ vars.PORT }}
