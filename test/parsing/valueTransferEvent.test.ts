@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
-import { alchemyUrl } from "../../src/utils/constants";
 import { parseValueTransfer } from "../../src/parsing/valueTransferEvent";
 import { client } from "../../src/clients/evmClient";
+import { alchemyUrl } from "../resources/alchemyUrl";
 
 describe("valueTransferEvent", () => {
   const claimID = faker.number.bigInt();

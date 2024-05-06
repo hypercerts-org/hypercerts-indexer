@@ -1,10 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
-import { alchemyUrl } from "../../src/utils/constants";
 import { parseAllowListCreated } from "../../src/parsing/allowListCreatedEvent";
 import { faker } from "@faker-js/faker";
-import { assignWith } from "lodash";
+import { alchemyUrl } from "../resources/alchemyUrl";
 
 describe("allowlistCreatedEvent", () => {
   const tokenID = faker.number.bigInt();
