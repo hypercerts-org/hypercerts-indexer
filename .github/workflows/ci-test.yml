@@ -16,6 +16,9 @@ jobs:
       SUPABASE_HC_URL: ${{ vars.SUPABASE_HC_URL }}
 
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_SERVICE_API_KEY: ${{ secrets.SUPABASE_SERVICE_API_KEY }}
+
       SUPABASE_HC_METADATA_API_KEY: ${{ secrets.SUPABASE_HC_METADATA_API_KEY }}
 
     permissions:
