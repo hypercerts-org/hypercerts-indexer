@@ -13,10 +13,10 @@ export default defineConfig({
       // If you want a coverage reports even if your tests are failing, include the reportOnFailure option
       reportOnFailure: true,
       thresholds: {
-        // lines: 60,
-        // branches: 60,
-        // functions: 60,
-        // statements: 60,
+        lines: 60,
+        branches: 60,
+        functions: 60,
+        statements: 60,
       },
       exclude: [
         ...(configDefaults.coverage.exclude as string[]),

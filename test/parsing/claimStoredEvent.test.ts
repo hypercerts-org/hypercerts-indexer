@@ -60,25 +60,21 @@ describe("claimStoredEvent", {}, () => {
     });
   });
 
-  it(
-    "returns undefined when the event is missing claimID or URI",
-    {},
-    async () => {
-      const address = faker.finance.ethereumAddress();
-      const event = {
-        id: "0x3e7d7e4c4f3d5a7f2b3d6c5",
-        event: "ClaimStored",
-        address,
-        args: {
-          uri: "https://example.com/claim",
-        },
-      };
+  it("returns undefined when the event is missing claimID or URI", async () => {
+    const address = faker.finance.ethereumAddress();
+    const event = {
+      id: "0x3e7d7e4c4f3d5a7f2b3d6c5",
+      event: "ClaimStored",
+      address,
+      args: {
+        uri: "https://example.com/claim",
+      },
+    };
 
-      const parsed = await parseClaimStoredEvent(event);
+    const parsed = await parseClaimStoredEvent(event);
 
-      expect(parsed).toBe(undefined);
-    },
-  );
+    expect(parsed).toBe(undefined);
+  });
 
   it("returns undefined when the event address is invalid", {}, async () => {
     const address = "invalid";
