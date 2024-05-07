@@ -1,5 +1,6 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
+import { z } from "zod";
 
 /* 
     This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
@@ -35,10 +36,52 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
 
   console.debug(`[StoreMetadata] Storing ${metadata.length} metadata entries`);
 
-  //TODO validations
+  const metadataValidationSchema = z
+    .object({
+      allow_list_uri: z.string().optional(),
+      contributors: z.array(z.string()).optional(),
+      description: z.string().optional(),
+      external_url: z.string().optional(),
+      id: z.string().optional(),
+      image: z.string().optional(),
+      impact_scope: z.array(z.string()).optional(),
+      impact_timeframe_from: z.number().optional(),
+      impact_timeframe_to: z.number().optional(),
+      name: z.string().optional(),
+      properties: z
+        .array(
+          z.object({
+            trait_type: z.string(),
+            value: z.any(),
+          }),
+        )
+        .optional(),
+      rights: z.array(z.string()).optional(),
+      uri: z.string().optional(),
+      work_scope: z.array(z.string()).optional(),
+      work_timeframe_from: z.number().optional(),
+      work_timeframe_to: z.number().optional(),
+    })
+    .refine(
+      (x) =>
+        x.work_timeframe_from !== undefined && x.work_timeframe_to !== undefined
+          ? x.work_timeframe_from < x.work_timeframe_to
+          : true,
+      "work_timeframe_from must be less than or equal to work_timeframe_to",
+    )
+    .refine(
+      (x) =>
+        x.impact_timeframe_from !== undefined &&
+        x.impact_timeframe_to !== undefined
+          ? x.impact_timeframe_from < x.impact_timeframe_to
+          : true,
+      "impact_timeframe_from must be less than or equal to impact_timeframe_to",
+    );
+
+  const parsedMetadata = metadata.map((x) => metadataValidationSchema.parse(x));
 
   await supabase
     .from("metadata")
-    .upsert(metadata, { onConflict: "uri", ignoreDuplicates: true })
+    .upsert(parsedMetadata, { onConflict: "uri", ignoreDuplicates: true })
     .throwOnError();
 };
