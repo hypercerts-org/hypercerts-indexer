@@ -67,7 +67,7 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
         x.work_timeframe_from !== undefined && x.work_timeframe_to !== undefined
           ? x.work_timeframe_from < x.work_timeframe_to
           : true,
-      "work_timeframe_from must be less than or equal to work_timeframe_to",
+      "work_timeframe_from must be less than work_timeframe_to",
     )
     .refine(
       (x) =>
@@ -75,7 +75,7 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
         x.impact_timeframe_to !== undefined
           ? x.impact_timeframe_from < x.impact_timeframe_to
           : true,
-      "impact_timeframe_from must be less than or equal to impact_timeframe_to",
+      "impact_timeframe_from must be less than impact_timeframe_to",
     );
 
   const parsedMetadata = metadata.map((x) => metadataValidationSchema.parse(x));

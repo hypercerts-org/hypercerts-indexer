@@ -53,7 +53,7 @@ describe("storeMetadata", () => {
         metadata: [metadata],
       });
     }).rejects.toThrowError(
-      "work_timeframe_from must be less than or equal to work_timeframe_to",
+      "work_timeframe_from must be less than work_timeframe_to",
     );
   });
 
@@ -69,7 +69,7 @@ describe("storeMetadata", () => {
         metadata: [metadata],
       });
     }).rejects.toThrowError(
-      "impact_timeframe_from must be less than or equal to impact_timeframe_to",
+      "impact_timeframe_from must be less than impact_timeframe_to",
     );
   });
 });
