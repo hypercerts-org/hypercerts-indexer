@@ -74,5 +74,5 @@ export const storeTransferSingleFraction = async ({
   return supabase
     .from("fractions")
     .upsert(sortedUniqueTokens, { onConflict: "claims_id, token_id" })
-    .select();
+    .throwOnError();
 };

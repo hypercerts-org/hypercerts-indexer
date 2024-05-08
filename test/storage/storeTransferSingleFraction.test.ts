@@ -37,32 +37,40 @@ describe("storeTransferSingleFraction", () => {
   });
 
   it("should only store the entry for a token with newest timestamp", async () => {
+    let theResult: any[] = [];
+    server.use(
+      http.post(`${supabaseUrl}/*`, async ({ request }) => {
+        const data = await request.json();
+        // @ts-ignore
+        theResult = data;
+        return HttpResponse.json(data);
+      }),
+    );
     const transferOld = {
       ...transfer,
       block_timestamp: transfer.block_timestamp - 1n,
       value: transfer.value - 1n,
     };
 
-    const result = await storeTransferSingleFraction({
+    await storeTransferSingleFraction({
       transfers: [transferOld, transfer],
     });
-    console.log(result);
-    if (!result?.data) {
+
+    if (!theResult) {
       expect.fail("result undefined");
     }
 
-    expect(result.data.length).toBe(1);
-    expect(result.data[0].value).toBe(transfer.value.toString());
+    expect(theResult.length).toBe(1);
+    expect(theResult[0].value).toBe(transfer.value.toString());
 
-    const resultReversed = await storeTransferSingleFraction({
+    await storeTransferSingleFraction({
       transfers: [transfer, transferOld],
     });
-    console.log(resultReversed);
-    if (!resultReversed?.data) {
+    if (!theResult) {
       expect.fail("resultReversed undefined");
     }
 
-    expect(resultReversed.data.length).toBe(1);
-    expect(resultReversed.data[0].value).toBe(transfer.value.toString());
+    expect(theResult.length).toBe(1);
+    expect(theResult[0].value).toBe(transfer.value.toString());
   });
 });
