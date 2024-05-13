@@ -2,8 +2,9 @@ import { supabase } from "@/clients/supabaseClient";
 
 export const getMissingAllowListUris = async () => {
   const { data, error } = await supabase
-    .rpc("find_missing_allow_list_uris_and_roots")
-    .select();
+    .from("allow_list_data")
+    .select("uri")
+    .eq("root", null);
 
   if (error) {
     console.error(
