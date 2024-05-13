@@ -17,14 +17,11 @@ create table events
 
 create table contract_events
 (
-    id                 uuid primary key default gen_random_uuid(),
-    contract_id        uuid not null references contracts (id),
-    event_id           uuid not null references events (id),
+    contracts_id       uuid not null references contracts,
+    events_id          uuid not null references events,
     last_block_indexed numeric(78, 0),
-    UNIQUE (contract_id, event_id)
+    primary key (contracts_id, events_id)
 );
-
-create type token_type as enum ('claim', 'fraction');
 
 create table claims
 (
@@ -38,14 +35,8 @@ create table claims
     value                       numeric(78, 0),
     units                       numeric(78, 0),
     uri                         text,
-    type                        token_type,
     UNIQUE (contracts_id, token_id)
 );
-
-create index idx_claims_hypercert_id on claims (hypercert_id);
-create index idx_claims_uri ON claims (uri);
-
-comment on table public.claims is e'@graphql({"totalCount": {"enabled": true}})';
 
 create table fractions
 (
@@ -58,14 +49,8 @@ create table fractions
     owner_address               text,
     value                       numeric(78, 0),
     units                       numeric(78, 0),
-    type                        token_type,
     UNIQUE (claims_id, token_id)
 );
-
-create index idx_fractions_claim_id on fractions (claims_id);
-create index idx_fractions_owner_address on fractions (owner_address);
-
-comment on table public.fractions is e'@graphql({"totalCount": {"enabled": true}})';
 
 create table metadata
 (
@@ -85,12 +70,10 @@ create table metadata
     uri                   text,
     properties            jsonb,
     allow_list_uri        text,
+    parsed                bool             default false,
     UNIQUE (uri)
 );
 
-comment on table public.metadata is e'@graphql({"totalCount": {"enabled": true}})';
-
-create index idx_metadata_uri ON metadata (uri);
 
 create table supported_schemas
 (
@@ -112,6 +95,7 @@ create table attestations
     chain_id             numeric(78, 0),
     contract_address     text,
     token_id             numeric(78, 0),
+    claims_id            uuid,
     recipient_address    text           not null,
     attester_address     text           not null,
     attestation          jsonb          not null,
@@ -120,42 +104,63 @@ create table attestations
     UNIQUE (supported_schemas_id, attestation_uid)
 );
 
-comment on table public.attestations is e'@graphql({"totalCount": {"enabled": true}})';
-
 create table allow_list_data
 (
-    id   uuid primary key default gen_random_uuid(),
-    uri  text,
-    root text,
-    data jsonb,
-    UNIQUE (root)
+    id     uuid primary key default gen_random_uuid(),
+    uri    text,
+    root   text,
+    data   jsonb,
+    parsed bool,
+    UNIQUE (uri)
 );
-
-CREATE INDEX idx_allow_list_data_uri ON allow_list_data (uri);
-CREATE INDEX idx_metadata_allow_list_uri ON metadata (allow_list_uri);
-
-comment on table public.allow_list_data is e'@graphql({"totalCount": {"enabled": true}})';
 
 create table hypercert_allow_lists
 (
-    id                 uuid primary key default gen_random_uuid(),
+    id                 uuid not null primary key default gen_random_uuid(),
     claims_id          uuid not null references claims (id),
-    allow_list_data_id uuid not null references allow_list_data (id),
+    allow_list_data_id uuid references allow_list_data (id),
+    root               text,
     parsed             bool,
-    UNIQUE (claims_id, allow_list_data_id)
+    unique (claims_id)
 );
 
-comment on table public.hypercert_allow_lists is e'@graphql({"totalCount": {"enabled": true}})';
-
-create table allow_list_records
+create table hypercert_allow_list_records
 (
-    id               uuid primary key default gen_random_uuid(),
-    hc_allow_list_id uuid           not null references hypercert_allow_lists (id),
-    user_address     text           not null,
-    units            numeric(78, 0) not null,
-    entry            numeric(78, 0) not null,
-    UNIQUE (hc_allow_list_id, user_address, units, entry)
+    id                       uuid primary key default gen_random_uuid(),
+    hypercert_allow_lists_id uuid           not null references hypercert_allow_lists (id),
+    user_address             text           not null,
+    units                    numeric(78, 0) not null,
+    entry                    numeric(78, 0) not null,
+    UNIQUE (hypercert_allow_lists_id, user_address, units, entry)
 );
 
-comment on table public.allow_list_records is e'@graphql({"totalCount": {"enabled": true}})';
+alter table attestations
+    add foreign key (claims_id) references claims (id);
+
+alter table claims
+    add foreign key (uri) references metadata (uri);
+
+alter table metadata
+    add foreign key (allow_list_uri) references allow_list_data (uri);
+
+comment on table public.allow_list_data is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.hypercert_allow_list_records is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.attestations is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.claims is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.contract_events is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.contracts is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.fractions is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.hypercert_allow_lists is e'@graphql({"totalCount": {"enabled": true}})';
+comment on table public.metadata is e'@graphql({"totalCount": {"enabled": true}})';
+
+create index idx_allow_list_data_uri ON allow_list_data (uri);
+create index idx_claims_hypercert_id on claims (hypercert_id);
+create index idx_claims_uri ON claims (uri);
+create index idx_fractions_claim_id on fractions (claims_id);
+create index idx_fractions_owner_address on fractions (owner_address);
+create index idx_metadata_allow_list_uri ON metadata (allow_list_uri);
+create index idx_metadata_uri ON metadata (uri);
+create index idx_supported_schemas_eas_schema_id ON supported_schemas (eas_schema_id);
+create index idx_supported_schemas_chain_id ON supported_schemas (chain_id);
+create index idx_attestations_attestation_uid ON attestations (attestation_uid);
 

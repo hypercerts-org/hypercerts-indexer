@@ -69,13 +69,13 @@ export const indexUnitTransfers = async ({
 
       const transfers = parsedEvents.map((transfer) => ({
         ...transfer,
-        contracts_id: contractEvent.contract_id,
+        contracts_id: contractEvent.contracts_id,
       }));
 
       return {
         transfers,
         contractEventUpdate: {
-          id: contractEvent.id,
+          ...contractEvent,
           last_block_indexed: toBlock,
         },
       };

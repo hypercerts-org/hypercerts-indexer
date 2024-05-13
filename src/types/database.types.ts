@@ -14,6 +14,13 @@ export type Database = MergeDeep<
           token_id: bigint | string | null;
           root: string | null;
         };
+        fraction_type: {
+          contract_id: string | null;
+          token_id: bigint | string | null;
+          value: bigint | string | null;
+          creation_block_timestamp: bigint | string | null;
+          last_block_update_timestamp: bigint | string | null;
+        };
         transfer_units_type: {
           claim_id: string | null;
           from_token_id: bigint | string | null;

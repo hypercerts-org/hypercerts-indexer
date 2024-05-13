@@ -1,5 +1,6 @@
 import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -29,27 +30,7 @@ interface FetchAllowListFromUri {
 }
 
 export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
-  if (!uri || uri === "ipfs://null" || uri === "ipfs://") {
-    console.error("[FetchAllowListFromUri] URI is missing: ", uri);
-    return;
-  }
-
-  let fetchResult;
-
-  // Try from IPFS
-  if (uri.startsWith("ipfs://")) {
-    fetchResult = await fetchFromIPFS({ uri });
-  }
-
-  // Try from HTTPS
-  if (uri.startsWith("https://")) {
-    fetchResult = await fetchFromHTTPS({ uri });
-  }
-
-  // If nothing found yet, try from IPFS as CID
-  if (!fetchResult) {
-    fetchResult = await fetchFromIPFS({ uri });
-  }
+  const fetchResult = await fetchFromHttpsOrIpfs(uri);
 
   if (!fetchResult) {
     console.error(
@@ -60,12 +41,30 @@ export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
 
   // If response object is already a OZ Merkle tree, return it as is
   try {
-    return StandardMerkleTree.load<[string, bigint]>(JSON.parse(fetchResult));
+    console.debug(
+      "[FetchAllowListFromUri] Loading OZ Merkle tree from response by parsing as JSON",
+    );
+
+    return StandardMerkleTree.load<[string, bigint]>(
+      JSON.parse(fetchResult as string),
+    );
   } catch (error) {
     console.error(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
       error,
     );
-    return;
+  }
+
+  // If response object is already a OZ Merkle tree, return it as is
+  try {
+    console.debug(
+      "[FetchAllowListFromUri] Loading OZ Merkle tree directly from response",
+    );
+    return StandardMerkleTree.load<[string, bigint]>(fetchResult as never);
+  } catch (error) {
+    console.error(
+      `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
+      error,
+    );
   }
 };

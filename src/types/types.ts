@@ -3,8 +3,17 @@ export type IndexerConfig = {
   batchSize?: bigint;
 };
 
+export type EventToFetch = {
+  contracts_id: string;
+  contract_address: string;
+  events_id: string;
+  event_name: string;
+  abi: string;
+  last_block_indexed: bigint;
+};
+
 export type NewClaim = {
-  contract_id: string;
+  contracts_id: string;
   creator_address: string;
   contract_address: string;
   token_id: bigint;

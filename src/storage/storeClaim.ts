@@ -28,7 +28,6 @@ import { z } from "zod";
 
 interface StoreClaim {
   claims?: NewClaim[];
-  contract?: Pick<Tables<"contracts">, "id">;
 }
 
 export const storeClaim = async ({ claims }: StoreClaim) => {
@@ -39,7 +38,7 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
 
   const validationSchema = z
     .object({
-      contract_id: z.string().uuid(),
+      contracts_id: z.string().uuid(),
       creator_address: z.string(),
       token_id: z.bigint(),
       block_timestamp: z.bigint(),
@@ -55,17 +54,22 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
     .map((claim) => validationSchema.parse(claim))
     .map((claim) => ({
       owner_address: claim.creator_address,
-      contracts_id: claim.contract_id,
+      contracts_id: claim.contracts_id,
       token_id: claim.token_id.toString(),
       creation_block_timestamp: claim.block_timestamp.toString(),
       last_block_update_timestamp: claim.block_timestamp.toString(),
-      type: "claim" as const,
       units: claim.units.toString(),
       uri: claim.uri,
       value: 1,
     }));
 
-  console.debug(`[StoreClaim] Storing ${claims.length} claims`);
+  console.debug(`[StoreClaim] Storing ${_claims.length} claims`);
 
-  await supabase.from("claims").upsert(_claims).throwOnError();
+  await supabase
+    .from("claims")
+    .upsert(_claims, {
+      onConflict: "contracts_id, token_id",
+      ignoreDuplicates: false,
+    })
+    .throwOnError();
 };

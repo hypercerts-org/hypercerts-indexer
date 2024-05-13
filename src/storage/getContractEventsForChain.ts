@@ -1,5 +1,6 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Database } from "@/types/database.types";
+import * as console from "console";
+import { EventToFetch } from "@/types/types";
 
 export type ContractEvents = {
   eventName: string;
@@ -15,10 +16,13 @@ export const getContractEventsForChain = async ({
     return;
   }
 
-  const { data, error } = await supabase.rpc("search_contract_events", {
-    p_chain: chainId,
-    p_event: eventName,
-  });
+  const { data, error } = await supabase
+    .from("contract_events")
+    .select(
+      "contract:contracts!inner(id,contract_address),event:events!inner(id,name,abi),last_block_indexed",
+    )
+    .eq("contracts.chain_id", chainId)
+    .eq("events.name", eventName);
 
   if (!data || error) {
     console.error(
@@ -29,8 +33,23 @@ export const getContractEventsForChain = async ({
   }
 
   console.debug(
-    `[GetContractEvents] Found ${data.length} contracts for ${eventName} on chain ${chainId}`,
+    `[GetContractEvents] Found ${data.length} contract events for ${eventName} on chain ${chainId}`,
   );
 
-  return data as Database["public"]["Functions"]["search_contract_events"]["Returns"];
+  return data.map(
+    (contractEvent) =>
+      ({
+        // @ts-expect-error incorrect typing as array
+        contracts_id: contractEvent.contract.id,
+        // @ts-expect-error incorrect typing as array
+        contract_address: contractEvent.contract.contract_address,
+        // @ts-expect-error incorrect typing as array
+        events_id: contractEvent.event.id,
+        // @ts-expect-error incorrect typing as array
+        event_name: contractEvent.event.name,
+        // @ts-expect-error incorrect typing as array
+        abi: contractEvent.event.abi,
+        last_block_indexed: contractEvent.last_block_indexed,
+      }) as EventToFetch,
+  );
 };

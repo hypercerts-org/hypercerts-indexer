@@ -83,7 +83,7 @@ DECLARE
     to_token_units   numeric(78, 0);
     p_contracts_id   uuid;
 BEGIN
-    FOREACH transfer IN ARRAY p_transfers
+    FOR transfer IN SELECT * FROM unnest(p_transfers)
         LOOP
             IF transfer.from_token_id != 0 THEN
                 SELECT fractions.units, claims.contracts_id
@@ -125,41 +125,10 @@ BEGIN
             ELSE
                 -- If to_token_id does not exist, create it with the provided amount of units
                 INSERT INTO fractions (claims_id, token_id, units, last_block_update_timestamp)
-                VALUES (transfer.claim_id, transfer.to_token_id, COALESCE(transfer.units_transferred, 0),
+                VALUES (transfer.claim_id, transfer.to_token_id, transfer.units_transferred,
                         transfer.block_timestamp);
             END IF;
         END LOOP;
-END;
-$$;
-
-CREATE OR REPLACE FUNCTION search_contract_events(p_chain numeric, p_event text)
-    RETURNS TABLE
-            (
-                id                 uuid,
-                contract_id        uuid,
-                contract_address   text,
-                start_block        numeric(78, 0),
-                event_name         text,
-                event_abi          text,
-                last_block_indexed numeric(78, 0)
-            )
-    LANGUAGE plpgsql
-AS
-$$
-BEGIN
-    RETURN QUERY
-        SELECT contract_events.id,
-               contract_events.contract_id,
-               contracts.contract_address,
-               contracts.start_block,
-               events.name,
-               events.abi,
-               contract_events.last_block_indexed
-        FROM contract_events
-                 INNER JOIN contracts ON contract_events.contract_id = contracts.id
-                 INNER JOIN events ON contract_events.event_id = events.id
-        WHERE contracts.chain_id = p_chain
-          AND events.name = p_event;
 END;
 $$;
 
@@ -186,47 +155,26 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION find_missing_allow_list_uris_and_roots()
-    RETURNS TABLE
-            (
-                allow_list_id   uuid,
-                allow_list_uri  text,
-                allow_list_root text
-            )
-AS
-$$
-BEGIN
-    RETURN QUERY
-        SELECT a.id, m.allow_list_uri, a.root
-        FROM hypercert_allow_lists h
-                 JOIN claims c ON h.claims_id = c.id
-                 JOIN metadata m ON c.uri = m.uri
-                 JOIN allow_list_data a ON h.allow_list_data_id = a.id
-        WHERE m.allow_list_uri IS NOT NULL
-          AND a.uri IS NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TYPE allow_list_data_type AS
+CREATE TYPE hc_allow_list_root_type AS
 (
     contract_id UUID,
     token_id    numeric(78, 0),
     root        TEXT
 );
 
-CREATE OR REPLACE FUNCTION store_allow_list_data_and_hypercert_allow_list_batch(p_allow_list_data allow_list_data_type[])
+CREATE OR REPLACE FUNCTION store_hypercert_allow_list_roots(p_hc_allow_list_roots hc_allow_list_root_type[])
     RETURNS VOID AS
 $$
 DECLARE
-    input             allow_list_data_type;
-    claim_id          UUID;
-    new_allow_list_id UUID;
+    input    hc_allow_list_root_type;
+    claim_id UUID;
 BEGIN
-    FOREACH input IN ARRAY p_allow_list_data
+    FOREACH input IN ARRAY p_hc_allow_list_roots
         LOOP
             -- Fetch the hypercert_token_id
             SELECT id
             INTO claim_id
+
             FROM claims
             WHERE contracts_id = input.contract_id
               AND token_id = input.token_id;
@@ -238,48 +186,99 @@ BEGIN
                 RETURNING id INTO claim_id;
             END IF;
 
-            -- Try to insert a new row into allow_list_data
-            WITH ins AS (
-                INSERT INTO allow_list_data (root)
-                    VALUES (input.root)
-                    ON CONFLICT (root) DO NOTHING
-                    RETURNING id)
-
-            -- If insertion was successful, get the new ID
-            SELECT id
-            FROM ins
-            UNION ALL
-            -- If insertion failed due to conflict, get the existing ID
-            SELECT id
-            FROM allow_list_data
-            WHERE root = input.root
-            LIMIT 1
-            INTO new_allow_list_id;
-
             -- Insert a new row into hypercert_allow_lists
-            INSERT INTO hypercert_allow_lists (claims_id, allow_list_data_id)
-            VALUES (claim_id, new_allow_list_id)
-            ON CONFLICT (claims_id, allow_list_data_id) DO NOTHING;
+            INSERT INTO hypercert_allow_lists (claims_id, root)
+            VALUES (claim_id, input.root)
+            ON CONFLICT (claims_id) DO NOTHING;
         END LOOP;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION update_allow_list_data_parsed()
+CREATE OR REPLACE FUNCTION insert_allow_list_uri()
     RETURNS TRIGGER AS
 $$
 BEGIN
-    -- Update the parsed column in the allow_list_data table
-    UPDATE hypercert_allow_lists
-    SET parsed = TRUE
-    WHERE id = NEW.hc_allow_list_id;
+    -- Check if the allow_list_uri is not null or empty
+    IF NEW.allow_list_uri IS NOT NULL AND NEW.allow_list_uri != '' THEN
+        -- Check if the allow_list_uri already exists in the allow_list_data table
+        IF NOT EXISTS (SELECT 1 FROM allow_list_data WHERE uri = NEW.allow_list_uri) THEN
+            -- If it doesn't exist, insert it
+            INSERT INTO allow_list_data (uri) VALUES (NEW.allow_list_uri);
+        END IF;
+    END IF;
 
     -- Return the new row to indicate success
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_parsed
-    AFTER INSERT OR UPDATE
-    ON allow_list_records
+CREATE TRIGGER insert_allow_list_uri_trigger
+    BEFORE INSERT OR UPDATE
+    ON metadata
     FOR EACH ROW
-EXECUTE FUNCTION update_allow_list_data_parsed();
+EXECUTE FUNCTION insert_allow_list_uri();
+
+CREATE TYPE fraction_type AS
+(
+    claims_id                   UUID,
+    token_id                    NUMERIC(78, 0),
+    creation_block_timestamp    NUMERIC(78, 0),
+    last_block_update_timestamp NUMERIC(78, 0),
+    owner_address               TEXT,
+    value                       NUMERIC(78, 0)
+);
+
+CREATE OR REPLACE FUNCTION store_fraction(
+    _fractions fraction_type[]
+)
+    RETURNS TABLE
+            (
+                fraction_id UUID
+            )
+    LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    _fraction    fraction_type;
+    _fraction_id UUID;
+BEGIN
+    -- Loop over the array to store each record
+    FOR _fraction IN SELECT * FROM unnest(_fractions)
+        LOOP
+            -- Check if an entry for claims_id and token_id exists in fractions
+            IF EXISTS (SELECT 1
+                       FROM fractions
+                       WHERE claims_id = _fraction.claims_id
+                         AND token_id = _fraction.token_id) THEN
+                -- If it exists, update last_block_update_timestamp, owner_address, and value
+                UPDATE fractions
+                SET last_block_update_timestamp = _fraction.last_block_update_timestamp,
+                    owner_address               = _fraction.owner_address,
+                    value                       = _fraction.value
+                WHERE claims_id = _fraction.claims_id
+                  AND token_id = _fraction.token_id
+                RETURNING id INTO _fraction_id;
+            ELSE
+                -- If it does not exist, insert a new row
+                INSERT INTO fractions (claims_id, token_id, creation_block_timestamp, last_block_update_timestamp,
+                                       owner_address, value)
+                VALUES (_fraction.claims_id,
+                        _fraction.token_id,
+                        _fraction.creation_block_timestamp,
+                        _fraction.last_block_update_timestamp,
+                        _fraction.owner_address,
+                        _fraction.value)
+                RETURNING id INTO _fraction_id;
+            END IF;
+            fraction_id := _fraction_id;
+            RETURN NEXT;
+        END LOOP;
+END;
+$$;
+
+create function claim_attestation_count(claims) returns bigint as
+$$
+select count(*)
+from attestations
+where attestations.claims_id = $1.id;
+$$ stable language sql;

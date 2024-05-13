@@ -66,14 +66,14 @@ export const indexAllowListCreated = async ({
 
       const allowListData = allowLists.map((allowList) => ({
         token_id: allowList.token_id.toString(),
-        contract_id: contractEvent.contract_id,
+        contract_id: contractEvent.contracts_id,
         root: allowList.root,
       }));
 
       return {
         allowListData,
         contractEventUpdate: {
-          id: contractEvent.id,
+          ...contractEvent,
           last_block_indexed: toBlock,
         },
       };

@@ -9,7 +9,7 @@ interface StoreAllowListData {
 export const storeAllowListData = async ({
   allowListData,
 }: StoreAllowListData) => {
-  const uniqueAllowListData = _.uniqBy(allowListData, "root");
+  const uniqueAllowListData = _.uniqBy(allowListData, "uri");
 
   if (uniqueAllowListData.length === 0) {
     console.debug("[StoreAllowListData] No allow list data to store");
@@ -22,6 +22,6 @@ export const storeAllowListData = async ({
 
   await supabase
     .from("allow_list_data")
-    .upsert(uniqueAllowListData)
+    .upsert(uniqueAllowListData, { onConflict: "uri", ignoreDuplicates: false })
     .throwOnError();
 };

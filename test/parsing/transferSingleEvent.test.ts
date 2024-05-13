@@ -58,7 +58,6 @@ describe("transferSingleEvent", {}, () => {
       owner_address: address,
       token_id: claimID,
       value,
-      type: "fraction",
     });
   });
 

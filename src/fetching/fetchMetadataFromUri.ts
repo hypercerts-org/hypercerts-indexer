@@ -1,6 +1,6 @@
-import { validateMetaData } from "@hypercerts-org/sdk";
-import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
+import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
 import { Tables } from "@/types/database.types";
+import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -30,27 +30,7 @@ interface FetchMetadataFromUri {
 }
 
 export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
-  if (!uri || uri === "ipfs://null" || uri === "ipfs://") {
-    console.error("[FetchMetadataFromUri] URI is missing");
-    return;
-  }
-
-  let fetchResult;
-
-  // Try from IPFS
-  if (uri.startsWith("ipfs://")) {
-    fetchResult = await fetchFromIPFS({ uri });
-  }
-
-  // Try from HTTPS
-  if (uri.startsWith("https://")) {
-    fetchResult = await fetchFromHTTPS({ uri });
-  }
-
-  // If nothing found yet, try from IPFS as CID
-  if (!fetchResult) {
-    fetchResult = await fetchFromIPFS({ uri });
-  }
+  const fetchResult = await fetchFromHttpsOrIpfs(uri);
 
   if (!fetchResult) {
     console.error(
@@ -59,31 +39,33 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
     return;
   }
 
-  const validation = validateMetaData(fetchResult);
+  const { valid, data, errors } = validateMetaData(fetchResult);
 
-  if (!validation.valid) {
+  if (!valid) {
     console.error(
       `[FetchMetadataFromUri] Invalid metadata for URI ${uri}`,
-      validation.errors,
+      errors,
     );
     return;
   }
 
+  const _metadata = data as HypercertMetadata;
+
   const metadata: Partial<Tables<"metadata">> = {
-    name: fetchResult.name,
-    description: fetchResult.description,
-    external_url: fetchResult.external_url,
-    image: fetchResult.image,
+    name: _metadata.name,
+    description: _metadata.description,
+    external_url: _metadata.external_url,
+    image: _metadata.image,
     properties: fetchResult.properties,
-    contributors: fetchResult.hypercert.contributors.value,
-    impact_scope: fetchResult.hypercert.impact_scope.value,
-    impact_timeframe_from: fetchResult.hypercert.impact_timeframe.value[0],
-    impact_timeframe_to: fetchResult.hypercert.impact_timeframe.value[1],
-    work_scope: fetchResult.hypercert.work_scope.value,
-    work_timeframe_from: fetchResult.hypercert.work_timeframe.value[0],
-    work_timeframe_to: fetchResult.hypercert.work_timeframe.value[1],
-    rights: fetchResult.hypercert.rights.value,
-    allow_list_uri: fetchResult.allowList,
+    contributors: _metadata.hypercert?.contributors.value,
+    impact_scope: _metadata.hypercert?.impact_scope.value,
+    impact_timeframe_from: _metadata.hypercert?.impact_timeframe?.value?.[0],
+    impact_timeframe_to: _metadata.hypercert?.impact_timeframe?.value?.[1],
+    work_scope: _metadata.hypercert?.work_scope.value,
+    work_timeframe_from: _metadata.hypercert?.work_timeframe?.value?.[0],
+    work_timeframe_to: _metadata.hypercert?.work_timeframe?.value?.[1],
+    rights: _metadata.hypercert?.rights?.value,
+    allow_list_uri: _metadata.allowList,
   };
 
   return metadata;

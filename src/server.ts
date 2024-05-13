@@ -73,7 +73,6 @@ app.listen(port, async () => {
     indexTransferSingleEvents,
     indexUnitTransfers,
     indexMetadata,
-    indexAllowListCreated,
     indexAllowListData,
     indexAllowlistRecords,
     indexAttestations,

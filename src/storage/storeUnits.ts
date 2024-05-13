@@ -22,14 +22,10 @@ import { getClaimTokenId } from "@/utils/tokenIds";
 
 interface StoreUnitTransfer {
   transfers?: NewUnitTransfer[];
-  contract?: Pick<Tables<"contracts">, "id">;
 }
 
-export const storeUnitTransfer = async ({
-  transfers,
-  contract,
-}: StoreUnitTransfer) => {
-  if (!transfers || transfers.length === 0 || !contract) {
+export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
+  if (!transfers || transfers.length === 0) {
     console.error(
       "[StoreUnitTransfer] No transfer to store or contract ID provided",
     );
@@ -46,7 +42,7 @@ export const storeUnitTransfer = async ({
         "get_or_create_claim",
         {
           p_token_id: getClaimTokenId(transfer.to_token_id).toString(),
-          p_contracts_id: contract.id,
+          p_contracts_id: transfer.contracts_id,
         },
       );
 
@@ -59,11 +55,11 @@ export const storeUnitTransfer = async ({
       }
 
       const _transfer = {
-        p_claim_id: claim.id,
-        p_from_token_id: transfer.from_token_id.toString(),
-        p_to_token_id: transfer.to_token_id.toString(),
-        p_block_timestamp: transfer.block_timestamp.toString(),
-        p_units_transferred: transfer.units.toString(),
+        claim_id: claim.id,
+        from_token_id: transfer.from_token_id.toString(),
+        to_token_id: transfer.to_token_id.toString(),
+        block_timestamp: transfer.block_timestamp,
+        units_transferred: transfer.units,
       };
 
       return _transfer;

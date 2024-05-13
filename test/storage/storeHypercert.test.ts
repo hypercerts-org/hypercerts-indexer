@@ -10,7 +10,7 @@ import { supabaseUrl } from "../../src/utils/constants";
 
 describe("storeHypercert", {}, async () => {
   const claim: NewClaim = {
-    contract_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
     uri: "ipfs://metadataCIDstoreHypercert",
     contract_address: default_contractAddress,
     creator_address: faker.finance.ethereumAddress(),

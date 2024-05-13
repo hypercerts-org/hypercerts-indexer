@@ -50,6 +50,7 @@ const processMetadataBatch = async (batch: string[]) => {
     await Promise.all(
       batch.map(async (uri) => ({
         uri,
+        parsed: true,
         ...(await fetchMetadataFromUri({ uri })),
       })),
     )

@@ -10,11 +10,11 @@ describe("storeTransferSingleFraction", () => {
     block_number: faker.number.bigInt(),
     contract_address: faker.finance.ethereumAddress(),
     value: faker.number.bigInt(),
-    type: "claim",
     block_timestamp: faker.number.bigInt(),
     owner_address: faker.finance.ethereumAddress(),
     token_id: faker.number.bigInt(),
     contracts_id: faker.string.uuid(),
+    type: "fraction",
   } as const;
 
   beforeEach(() => {
@@ -42,7 +42,7 @@ describe("storeTransferSingleFraction", () => {
       http.post(`${supabaseUrl}/*`, async ({ request }) => {
         const data = await request.json();
         // @ts-ignore
-        theResult = data;
+        theResult = data._fractions;
         return HttpResponse.json(data);
       }),
     );

@@ -1,28 +1,30 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { EventToFetch } from "@/types/types";
 
 interface UpdateLastBlockIndexedContractEvents {
-  contract_events: Pick<
-    Tables<"contract_events">,
-    "id" | "last_block_indexed"
-  >[];
+  contract_events: EventToFetch[];
 }
 
 export const updateLastBlockIndexedContractEvents = async ({
   contract_events,
 }: UpdateLastBlockIndexedContractEvents) => {
-  for (const contract_event of contract_events) {
-    const { error } = await supabase
+  const filteredObjects = contract_events.map((ce) => ({
+    contracts_id: ce.contracts_id,
+    events_id: ce.events_id,
+    last_block_indexed: ce.last_block_indexed,
+  }));
+  try {
+    await supabase
       .from("contract_events")
-      .update({ last_block_indexed: contract_event.last_block_indexed })
-      .eq("id", contract_event.id);
-
-    if (error) {
-      console.error(
-        `[UpdateLastBlockIndexedEvents] Error while updating last block indexed for contract event with id ${contract_event.id}`,
-        error,
-      );
-      return;
-    }
+      .upsert(filteredObjects, {
+        onConflict: "contracts_id, events_id",
+        ignoreDuplicates: false,
+      })
+      .throwOnError();
+  } catch (error) {
+    console.error(
+      "[UpdateLastBlockIndexedContractEvents] Error while updating last block indexed for contract events",
+      error,
+    );
   }
 };

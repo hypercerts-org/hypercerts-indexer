@@ -1,7 +1,6 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 import { NewTransfer } from "@/types/types";
-import { isClaimToken } from "@/utils/tokenIds";
 
 type TransferSingleEvent = {
   address: string;
@@ -39,7 +38,6 @@ export const parseTransferSingle = async (event: unknown) => {
     block_number: event.blockNumber,
     value: args.value,
     owner_address: args.to,
-    type: isClaimToken(args.id) ? "claim" : "fraction",
   };
 
   return row;
