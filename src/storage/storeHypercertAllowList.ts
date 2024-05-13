@@ -16,8 +16,8 @@ export const storeHypercertAllowList = async ({
   }
 
   await supabase
-    .rpc("store_allow_list_data_and_hypercert_allow_list_batch", {
-      p_allow_list_data: batchToStore,
+    .rpc("store_hypercert_allow_list_roots", {
+      p_hc_allow_list_roots: batchToStore,
     })
     .throwOnError();
 };

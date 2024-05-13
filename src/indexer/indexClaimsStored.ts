@@ -20,7 +20,7 @@ import { storeClaim } from "@/storage/storeClaim";
  */
 
 const defaultConfig = {
-  batchSize: 10000n,
+  batchSize: 20000n,
   eventName: "ClaimStored",
 };
 
@@ -50,6 +50,10 @@ export const indexClaimsStoredEvents = async ({
       });
 
       if (!logsFound) {
+        console.debug(
+          " [IndexClaimsStored] No logs found for contract event",
+          contractEvent,
+        );
         return;
       }
 
@@ -65,13 +69,13 @@ export const indexClaimsStoredEvents = async ({
 
       const claims = parsedEvents.map((claim) => ({
         ...claim,
-        contract_id: contractEvent.contract_id,
+        contracts_id: contractEvent.contracts_id,
       }));
 
       return {
         claims,
         contractEventUpdate: {
-          id: contractEvent.id,
+          ...contractEvent,
           last_block_indexed: toBlock,
         },
       };

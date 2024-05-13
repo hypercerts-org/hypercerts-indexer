@@ -5,6 +5,7 @@ import { storeTransferSingleFraction } from "@/storage/storeTransferSingleFracti
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts";
+import { isClaimToken } from "@/utils/tokenIds";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -70,18 +71,23 @@ export const indexTransferSingleEvents = async ({
         (transfer): transfer is NewTransfer =>
           transfer !== null &&
           transfer !== undefined &&
-          transfer.type === "fraction",
+          transfer.token_id !== null &&
+          !isClaimToken(transfer.token_id),
       );
 
       const transfers = tokensToStore.map((transfer) => ({
         ...transfer,
-        contracts_id: contractEvent.contract_id,
+        contracts_id: contractEvent.contracts_id,
       }));
+
+      console.debug(
+        `[IndexTokenTransfers] Found ${transfers.length} transfers`,
+      );
 
       return {
         transfers,
         contractEventUpdate: {
-          id: contractEvent.id,
+          ...contractEvent,
           last_block_indexed: toBlock,
         },
       };

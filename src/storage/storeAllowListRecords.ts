@@ -1,21 +1,22 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
-import _ from "lodash";
 
 interface StoreAllowListRecords {
-  allowListRecords: Partial<Tables<"allow_list_records">>[];
+  claim_id?: string;
+  allow_list_data_id?: string;
+  records?: Partial<Tables<"hypercert_allow_list_records">>[];
 }
 
 export const storeAllowListRecords = async ({
-  allowListRecords,
+  claim_id,
+  allow_list_data_id,
+  records,
 }: StoreAllowListRecords) => {
-  const uniqueAllowListRecords = _.uniqWith(allowListRecords, _.isEqual);
-
   await supabase
-    .from("allow_list_records")
-    .upsert(uniqueAllowListRecords, {
-      onConflict: "hc_allow_list_id, user_address, units, entry",
-      // ignoreDuplicates: true,
+    .rpc("store_allow_list_records", {
+      _claims_id: claim_id,
+      _allow_list_data_id: allow_list_data_id,
+      _records: records,
     })
     .throwOnError();
 };

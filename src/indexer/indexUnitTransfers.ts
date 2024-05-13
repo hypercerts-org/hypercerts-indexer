@@ -69,13 +69,13 @@ export const indexUnitTransfers = async ({
 
       const transfers = parsedEvents.map((transfer) => ({
         ...transfer,
-        contracts_id: contractEvent.contract_id,
+        contracts_id: contractEvent.contracts_id,
       }));
 
       return {
         transfers,
         contractEventUpdate: {
-          id: contractEvent.id,
+          ...contractEvent,
           last_block_indexed: toBlock,
         },
       };
@@ -88,6 +88,9 @@ export const indexUnitTransfers = async ({
       (transfer): transfer is NewUnitTransfer =>
         transfer !== null && transfer !== undefined,
     );
+
+  console.log("#transfers after flat", transfers.length);
+  console.log("transfers after flat", transfers);
 
   // store the claim and fraction tokens
   return await storeUnitTransfer({

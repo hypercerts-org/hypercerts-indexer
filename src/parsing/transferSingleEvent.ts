@@ -39,7 +39,6 @@ export const parseTransferSingle = async (event: unknown) => {
     block_number: event.blockNumber,
     value: args.value,
     owner_address: args.to,
-    type: isClaimToken(args.id) ? "claim" : "fraction",
   };
 
   return row;

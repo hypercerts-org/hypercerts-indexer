@@ -1,14 +1,27 @@
 import { supabase } from "@/clients/supabaseClient";
 
-export const getUnparsedAllowLists = async () => {
-  const { data } = await supabase
-    .from("allow_list_data")
+export type UnparsedAllowListRecord = {
+  claim_id: string;
+  al_data_id: string;
+  data: string;
+};
+
+export const getUnparsedAllowListRecords = async () => {
+  const { data, error } = await supabase
+    .rpc("get_unparsed_hypercert_allow_lists")
     .select()
-    .not("parsed", "is", true)
-    .throwOnError();
+    .returns<UnparsedAllowListRecord[]>();
+
+  if (error) {
+    console.error(
+      "[GetUnparsedAllowListRecords] Failed to fetch unparsed allow list records",
+      error,
+    );
+    return null;
+  }
 
   console.debug(
-    `[GetUnparsedAllowLists] Fetched ${data?.length} unparsed allow lists`,
+    `[GetUnparsedAllowListRecords] Fetched ${data?.length} unparsed allow list records`,
   );
 
   return data;

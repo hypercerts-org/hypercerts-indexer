@@ -1,25 +1,27 @@
 import { supabase } from "@/clients/supabaseClient";
+import { Tables } from "@/types/database.types";
 
-export const getMissingAllowListUris = async () => {
+export const getIncompleteAllowLists = async () => {
   const { data, error } = await supabase
     .from("allow_list_data")
-    .select("uri")
-    .eq("root", null);
+    .select()
+    .not("root", "eq", null)
+    .returns<Tables<"allow_list_data">[]>();
 
   if (error) {
     console.error(
-      `[GetMissingAllowListUris] Error while fetching missing allow list URIs: ${error.message}`,
+      `[getIncompleteAllowLists] Error while fetching missing allow list URIs: ${error.message}`,
     );
     return;
   }
 
   if (!data) {
-    console.debug("[GetMissingAllowListUris] No data returned from database");
+    console.debug("[getIncompleteAllowLists] No data returned from database");
     return;
   }
 
   console.debug(
-    `[GetMissingAllowListUris] Found ${data.length} missing allow list URIs`,
+    `[getIncompleteAllowLists] Found ${data.length} missing allow list URIs`,
   );
 
   return data;

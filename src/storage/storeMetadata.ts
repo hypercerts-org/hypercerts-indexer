@@ -37,8 +37,12 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
 
   //TODO validations
 
-  await supabase
-    .from("metadata")
-    .upsert(metadata, { onConflict: "uri", ignoreDuplicates: true })
-    .throwOnError();
+  try {
+    await supabase
+      .from("metadata")
+      .upsert(metadata, { onConflict: "uri", ignoreDuplicates: false })
+      .throwOnError();
+  } catch (error) {
+    console.error("[StoreMetadata] Error while storing metadata", error);
+  }
 };

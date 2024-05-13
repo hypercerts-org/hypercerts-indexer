@@ -1,8 +1,9 @@
 import { IndexerConfig } from "@/types/types";
-import { getMissingAllowListUris } from "@/storage/getMissingAllowListUris";
+import { getIncompleteAllowLists } from "@/storage/getIncompleteAllowLists";
 import { fetchAllowListFromUri } from "@/fetching/fetchAllowlistFromUri";
 import { storeAllowListData } from "@/storage/storeAllowListData";
-import { Database, Tables } from "@/types/database.types";
+import { Tables } from "@/types/database.types";
+import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -24,7 +25,7 @@ const defaultConfig = {
 export const indexAllowListData = async ({
   batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
-  const missingAllowLists = await getMissingAllowListUris();
+  const missingAllowLists = await getUnparsedAllowLists();
 
   if (!missingAllowLists || missingAllowLists.length === 0) {
     console.debug("[IndexAllowListData] No missing allow lists found");
@@ -46,31 +47,32 @@ export const indexAllowListData = async ({
 };
 
 const processAllowListBatch = async (
-  batch: Database["public"]["Functions"]["find_missing_allow_list_uris_and_roots"]["Returns"],
+  batch: Partial<Tables<"allow_list_data">>[],
 ) => {
   const allowListData = (
     await Promise.all(
       batch.map(async (missingList) => {
+        if (!missingList.uri) {
+          console.error(
+            `[IndexAllowListData] Missing URI for allow list ${missingList.id}`,
+          );
+          return;
+        }
+
         const allowList = await fetchAllowListFromUri({
-          uri: missingList.allow_list_uri,
+          uri: missingList.uri,
         });
 
         if (!allowList) {
           return;
         }
 
-        if (missingList.allow_list_root !== allowList.root) {
-          console.error(
-            `[IndexAllowListData] Root hash mismatch for allow list ${missingList.allow_list_uri}: expected ${missingList.allow_list_root}, got ${allowList.root}`,
-          );
-          return;
-        }
-
         return {
-          id: missingList.allow_list_id,
+          id: missingList.id,
           data: JSON.stringify(allowList.dump()),
-          root: missingList.allow_list_root,
-          uri: missingList.allow_list_uri,
+          root: allowList.root,
+          uri: missingList.uri,
+          parsed: true,
         } as Tables<"allow_list_data">;
       }),
     )

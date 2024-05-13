@@ -1,7 +1,7 @@
 import { client } from "@/clients/evmClient";
 import { parseAbiItem } from "viem";
 import { getDeployment } from "@/utils/getDeployment";
-import { Database } from "@/types/database.types";
+import { EventToFetch } from "@/types/types";
 
 const getMinterAddress = () => {
   const { addresses, startBlock } = getDeployment();
@@ -35,7 +35,7 @@ const getBlocksToFetch = async ({
 interface LogsForContractEvents {
   fromBlock?: bigint;
   batchSize: bigint;
-  contractEvent: Database["public"]["Functions"]["search_contract_events"]["Returns"][0];
+  contractEvent: EventToFetch;
 }
 
 export const getLogsForContractEvents = async ({
@@ -60,7 +60,7 @@ export const getLogsForContractEvents = async ({
     `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${from} to ${to}`,
   );
 
-  const abiItem = parseAbiItem([contractEvent.event_abi]);
+  const abiItem = parseAbiItem([contractEvent.abi]);
   const filter = await client.createEventFilter({
     address,
     fromBlock: from,

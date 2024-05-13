@@ -1,16 +1,18 @@
 import { supabase } from "@/clients/supabaseClient";
 
-export const getUnparsedAllowLists = async () => {
-  const { data } = await supabase
-    .from("allow_list_data")
-    .select()
-    .not("uri", "is", null)
-    .not("parsed", "is", true)
-    .throwOnError();
-
-  console.debug(
-    `[GetUnparsedAllowLists] Fetched ${data?.length} unparsed allow lists`,
+export const getUnparsedAllowListClaims = async () => {
+  const { data: claims, error } = await supabase.rpc(
+    "get_claim_ids_with_allow_list_data",
   );
 
-  return data;
+  if (error) {
+    console.error("Error: ", error);
+    return;
+  }
+
+  console.log(
+    "[GetUnparsedAllowListClaims] Claims not in allow lists: ",
+    claims,
+  );
+  return claims;
 };

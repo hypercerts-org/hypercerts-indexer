@@ -39,17 +39,22 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
 
   const _claims = claims.map((claim) => ({
     owner_address: claim.creator_address,
-    contracts_id: claim.contract_id,
+    contracts_id: claim.contracts_id,
     token_id: claim.token_id.toString(),
     creation_block_timestamp: claim.block_timestamp.toString(),
     last_block_update_timestamp: claim.block_timestamp.toString(),
-    type: "claim" as const,
     units: claim.units.toString(),
     uri: claim.uri,
     value: 1,
   }));
 
-  console.debug(`[StoreClaim] Storing ${claims.length} claims`);
+  console.debug(`[StoreClaim] Storing ${_claims.length} claims`);
 
-  await supabase.from("claims").upsert(_claims).throwOnError();
+  await supabase
+    .from("claims")
+    .upsert(_claims, {
+      onConflict: "contracts_id, token_id",
+      ignoreDuplicates: false,
+    })
+    .throwOnError();
 };
