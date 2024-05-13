@@ -36,6 +36,8 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
 
   console.debug(`[StoreMetadata] Storing ${metadata.length} metadata entries`);
 
+  console.log(metadata);
+
   const metadataValidationSchema = z
     .object({
       allow_list_uri: z.string().optional(),
@@ -65,17 +67,19 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
     .refine(
       (x) =>
         x.work_timeframe_from !== undefined && x.work_timeframe_to !== undefined
-          ? x.work_timeframe_from < x.work_timeframe_to
+          ? x.work_timeframe_to === 0 ||
+            x.work_timeframe_from <= x.work_timeframe_to
           : true,
-      "work_timeframe_from must be less than work_timeframe_to",
+      "work_timeframe_from must be less than work_timeframe_to, unless work_timeframe_to is infinite (0)",
     )
     .refine(
       (x) =>
         x.impact_timeframe_from !== undefined &&
         x.impact_timeframe_to !== undefined
-          ? x.impact_timeframe_from < x.impact_timeframe_to
+          ? x.impact_timeframe_to === 0 ||
+            x.impact_timeframe_from <= x.impact_timeframe_to
           : true,
-      "impact_timeframe_from must be less than impact_timeframe_to",
+      "impact_timeframe_from must be less than impact_timeframe_to, unless impact_timeframe_to is infinite (0)",
     );
 
   const parsedMetadata = metadata.map((x) => metadataValidationSchema.parse(x));

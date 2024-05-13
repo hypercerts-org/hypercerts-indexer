@@ -522,7 +522,9 @@ export type Database = {
         Args: {
           _fractions: Database["public"]["CompositeTypes"]["fraction_type"][]
         }
-        Returns: undefined
+        Returns: {
+          fraction_id: string
+        }[]
       }
       store_hypercert_allow_list_roots: {
         Args: {

@@ -1,7 +1,6 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 import { NewTransfer } from "@/types/types";
-import { isClaimToken } from "@/utils/tokenIds";
 
 type TransferSingleEvent = {
   address: string;

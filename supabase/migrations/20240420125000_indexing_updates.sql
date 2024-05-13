@@ -85,53 +85,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- CREATE OR REPLACE FUNCTION get_hypercerts_with_attestations_count()
---     RETURNS TABLE
---             (
---                 id                          uuid,
---                 contracts_id                uuid,
---                 token_id                    numeric,
---                 hypercert_id                text,
---                 creation_block_timestamp    numeric,
---                 last_block_update_timestamp numeric,
---                 owner_address               text,
---                 units                       numeric,
---                 uri                         text,
---                 attestations_count          bigint
---             )
--- AS
--- $$
--- BEGIN
---     RETURN QUERY
---         SELECT c.id,
---                c.contracts_id,
---                c.token_id,
---                c.hypercert_id,
---                c.creation_block_timestamp,
---                c.last_block_update_timestamp,
---                c.owner_address,
---                c.units,
---                c.uri,
---                COUNT(a.id) AS attestations_count
---         FROM claims c
---                  LEFT JOIN
---              attestations a ON a.claims_id = c.id
---                  LEFT JOIN
---              metadata m on c.uri = m.uri
---                 LEFT JOIN
---              fractions f on c.id = f.claims_id
---         GROUP BY c.id,
---                  c.contracts_id,
---                  c.token_id,
---                  c.hypercert_id,
---                  c.creation_block_timestamp,
---                  c.last_block_update_timestamp,
---                  c.owner_address,
---                  c.units,
---                  c.uri;
--- END;
--- $$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION get_unparsed_hypercert_allow_lists()
     RETURNS TABLE
             (

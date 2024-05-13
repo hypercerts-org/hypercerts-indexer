@@ -2,8 +2,6 @@ import { supabase } from "@/clients/supabaseClient";
 import { NewTransfer } from "@/types/types";
 import { getClaimTokenId } from "@/utils/tokenIds";
 import _ from "lodash";
-import { client } from "@/clients/evmClient";
-import { fetchTokenUnits } from "@/fetching/fetchTokenUnits";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -78,7 +76,7 @@ export const storeTransferSingleFraction = async ({
     `[StoreTransferSingleFraction] Found ${sortedUniqueTokens.length} unique tokens`,
   );
 
-  await supabase
+  return await supabase
     .rpc("store_fraction", { _fractions: sortedUniqueTokens })
     .throwOnError();
 };

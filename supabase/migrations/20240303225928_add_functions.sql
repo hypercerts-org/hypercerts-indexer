@@ -231,12 +231,16 @@ CREATE TYPE fraction_type AS
 CREATE OR REPLACE FUNCTION store_fraction(
     _fractions fraction_type[]
 )
-    RETURNS VOID
+    RETURNS TABLE
+            (
+                fraction_id UUID
+            )
     LANGUAGE plpgsql
 AS
 $$
 DECLARE
-    _fraction fraction_type;
+    _fraction    fraction_type;
+    _fraction_id UUID;
 BEGIN
     -- Loop over the array to store each record
     FOR _fraction IN SELECT * FROM unnest(_fractions)
@@ -252,7 +256,8 @@ BEGIN
                     owner_address               = _fraction.owner_address,
                     value                       = _fraction.value
                 WHERE claims_id = _fraction.claims_id
-                  AND token_id = _fraction.token_id;
+                  AND token_id = _fraction.token_id
+                RETURNING id INTO _fraction_id;
             ELSE
                 -- If it does not exist, insert a new row
                 INSERT INTO fractions (claims_id, token_id, creation_block_timestamp, last_block_update_timestamp,
@@ -262,12 +267,18 @@ BEGIN
                         _fraction.creation_block_timestamp,
                         _fraction.last_block_update_timestamp,
                         _fraction.owner_address,
-                        _fraction.value);
+                        _fraction.value)
+                RETURNING id INTO _fraction_id;
             END IF;
+            fraction_id := _fraction_id;
+            RETURN NEXT;
         END LOOP;
 END;
 $$;
 
-create function claim_attestation_count(claims) returns bigint as $$
-select count(*) from attestations where attestations.claims_id = $1.id;
+create function claim_attestation_count(claims) returns bigint as
+$$
+select count(*)
+from attestations
+where attestations.claims_id = $1.id;
 $$ stable language sql;
