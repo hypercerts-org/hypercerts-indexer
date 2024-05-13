@@ -67,10 +67,16 @@ export const storeTransferSingleFraction = async ({
     }),
   );
 
+  console.log(`[StoreTransferSingleFraction] Storing ${tokens.length} tokens`);
+
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_block_update_timestamp"], ["desc"])
     .uniqBy("token_id")
     .value();
+
+  console.log(
+    `[StoreTransferSingleFraction] Found ${sortedUniqueTokens.length} unique tokens`,
+  );
 
   await supabase
     .rpc("store_fraction", { _fractions: sortedUniqueTokens })

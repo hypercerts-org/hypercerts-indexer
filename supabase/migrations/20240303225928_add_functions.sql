@@ -85,7 +85,6 @@ DECLARE
 BEGIN
     FOR transfer IN SELECT * FROM unnest(p_transfers)
         LOOP
-            RAISE NOTICE 'Processing transfer: %', transfer;
             IF transfer.from_token_id != 0 THEN
                 SELECT fractions.units, claims.contracts_id
                 INTO from_token_units, p_contracts_id
@@ -97,8 +96,6 @@ BEGIN
                 IF NOT FOUND THEN
                     RAISE 'from_token_id does not exist in fractions table';
                 END IF;
-
-                RAISE NOTICE 'from_token_units: %', from_token_units;
 
                 IF from_token_units >= transfer.units_transferred THEN
                     UPDATE fractions
@@ -117,8 +114,6 @@ BEGIN
             FROM fractions
             WHERE fractions.token_id = transfer.to_token_id
               AND fractions.claims_id = transfer.claim_id;
-
-            RAISE NOTICE 'to_token_units: %', to_token_units;
 
             -- If to_token_id exists, update its units
             IF FOUND THEN
@@ -272,3 +267,7 @@ BEGIN
         END LOOP;
 END;
 $$;
+
+create function claim_attestation_count(claims) returns bigint as $$
+select count(*) from attestations where attestations.claims_id = $1.id;
+$$ stable language sql;

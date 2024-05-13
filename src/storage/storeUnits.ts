@@ -62,8 +62,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         units_transferred: transfer.units,
       };
 
-      console.log(_transfer);
-
       return _transfer;
     }),
   );

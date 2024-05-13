@@ -130,6 +130,7 @@ export type Database = {
           units: number | null
           uri: string | null
           value: number | null
+          claim_attestation_count: number | null
         }
         Insert: {
           contracts_id: string
@@ -462,20 +463,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_hypercerts_with_attestations_count: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          id: string
-          contracts_id: string
-          token_id: number
-          hypercert_id: string
-          creation_block_timestamp: number
-          last_block_update_timestamp: number
-          owner_address: string
-          units: number
-          uri: string
-          attestations_count: number
-        }[]
+      claim_attestation_count: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
       }
       get_missing_metadata_uris: {
         Args: Record<PropertyKey, never>

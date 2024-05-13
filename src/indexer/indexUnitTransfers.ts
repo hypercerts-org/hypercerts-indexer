@@ -89,9 +89,6 @@ export const indexUnitTransfers = async ({
         transfer !== null && transfer !== undefined,
     );
 
-  console.log("#transfers after flat", transfers.length);
-  console.log("transfers after flat", transfers);
-
   // store the claim and fraction tokens
   return await storeUnitTransfer({
     transfers,
