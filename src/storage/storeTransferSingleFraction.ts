@@ -57,8 +57,8 @@ export const storeTransferSingleFraction = async ({
       return {
         claims_id: claim.id,
         token_id: transfer.token_id.toString(),
-        creation_block_timestamp: transfer.block_timestamp,
-        last_block_update_timestamp: transfer.block_timestamp,
+        creation_block_timestamp: transfer.block_timestamp.toString(),
+        last_block_update_timestamp: transfer.block_timestamp.toString(),
         owner_address: transfer.owner_address,
         value: transfer.value.toString(),
         type: transfer.type,
@@ -71,7 +71,7 @@ export const storeTransferSingleFraction = async ({
     .uniqBy(["claims_id", "token_id"])
     .value();
 
-  await supabase
+  return supabase
     .from("fractions")
     .upsert(sortedUniqueTokens, { onConflict: "claims_id, token_id" })
     .throwOnError();

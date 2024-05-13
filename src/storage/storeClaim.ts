@@ -1,6 +1,8 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
 import { NewClaim } from "@/types/types";
+import { isAddress } from "viem";
+import { z } from "zod";
 
 /* 
     This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
@@ -35,19 +37,33 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
     return;
   }
 
-  // TODO validations
+  const validationSchema = z
+    .object({
+      contract_id: z.string().uuid(),
+      creator_address: z.string(),
+      token_id: z.bigint(),
+      block_timestamp: z.bigint(),
+      units: z.bigint(),
+      uri: z.string(),
+    })
+    .refine(
+      (x) => isAddress(x.creator_address),
+      `[StoreClaim] Invalid creator address`,
+    );
 
-  const _claims = claims.map((claim) => ({
-    owner_address: claim.creator_address,
-    contracts_id: claim.contract_id,
-    token_id: claim.token_id.toString(),
-    creation_block_timestamp: claim.block_timestamp.toString(),
-    last_block_update_timestamp: claim.block_timestamp.toString(),
-    type: "claim" as const,
-    units: claim.units.toString(),
-    uri: claim.uri,
-    value: 1,
-  }));
+  const _claims = claims
+    .map((claim) => validationSchema.parse(claim))
+    .map((claim) => ({
+      owner_address: claim.creator_address,
+      contracts_id: claim.contract_id,
+      token_id: claim.token_id.toString(),
+      creation_block_timestamp: claim.block_timestamp.toString(),
+      last_block_update_timestamp: claim.block_timestamp.toString(),
+      type: "claim" as const,
+      units: claim.units.toString(),
+      uri: claim.uri,
+      value: 1,
+    }));
 
   console.debug(`[StoreClaim] Storing ${claims.length} claims`);
 
