@@ -5,6 +5,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    environment: test
 
     env:
       PORT: ${{ vars.PORT }}
@@ -12,10 +13,9 @@ jobs:
       BATCH_SIZE: ${{ vars.BATCH_SIZE }}
       DELAY: ${{ vars.DELAY }}
       SENTRY_ENVIRONMENT: ${{ vars.SENTRY_ENVIRONMENT }}
-      SUPABASE_HC_URL: ${{ vars.SUPABASE_HC_URL }}
-
+      SUPABASE_DB_URL: ${{ vars.SUPABASE_DB_URL }}
+      SUPABASE_SERVICE_API_KEY: ${{ vars.SUPABASE_SERVICE_API_KEY }}
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-      SUPABASE_HC_METADATA_API_KEY: ${{ secrets.SUPABASE_HC_METADATA_API_KEY }}
 
     permissions:
       # Required to checkout the code
@@ -29,8 +29,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
-      - name: 'Install Deps'
-        run: npm install
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install
+
       - name: 'Test'
         run: npx vitest --coverage.enabled true
       - name: 'Report Coverage'
