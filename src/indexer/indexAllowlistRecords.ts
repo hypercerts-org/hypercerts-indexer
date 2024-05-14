@@ -1,6 +1,5 @@
 import { IndexerConfig } from "@/types/types";
 import { storeAllowListRecords } from "@/storage/storeAllowListRecords";
-import { Tables } from "@/types/database.types";
 import {
   getUnparsedAllowListRecords,
   UnparsedAllowListRecord,
@@ -69,10 +68,14 @@ const processAllowListEntriesBatch = async (
 
       const rows = [];
       for (const [i, v] of tree.entries()) {
+        const leaf = tree.leafHash(v);
+        const proof = tree.getProof(v);
         rows.push({
           user_address: v[0],
           entry: i,
           units: v[1],
+          leaf,
+          proof,
         });
       }
 
