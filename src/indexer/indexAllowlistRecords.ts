@@ -56,7 +56,7 @@ const processAllowListEntriesBatch = async (
 ) => {
   const allowListsToStore = await Promise.all(
     batch.map(async (allowList) => {
-      const tree = StandardMerkleTree.load(JSON.parse(allowList.data));
+      const tree = StandardMerkleTree.load(allowList.data);
 
       if (!tree) {
         console.error(

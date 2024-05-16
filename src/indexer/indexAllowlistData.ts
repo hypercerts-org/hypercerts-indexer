@@ -69,7 +69,7 @@ const processAllowListBatch = async (
 
         return {
           id: missingList.id,
-          data: JSON.stringify(allowList.dump()),
+          data: JSON.parse(JSON.stringify(allowList.dump())),
           root: allowList.root,
           uri: missingList.uri,
           parsed: true,

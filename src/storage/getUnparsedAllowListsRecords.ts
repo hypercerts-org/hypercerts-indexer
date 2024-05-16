@@ -3,7 +3,8 @@ import { supabase } from "@/clients/supabaseClient";
 export type UnparsedAllowListRecord = {
   claim_id: string;
   al_data_id: string;
-  data: string;
+  // TODO: Can this be typed correctly?
+  data: any;
 };
 
 export const getUnparsedAllowListRecords = async () => {
