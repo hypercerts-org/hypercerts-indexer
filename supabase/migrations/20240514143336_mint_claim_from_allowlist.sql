@@ -36,7 +36,7 @@ FOR _record IN SELECT * FROM unnest(_records)
                                  LOOP
     INSERT INTO hypercert_allow_list_records (hypercert_allow_lists_id, user_address, units, entry, leaf, proof)
                VALUES (_hypercert_allow_lists_id, (_record ->> 'user_address')::text, (_record ->> 'units')::numeric,
-                   (_record ->> 'entry')::numeric, _record ->> 'leaf', _record ->> 'proof');
+                   (_record ->> 'entry')::numeric, (_record ->> 'leaf')::text, (_record ->> 'proof')::jsonb);
 END LOOP;
 
     -- Set hypercert_allow_lists.parsed to true
