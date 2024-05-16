@@ -1,24 +1,42 @@
 import { supabase } from "@/clients/supabaseClient";
 
 export const updateAllowlistRecordClaimed = async ({
+  tokenId,
   leaf,
   userAddress,
 }: {
+  tokenId: bigint;
   leaf: string;
   userAddress: `0x${string}`;
 }) => {
   try {
-    // Get an allowlist record for corresponding leaf that has not been claimed
+    // Get an allowlist record for corresponding tokenId and leaf that has not been claimed
     const record = await supabase
-      .from("hypercert_allow_list_records")
-      .select()
-      .eq("leaf", leaf)
-      .ilike("user_address", userAddress)
-      .eq("claimed", false)
+      .from("claims")
+      .select(
+        "*, metadata(*, allow_list_data(*, hypercert_allow_lists(*, hypercert_allow_list_records(*))))",
+      )
+      .eq("token_id", tokenId)
+      .eq(
+        "metadata.allow_list_data.hypercert_allow_lists.hypercert_allow_list_records.leaf",
+        leaf,
+      )
+      .ilike(
+        "metadata.allow_list_data.hypercert_allow_lists.hypercert_allow_list_records.user_address",
+        userAddress,
+      )
+      .eq(
+        "metadata.allow_list_data.hypercert_allow_lists.hypercert_allow_list_records.claimed",
+        false,
+      )
       .single()
       .throwOnError();
 
-    if (!record.data) {
+    const hypercertAllowListRecordId =
+      record.data?.metadata?.allow_list_data?.hypercert_allow_lists?.[0]
+        ?.hypercert_allow_list_records?.[0]?.id;
+
+    if (!hypercertAllowListRecordId) {
       console.error(
         "[UpdateAllowlistRecordClaimed] Could not find unclaimed allowlist record",
         record.error?.message,
@@ -30,7 +48,7 @@ export const updateAllowlistRecordClaimed = async ({
     await supabase
       .from("hypercert_allow_list_records")
       .update({ claimed: true })
-      .eq("id", record.data.id);
+      .eq("id", hypercertAllowListRecordId);
   } catch (e) {
     console.error(
       "[UpdateAllowlistRecordClaimed] Error while updating allow list record as claimed",

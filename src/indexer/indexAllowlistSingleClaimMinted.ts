@@ -1,6 +1,6 @@
 import { parseLeafClaimedEvent } from "@/parsing";
 import { getDeployment } from "@/utils";
-import { IndexerConfig, LeafClaimed, NewClaim } from "@/types/types";
+import { IndexerConfig, LeafClaimed } from "@/types/types";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts";
@@ -92,6 +92,7 @@ export const indexAllowlistSingleClaimMinted = async ({
   await Promise.all(
     claims.map(async (claim) => {
       return updateAllowlistRecordClaimed({
+        tokenId: claim.token_id,
         leaf: claim.leaf,
         userAddress: claim.creator_address as `0x${string}`,
       });
