@@ -61,45 +61,45 @@ export type Database = {
       attestations: {
         Row: {
           attestation: Json
-          attestation_uid: string
-          attester_address: string
+          attester: string
           block_timestamp: number
           chain_id: number | null
           claims_id: string | null
           contract_address: string | null
-          decoded_attestation: Json
+          data: Json
           id: string
-          recipient_address: string
+          recipient: string
           supported_schemas_id: string
           token_id: number | null
+          uid: string
         }
         Insert: {
           attestation: Json
-          attestation_uid: string
-          attester_address: string
+          attester: string
           block_timestamp: number
           chain_id?: number | null
           claims_id?: string | null
           contract_address?: string | null
-          decoded_attestation: Json
+          data: Json
           id?: string
-          recipient_address: string
+          recipient: string
           supported_schemas_id: string
           token_id?: number | null
+          uid: string
         }
         Update: {
           attestation?: Json
-          attestation_uid?: string
-          attester_address?: string
+          attester?: string
           block_timestamp?: number
           chain_id?: number | null
           claims_id?: string | null
           contract_address?: string | null
-          decoded_attestation?: Json
+          data?: Json
           id?: string
-          recipient_address?: string
+          recipient?: string
           supported_schemas_id?: string
           token_id?: number | null
+          uid?: string
         }
         Relationships: [
           {

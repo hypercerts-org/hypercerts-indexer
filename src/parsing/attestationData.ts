@@ -1,36 +1,46 @@
 import { decodeAbiParameters, isAddress } from "viem";
 import { Tables } from "@/types/database.types";
-import { isAttestation } from "@/fetching/fetchAttestationData";
+import { Attestation, isAttestation } from "@/fetching/fetchAttestationData";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 
 /*
  * Helper method to get the attestation content from the encoded data
  *
  * @param attestation - The attestation object.
  *
- * @returns {AttestationData} - The provided attestation object extended with the decoded attestation data.
+ * @returns The decoded attestation object.
  * */
 export const decodeAttestationData = ({
   attestation,
   schema,
 }: {
-  attestation?: Partial<Tables<"attestations">>;
+  attestation?: ParsedAttestedEvent & { attestation: Attestation };
   schema?: Partial<Tables<"supported_schemas">>;
 }) => {
   if (!schema || !schema?.schema) {
-    console.error("Schema is missing data for parsing", schema);
+    console.error(
+      "[DecodeAttestationData] Schema is missing data for parsing",
+      schema,
+    );
     return;
   }
 
   if (!attestation || !attestation?.attestation) {
-    console.error("Attestation is missing data for parsing", attestation);
+    console.error(
+      "[DecodeAttestationData] Attestation is missing data for parsing",
+      attestation,
+    );
     return;
   }
 
-  const attestationData = JSON.parse(attestation.attestation as string);
+  const attestationData = attestation.attestation;
 
   if (!isAttestation(attestationData)) {
-    console.error("Invalid attestation data", attestationData);
+    console.error(
+      "[DecodeAttestationData] Invalid attestation data",
+      attestationData,
+    );
     return;
   }
 
@@ -52,12 +62,22 @@ export const decodeAttestationData = ({
   );
 
   if (!decodedAttestationObject) {
-    console.error("Attestation data could not be parsed", attestation);
+    console.error(
+      "[DecodeAttestationData] Attestation data could not be parsed",
+      attestation,
+    );
     return;
   }
 
-  const _attestation = attestation;
-  _attestation.decoded_attestation = JSON.stringify(decodedAttestationObject);
+  const _attestation: Partial<Tables<"attestations">> = {};
+  _attestation.attester = attestationData.attester;
+  _attestation.recipient = attestationData.recipient;
+  _attestation.block_timestamp = attestation.block_timestamp;
+  _attestation.uid = attestation.uid;
+  _attestation.supported_schemas_id = schema.id;
+  _attestation.attestation = JSON.parse(JSON.stringify(attestationData));
+  _attestation.data = JSON.parse(JSON.stringify(decodedAttestationObject));
+
   if (decodedAttestationObject?.chain_id)
     _attestation.chain_id = mapUnknownToBigInt(
       decodedAttestationObject.chain_id,

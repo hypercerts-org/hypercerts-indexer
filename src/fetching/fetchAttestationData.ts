@@ -22,53 +22,59 @@ export interface Attestation {
  * This function fetches the attestation data as stored at the provided UID on the contract.
  *
  * @param attestation - The EAS Attested event data.
- * @returns  - The event data with the attestation data attached
+ * @returns {Attestation}  - The event data with the attestation data attached
  *
  * @example
  * ```js
  *
- * const easData: AttestationData = {
- * recipient: "0x1234...5678",
- * attester: "0x1234...5678",
- * uid: "0x1234...5678",
- * schema: "0x1234...5678",
+ * const easData = {
+ *    recipient: "0x1234...5678",
+ *    attester: "0x1234...5678",
+ *    uid: "0x1234...5678",
+ *    schema: "0x1234...5678",
  *  };
  *
- * const attestation = await fetchAttestationData(easData);
+ * const attestation: Attestation = await fetchAttestationData(easData);
  * ```
  */
 
 interface FetchAttestationData {
-  attestation?: ParsedAttestedEvent;
+  attestedEvent?: ParsedAttestedEvent;
 }
 
 export const fetchAttestationData = async ({
-  attestation,
+  attestedEvent,
 }: FetchAttestationData) => {
   const { easAddress } = getDeployment();
-  if (!attestation || !attestation.attestation_uid) {
-    console.error(`Could not find UID for attestation`, attestation);
+  if (!attestedEvent || !attestedEvent.uid) {
+    console.error(
+      `[FetchAttestationData] Could not find UID for attestation`,
+      attestedEvent,
+    );
     return;
   }
-  const { attestation_uid } = attestation;
+  const { uid } = attestedEvent;
 
   try {
     const _attestationData = await client.readContract({
       address: easAddress as `0x${string}`,
       abi: easAbi,
       functionName: "getAttestation",
-      args: [attestation_uid],
+      args: [uid],
     });
 
     if (!_attestationData || !isAttestation(_attestationData)) {
-      console.error("Invalid attestation data", _attestationData);
+      console.error(
+        "[FetchAttestationData] Invalid attestation data",
+        _attestationData,
+      );
       return;
     }
 
-    return { ...attestation, attestation: JSON.stringify(_attestationData) };
+    return { ...attestedEvent, attestation: _attestationData };
   } catch (e) {
     console.error(
-      `Error fetching attestation data for UID ${attestation_uid} on contract ${easAddress}:`,
+      `[FetchAttestationData] Error fetching attestation data for UID ${uid} on contract ${easAddress}:`,
       e,
     );
     return;
