@@ -1,10 +1,10 @@
 import { Hex, isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
-import { LeafClaimed, NewClaim } from "@/types/types";
+import { LeafClaimed } from "@/types/types";
 import { client } from "@/clients/evmClient";
 import { z } from "zod";
 
-type ClaimStoredEvent = {
+type LeadClaimedEvent = {
   address: string;
   args: {
     tokenID: bigint;
@@ -16,7 +16,7 @@ type ClaimStoredEvent = {
 };
 
 /*
- * Helper method to get the claimID, contract address, URI, and units from the event. Will return undefined when the event is
+ * Helper method to get the tokenID, contract address, minter address and leaf hash from the event. Will return undefined when the event is
  * missing values.
  *
  * @param event - The event object.
@@ -47,8 +47,8 @@ export const parseLeafClaimedEvent = async (event: unknown) => {
   return claim;
 };
 
-function isLeafClaimedEvent(event: unknown): event is ClaimStoredEvent {
-  const e = event as Partial<ClaimStoredEvent>;
+function isLeafClaimedEvent(event: unknown): event is LeadClaimedEvent {
+  const e = event as Partial<LeadClaimedEvent>;
 
   try {
     z.object({

@@ -7,15 +7,14 @@ import { getLogsForContractEvents } from "@/monitoring/hypercerts";
 import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed";
 
 /*
- * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the hypercerts in the
- * database.
+ * This function indexes the logs of the LeafClaimed event emitted by the HypercertMinter contract. Based on the last
+ * block indexed, it fetches the logs in batches, parses them, finds the correct allowlist entry and marks it as claimed.
  *
  * @param [batchSize] - The number of logs to fetch and parse in each batch.
  *
  * @example
  * ```js
- * await indexClaimsStoredEvents({ batchSize: 1000n });
+ * await indexAllowlistSingleClaimMinted({ batchSize: 1000n });
  * ```
  */
 
@@ -87,7 +86,6 @@ export const indexAllowlistSingleClaimMinted = async ({
     .filter(
       (claim): claim is LeafClaimed => claim !== null && claim !== undefined,
     );
-  // .map(({ claims }) => claims !== null && claims !== undefined);
 
   await Promise.all(
     claims.map(async (claim) => {
