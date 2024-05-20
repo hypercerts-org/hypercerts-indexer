@@ -17,10 +17,7 @@ type AttestedEvent = {
 
 export type ParsedAttestedEvent = Pick<
   Tables<"attestations">,
-  | "attester_address"
-  | "recipient_address"
-  | "attestation_uid"
-  | "block_timestamp"
+  "attester" | "recipient" | "uid" | "block_timestamp"
 >;
 
 /*
@@ -56,9 +53,9 @@ export const parseAttestedEvent = async (log: unknown) => {
   }
 
   const res: ParsedAttestedEvent = {
-    attester_address: args.attester,
-    recipient_address: args.recipient,
-    attestation_uid: args.uid,
+    recipient: args.recipient,
+    attester: args.attester,
+    uid: args.uid,
     block_timestamp: await getBlockTimestamp(log.blockNumber),
   };
 
@@ -75,8 +72,6 @@ function isAttestedEvent(event: unknown): event is AttestedEvent {
     e.args !== null &&
     isAddress(e.args.recipient) &&
     isAddress(e.args.attester) &&
-    typeof e.args.uid === "string" &&
-    typeof e.args.schema === "string" &&
     typeof e.address === "string" &&
     isAddress(e.address) &&
     typeof e.blockNumber === "bigint"

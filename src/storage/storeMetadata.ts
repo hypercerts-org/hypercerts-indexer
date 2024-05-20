@@ -36,8 +36,6 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
 
   console.debug(`[StoreMetadata] Storing ${metadata.length} metadata entries`);
 
-  console.log(metadata);
-
   const metadataValidationSchema = z
     .object({
       allow_list_uri: z.string().optional(),

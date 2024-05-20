@@ -9,7 +9,6 @@ import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored";
 import { indexTransferSingleEvents } from "@/indexer/indexFractionTransfers";
 import { indexUnitTransfers } from "@/indexer/indexUnitTransfers";
 import { indexMetadata } from "@/indexer/indexMetadata";
-import { indexAllowListCreated } from "@/indexer/indexAllowlistCreated";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords";
 import { indexAllowListData } from "@/indexer/indexAllowlistData";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas";

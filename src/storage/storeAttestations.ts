@@ -1,49 +1,30 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Tables } from "@/types/database.types";
+import * as console from "node:console";
 
-/* 
-    This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
-
-    @param claim The claim to store. 
-    @returns The stored data.
-
-    @example
-    ```js
-    
-    const metadata: HypercertMetadata = {
-            name: "My Hypercert",
-            description: "This is a Hypercert",
-            image: "data:image/png;base64,iVBOA...uQmCC',
-            external_url: "https://example.com/hypercert/1",
-            hypercert: {...}
-           };
-    const cid = "QmXZj9Pm4g7Hv3Z6K4Vw2vW";
-    
-    const storedData = await storeHypercert("0x1234...5678", 1n, metadata, cid);
-    ```
+/*
+ *  Stores the provided attestation data in the database.
+ *
+ *   @param {attestations} - An array of attestations to store in the database.
+ *   @returns {Promise<void>} - A promise that resolves when the attestation data has been stored in the database.
+ *
+ *  @throws {Error} - If the attestation data cannot be stored in the database.
  */
 export const storeAttestations = async ({
   attestations,
-  schema,
 }: {
   attestations?: Tables<"attestations">[];
-  schema?: Tables<"supported_schemas">;
 }) => {
   if (!attestations) {
     console.error("No attestation data provided");
     return;
   }
 
-  const _attestations = attestations.map((attestation) => ({
-    ...attestation,
-    supported_schemas_id: schema?.id,
-  }));
-
-  if (_attestations.length === 0) return;
+  if (attestations.length === 0) return;
 
   console.debug(
-    `[StoreAttestations] Storing ${_attestations.length} attestations`,
+    `[StoreAttestations] Storing ${attestations.length} attestations`,
   );
 
-  await supabase.from("attestations").upsert(_attestations).throwOnError();
+  await supabase.from("attestations").upsert(attestations).throwOnError();
 };

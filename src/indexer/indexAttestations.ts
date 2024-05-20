@@ -10,15 +10,14 @@ import { storeAttestations } from "@/storage/storeAttestations";
 import { fetchAttestationData } from "@/fetching/fetchAttestationData";
 
 /*
- * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the hypercerts in the
- * database.
+ * Indexes attestation logs for all supported schemas. Attestation logs are fetched from the chain and parsed into attestation data.
+ * The attestation data is then stored in the database.
  *
  * @param [batchSize] - The number of logs to fetch and parse in each batch.
  *
  * @example
  * ```js
- * await indexClaimsStoredEvents({ batchSize: 1000n });
+ * await indexAttestations({ batchSize: 1000n });
  * ```
  */
 
@@ -79,9 +78,9 @@ export const indexAttestations = async ({
 
       const attestations = (
         await Promise.all(
-          parsedEvents.map(async (parsedEvent) =>
-            fetchAttestationData({ attestation: parsedEvent }).then(
-              (attestation) => decodeAttestationData({ attestation, schema }),
+          parsedEvents.map(async (event) =>
+            fetchAttestationData({ attestedEvent: event }).then((attestation) =>
+              decodeAttestationData({ attestation, schema }),
             ),
           ),
         )
@@ -92,7 +91,6 @@ export const indexAttestations = async ({
 
       return await storeAttestations({
         attestations,
-        schema,
       }).then(
         async () =>
           await storeSupportedSchemas({
