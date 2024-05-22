@@ -291,23 +291,32 @@ export type Database = {
       }
       hypercert_allow_list_records: {
         Row: {
+          claimed: boolean
           entry: number
           hypercert_allow_lists_id: string
           id: string
+          leaf: string
+          proof: Json
           units: number
           user_address: string
         }
         Insert: {
+          claimed?: boolean
           entry: number
           hypercert_allow_lists_id: string
           id?: string
+          leaf: string
+          proof: Json
           units: number
           user_address: string
         }
         Update: {
+          claimed?: boolean
           entry?: number
           hypercert_allow_lists_id?: string
           id?: string
+          leaf?: string
+          proof?: Json
           units?: number
           user_address?: string
         }
