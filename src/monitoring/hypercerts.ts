@@ -56,6 +56,20 @@ export const getLogsForContractEvents = async ({
     batchSize,
   });
 
+  // Allowlist that has entries that are later minted using batch claim
+  // const from = 5237421n;
+  // const to = 5237423n;
+  // Batch claim from ^ allowlist
+  // const from = 5758812n;
+  // const to = 5758814n;
+
+  // Allowlist that has entries for single claim
+  // const from = 5712925n;
+  // const to = 5712927n;
+  // Single claim from ^ allowlist
+  // const from = 5712928n;
+  // const to = 5712930n;
+
   console.info(
     `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${from} to ${to}`,
   );

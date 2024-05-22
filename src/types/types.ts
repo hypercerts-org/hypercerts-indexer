@@ -22,6 +22,15 @@ export type NewClaim = {
   uri: string;
 };
 
+export type LeafClaimed = {
+  contracts_id: string;
+  creator_address: string;
+  contract_address: string;
+  block_timestamp: bigint;
+  token_id: bigint;
+  leaf: string;
+};
+
 export type NewTransfer = {
   contracts_id: string;
   contract_address: string;

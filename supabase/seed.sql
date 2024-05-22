@@ -44,6 +44,15 @@ $$
 
         INSERT INTO public.contract_events (contracts_id, events_id)
         VALUES (contract_id, event_id);
+
+        -- Repeat the process for the fifth set of data
+        INSERT INTO public.events (name, abi)
+        VALUES ('LeafClaimed',
+                'event LeafClaimed(uint256 tokenID, bytes32 leaf)')
+        RETURNING id INTO event_id;
+
+        INSERT INTO public.contract_events (contracts_id, events_id)
+        VALUES (contract_id, event_id);
     END
 $$;
 

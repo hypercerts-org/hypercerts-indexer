@@ -13,6 +13,7 @@ import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords";
 import { indexAllowListData } from "@/indexer/indexAllowlistData";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas";
 import { runIndexing } from "@/indexer/runIndexing";
+import { indexAllowlistSingleClaimMinted } from "@/indexer/indexAllowlistSingleClaimMinted";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ Sentry.init({
     new Sentry.Integrations.Http({ tracing: true }),
     // enable Express.js middleware tracing
     new Sentry.Integrations.Express({ app }),
+    // @ts-ignore
     new ProfilingIntegration(),
     captureConsoleIntegration({
       levels: ["error"],
@@ -75,6 +77,7 @@ app.listen(port, async () => {
     indexAllowListData,
     indexAllowlistRecords,
     indexAttestations,
+    indexAllowlistSingleClaimMinted,
   ];
 
   await runIndexing(indexingMethods, delay);
