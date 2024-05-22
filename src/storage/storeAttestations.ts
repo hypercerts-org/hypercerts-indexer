@@ -16,7 +16,7 @@ export const storeAttestations = async ({
   attestations?: Tables<"attestations">[];
 }) => {
   if (!attestations) {
-    console.error("No attestation data provided");
+    console.debug("[StoreAttestations] No attestation data provided");
     return;
   }
 
@@ -26,5 +26,10 @@ export const storeAttestations = async ({
     `[StoreAttestations] Storing ${attestations.length} attestations`,
   );
 
-  await supabase.from("attestations").upsert(attestations).throwOnError();
+  await supabase
+    .from("attestations")
+    .upsert(attestations, {
+      onConflict: "supported_schemas_id, uid",
+    })
+    .throwOnError();
 };
