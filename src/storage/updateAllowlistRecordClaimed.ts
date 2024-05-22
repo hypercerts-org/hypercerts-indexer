@@ -29,7 +29,7 @@ export const updateAllowlistRecordClaimed = async ({
         "metadata.allow_list_data.hypercert_allow_lists.hypercert_allow_list_records.claimed",
         false,
       )
-      .single()
+      .maybeSingle()
       .throwOnError();
 
     const hypercertAllowListRecordId =

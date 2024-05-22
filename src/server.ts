@@ -71,8 +71,8 @@ app.listen(port, async () => {
   const indexingMethods = [
     indexSupportedSchemas,
     indexClaimsStoredEvents,
-    indexTransferSingleEvents,
     indexUnitTransfers,
+    indexTransferSingleEvents,
     indexMetadata,
     indexAllowListData,
     indexAllowlistRecords,

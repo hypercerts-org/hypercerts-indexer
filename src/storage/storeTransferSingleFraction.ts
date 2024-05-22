@@ -58,25 +58,28 @@ export const storeTransferSingleFraction = async ({
         claims_id: claim.id,
         token_id: transfer.token_id.toString(),
         creation_block_timestamp: transfer.block_timestamp.toString(),
-        last_block_update_timestamp: transfer.block_timestamp.toString(),
-        owner_address: transfer.owner_address,
+        block_timestamp: transfer.block_timestamp.toString(),
+        from_owner_address: transfer.from_owner_address,
+        to_owner_address: transfer.to_owner_address,
         value: transfer.value.toString(),
       };
     }),
   );
 
-  console.log(`[StoreTransferSingleFraction] Storing ${tokens.length} tokens`);
+  console.debug(
+    `[StoreTransferSingleFraction] Storing ${tokens.length} tokens`,
+  );
 
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_block_update_timestamp"], ["desc"])
     .uniqBy("token_id")
     .value();
 
-  console.log(
+  console.debug(
     `[StoreTransferSingleFraction] Found ${sortedUniqueTokens.length} unique tokens`,
   );
 
   return await supabase
-    .rpc("store_fraction", { _fractions: sortedUniqueTokens })
+    .rpc("transfer_fractions_batch", { p_transfers: sortedUniqueTokens })
     .throwOnError();
 };
