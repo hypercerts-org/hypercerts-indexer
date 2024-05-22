@@ -20,7 +20,7 @@ import { storeClaim } from "@/storage/storeClaim";
  */
 
 const defaultConfig = {
-  batchSize: 20000n,
+  batchSize: 10000n,
   eventName: "ClaimStored",
 };
 
