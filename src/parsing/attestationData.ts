@@ -69,36 +69,45 @@ export const decodeAttestationData = ({
     return;
   }
 
-  const _attestation: Partial<Tables<"attestations">> = {};
-  _attestation.attester = attestationData.attester;
-  _attestation.recipient = attestationData.recipient;
-  _attestation.block_timestamp = attestation.block_timestamp;
-  _attestation.uid = attestation.uid;
-  _attestation.supported_schemas_id = schema.id;
-  _attestation.attestation = JSON.parse(JSON.stringify(attestationData));
-  _attestation.data = JSON.parse(JSON.stringify(decodedAttestationObject));
+  try {
+    const _attestation: Partial<Tables<"attestations">> = {};
 
-  if (decodedAttestationObject?.chain_id)
-    _attestation.chain_id = mapUnknownToBigInt(
-      decodedAttestationObject.chain_id,
-    )?.toString();
+    _attestation.attester = attestationData.attester;
+    _attestation.recipient = attestationData.recipient;
+    _attestation.block_timestamp = attestation.block_timestamp;
+    _attestation.uid = attestation.uid;
+    _attestation.supported_schemas_id = schema.id;
+    _attestation.attestation = JSON.parse(JSON.stringify(attestationData));
+    _attestation.data = JSON.parse(JSON.stringify(decodedAttestationObject));
 
-  if (
-    decodedAttestationObject?.contract_address &&
-    decodedAttestationObject?.token_id
-  ) {
-    _attestation.contract_address =
-      typeof decodedAttestationObject?.contract_address === "string" &&
-      isAddress(decodedAttestationObject?.contract_address)
-        ? decodedAttestationObject.contract_address
-        : null;
+    if (decodedAttestationObject?.chain_id)
+      _attestation.chain_id = mapUnknownToBigInt(
+        decodedAttestationObject.chain_id,
+      )?.toString();
 
-    _attestation.token_id = mapUnknownToBigInt(
-      decodedAttestationObject.token_id,
-    )?.toString();
+    if (
+      decodedAttestationObject?.contract_address &&
+      decodedAttestationObject?.token_id
+    ) {
+      _attestation.contract_address =
+        typeof decodedAttestationObject?.contract_address === "string" &&
+        isAddress(decodedAttestationObject?.contract_address)
+          ? decodedAttestationObject.contract_address
+          : null;
+
+      _attestation.token_id = mapUnknownToBigInt(
+        decodedAttestationObject.token_id,
+      )?.toString();
+    }
+
+    return _attestation;
+  } catch (error) {
+    console.error(
+      "[DecodeAttestationData] Error while decoding attestation data",
+      error,
+    );
+    return;
   }
-
-  return _attestation;
 };
 
 const mapUnknownToBigInt = (value: unknown) => {
