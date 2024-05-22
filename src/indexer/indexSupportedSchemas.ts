@@ -29,7 +29,7 @@ export const indexSupportedSchemas = async ({
   const supportedSchemas = await getSupportedSchemas({ chainId });
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
-    console.error("[IndexSupportedSchema] No supported schemas found");
+    console.debug("[IndexSupportedSchema] No supported schemas found");
     return;
   }
 
