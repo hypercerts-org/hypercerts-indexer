@@ -305,8 +305,8 @@ export type Database = {
           entry: number
           hypercert_allow_lists_id: string
           id?: string
-          leaf: string
-          proof: Json
+          leaf?: string
+          proof?: Json
           units: number
           user_address: string
         }
