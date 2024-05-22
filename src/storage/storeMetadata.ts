@@ -80,8 +80,12 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
       "impact_timeframe_from must be less than impact_timeframe_to, unless impact_timeframe_to is infinite (0)",
     );
 
-  const parsedMetadata = metadata.map((x) => metadataValidationSchema.parse(x));
+  const parsedMetadata = metadata.map((x) => ({
+    ...metadataValidationSchema.parse(x),
+    parsed: true,
+  }));
 
+  console.log(parsedMetadata.map((x) => x.uri));
   try {
     await supabase
       .from("metadata")
