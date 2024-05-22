@@ -21,7 +21,7 @@ import { fetchAttestationData } from "@/fetching/fetchAttestationData";
  * ```
  */
 
-const defaultConfig = { batchSize: 1000n };
+const defaultConfig = { batchSize: 10000n };
 
 export const indexAttestations = async ({
   batchSize = defaultConfig.batchSize,
@@ -86,7 +86,7 @@ export const indexAttestations = async ({
         )
       ).filter(
         (attestation): attestation is Tables<"attestations"> =>
-          attestation !== null,
+          attestation !== null && attestation !== undefined,
       );
 
       return await storeAttestations({
