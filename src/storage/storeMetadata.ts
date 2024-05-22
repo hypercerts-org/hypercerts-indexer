@@ -85,7 +85,6 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
     parsed: true,
   }));
 
-  console.log(parsedMetadata.map((x) => x.uri));
   try {
     await supabase
       .from("metadata")

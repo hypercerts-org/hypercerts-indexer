@@ -38,7 +38,8 @@ export type NewTransfer = {
   block_timestamp: bigint;
   block_number: bigint;
   value: bigint;
-  owner_address: string;
+  from_owner_address: string;
+  to_owner_address: string;
   type: "claim" | "fraction";
 };
 

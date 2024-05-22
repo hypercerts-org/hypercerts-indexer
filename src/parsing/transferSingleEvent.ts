@@ -37,7 +37,8 @@ export const parseTransferSingle = async (event: unknown) => {
     block_timestamp: await getBlockTimestamp(event.blockNumber),
     block_number: event.blockNumber,
     value: args.value,
-    owner_address: args.to,
+    to_owner_address: args.to,
+    from_owner_address: args.from,
   };
 
   return row;
