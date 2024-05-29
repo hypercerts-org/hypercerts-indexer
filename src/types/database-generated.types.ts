@@ -469,7 +469,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      hypercert_allow_list_records_with_token_id: {
+        Row: {
+          claimed: boolean | null
+          entry: number | null
+          id: string | null
+          leaf: string | null
+          token_id: number | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       claim_attestation_count: {
