@@ -7,6 +7,7 @@ import { client } from "@/clients/evmClient";
 import { faker } from "@faker-js/faker";
 import sinon from "sinon";
 import { getAddress } from "viem";
+import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
 
 describe("fetchAttestationData", () => {
   afterEach(() => {
@@ -27,7 +28,9 @@ describe("fetchAttestationData", () => {
   test("returns undefined when attestedEvent.uid is not provided", async ({
     expect,
   }) => {
-    const result = await fetchAttestationData({ attestedEvent: {} });
+    const result = await fetchAttestationData({
+      attestedEvent: {} as unknown as ParsedAttestedEvent,
+    });
     expect(result).toBeUndefined();
   });
 
