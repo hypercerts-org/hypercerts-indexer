@@ -3,6 +3,38 @@ import { client } from "@/clients/evmClient";
 import easAbi from "@/abis/eas.json";
 import { Address, Hex, isAddress } from "viem";
 import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
+import * as z from "zod";
+import { messages } from "@/utils/validation";
+
+/**
+ * Asynchronously fetches attestation data from a contract.
+ *
+ * This function fetches the attestation data as stored at the provided UID on the contract.
+ * It first checks if the attestedEvent and its UID are defined. If not, it logs an error and returns.
+ * Then, it tries to read the contract using the client, with the provided address, abi, function name, and arguments.
+ * If the contract read is successful, it parses the attestation data using the AttestationSchema.
+ * If the parsing is successful, it returns the attestedEvent with the attestation data attached.
+ * If an error occurs during the contract read, it logs the error and returns.
+ *
+ * @param {Object} attestedEvent - The EAS Attested event data.
+ * @returns {Promise<Object | undefined>} - The event data with the attestation data attached, or undefined if an error occurs.
+ *
+ * @example
+ * ```js
+ * const attestedEvent = {
+ *    recipient: "0x1234...5678",
+ *    attester: "0x1234...5678",
+ *    uid: "0x1234...5678",
+ *    schema: "0x1234...5678",
+ *    refUID: "0x1234...5678",
+ *    time: BigInt(1633027200),
+ *    expirationTime: BigInt(1733027200),
+ *    revocationTime: BigInt(0),
+ *    revocable: true,
+ *    data: "0x1234...5678",
+ *  };
+ * const attestation: Attestation | undefined = await fetchAttestationData({ attestedEvent });
+ **/
 
 //https://github.com/ethereum-attestation-service/eas-sdk/blob/master/src/eas.ts#L87
 export interface Attestation {
@@ -18,25 +50,21 @@ export interface Attestation {
   data: Hex;
 }
 
-/*
- * This function fetches the attestation data as stored at the provided UID on the contract.
- *
- * @param attestation - The EAS Attested event data.
- * @returns {Attestation}  - The event data with the attestation data attached
- *
- * @example
- * ```js
- *
- * const easData = {
- *    recipient: "0x1234...5678",
- *    attester: "0x1234...5678",
- *    uid: "0x1234...5678",
- *    schema: "0x1234...5678",
- *  };
- *
- * const attestation: Attestation = await fetchAttestationData(easData);
- * ```
- */
+// Zod validation of Attestation
+export const AttestationSchema = z.object({
+  uid: z.string(),
+  schema: z.string(),
+  refUID: z.string(),
+  time: z.bigint(),
+  expirationTime: z.bigint(),
+  revocationTime: z.bigint(),
+  recipient: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  revocable: z.boolean(),
+  attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  data: z.string(),
+});
 
 interface FetchAttestationData {
   attestedEvent?: ParsedAttestedEvent;
@@ -63,13 +91,7 @@ export const fetchAttestationData = async ({
       args: [uid],
     });
 
-    if (!_attestationData || !isAttestation(_attestationData)) {
-      console.error(
-        "[FetchAttestationData] Invalid attestation data",
-        _attestationData,
-      );
-      return;
-    }
+    AttestationSchema.parse(_attestationData);
 
     return { ...attestedEvent, attestation: _attestationData };
   } catch (e) {
@@ -79,26 +101,4 @@ export const fetchAttestationData = async ({
     );
     return;
   }
-};
-
-export const isAttestation = (data: unknown): data is Attestation => {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "uid" in data &&
-    "schema" in data &&
-    "refUID" in data &&
-    "time" in data &&
-    "expirationTime" in data &&
-    "revocationTime" in data &&
-    "recipient" in data &&
-    typeof data.recipient === "string" &&
-    isAddress(data.recipient) &&
-    "revocable" in data &&
-    typeof data.revocable === "boolean" &&
-    "attester" in data &&
-    typeof data.attester === "string" &&
-    isAddress(data.attester) &&
-    "data" in data
-  );
 };
