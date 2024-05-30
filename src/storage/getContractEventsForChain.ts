@@ -49,7 +49,9 @@ export const getContractEventsForChain = async ({
         event_name: contractEvent.event.name,
         // @ts-expect-error incorrect typing as array
         abi: contractEvent.event.abi,
-        last_block_indexed: contractEvent.last_block_indexed,
+        last_block_indexed: contractEvent.last_block_indexed
+          ? BigInt(contractEvent.last_block_indexed)
+          : null,
       }) as EventToFetch,
   );
 };

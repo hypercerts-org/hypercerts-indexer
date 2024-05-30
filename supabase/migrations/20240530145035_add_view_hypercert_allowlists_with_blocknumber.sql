@@ -1,0 +1,2 @@
+create view hypercert_allowlists_with_claim as
+    select hal.id as hypercert_allow_list_id, c.id as claim_id, hypercert_id, block_number from hypercert_allow_lists hal join public.claims c on c.id = hal.claims_id

@@ -110,6 +110,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attestations_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
+          {
             foreignKeyName: "attestations_supported_schemas_id_fkey"
             columns: ["supported_schemas_id"]
             isOneToOne: false
@@ -120,11 +127,10 @@ export type Database = {
       }
       claims: {
         Row: {
+          block_number: number | null
           contracts_id: string
-          creation_block_timestamp: number | null
           hypercert_id: string | null
           id: string
-          last_block_update_timestamp: number | null
           owner_address: string | null
           token_id: number
           units: number | null
@@ -133,11 +139,10 @@ export type Database = {
           claim_attestation_count: number | null
         }
         Insert: {
+          block_number?: number | null
           contracts_id: string
-          creation_block_timestamp?: number | null
           hypercert_id?: string | null
           id?: string
-          last_block_update_timestamp?: number | null
           owner_address?: string | null
           token_id: number
           units?: number | null
@@ -145,11 +150,10 @@ export type Database = {
           value?: number | null
         }
         Update: {
+          block_number?: number | null
           contracts_id?: string
-          creation_block_timestamp?: number | null
           hypercert_id?: string | null
           id?: string
-          last_block_update_timestamp?: number | null
           owner_address?: string | null
           token_id?: number
           units?: number | null
@@ -287,6 +291,13 @@ export type Database = {
             referencedRelation: "claims"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
         ]
       }
       hypercert_allow_list_records: {
@@ -328,6 +339,13 @@ export type Database = {
             referencedRelation: "hypercert_allow_lists"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["hypercert_allow_list_id"]
+          },
         ]
       }
       hypercert_allow_lists: {
@@ -366,6 +384,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "claims"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: true
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
           },
         ]
       }
@@ -480,6 +505,15 @@ export type Database = {
         }
         Relationships: []
       }
+      hypercert_allowlists_with_claim: {
+        Row: {
+          block_number: number | null
+          claim_id: string | null
+          hypercert_allow_list_id: string | null
+          hypercert_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       claim_attestation_count: {
@@ -509,11 +543,10 @@ export type Database = {
               p_token_id: number
             }
             Returns: {
+              block_number: number | null
               contracts_id: string
-              creation_block_timestamp: number | null
               hypercert_id: string | null
               id: string
-              last_block_update_timestamp: number | null
               owner_address: string | null
               token_id: number
               units: number | null

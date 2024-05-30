@@ -55,7 +55,8 @@ describe("transferSingleEvent", {}, () => {
     expect(parsed).toEqual({
       block_number: blockNumber,
       block_timestamp: timestamp,
-      owner_address: address,
+      from_owner_address: address,
+      to_owner_address: address,
       token_id: claimID,
       value,
     });
