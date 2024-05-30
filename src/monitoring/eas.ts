@@ -59,11 +59,11 @@ export const getAttestationsForSchema = async ({
       fromBlock: _fromBlock,
       toBlock: _toBlock,
       event: parseAbiItem(
-        "event Attested(address indexed recipient, address indexed attester, bytes32 uid, bytes32 indexed schema),
+        "event Attested(address indexed recipient, address indexed attester, bytes32 uid, bytes32 indexed schema)",
       ),
       args: {
-        schema: schema.eas_schema_id as `0x${string},
-      ,
+        schema: schema.eas_schema_id as `0x${string}`,
+      },
     });
 
     return {

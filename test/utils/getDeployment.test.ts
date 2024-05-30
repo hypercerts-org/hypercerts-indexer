@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test, vi } from "vitest";
 import { getDeployment } from "../../src/utils";
-import { chainId } from "../../src/utils/constants";
+import * as constants from "../../src/utils/constants";
 
 describe("getDeployment", () => {
   afterAll(() => {
@@ -8,13 +8,16 @@ describe("getDeployment", () => {
   });
 
   test("returns deployment for supported chain ID", () => {
+    const chainId = 11155111;
+    vi.spyOn(constants, "chainId", "get").mockReturnValue(chainId);
     const deployment = getDeployment();
 
     expect(deployment.chainId).toEqual(chainId);
   });
 
   test("throws error for unsupported chain ID", () => {
-    vi.mock("../../src/utils/constants", () => ({ chainId: 1337 }));
+    const chainId = 999_999_999;
+    vi.spyOn(constants, "chainId", "get").mockReturnValue(chainId);
 
     expect(() => getDeployment()).toThrowError("Unsupported chain ID");
   });

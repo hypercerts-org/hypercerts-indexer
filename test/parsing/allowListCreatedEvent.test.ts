@@ -1,9 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { server } from "../setup-env";
-import { http, HttpResponse } from "msw";
+import { describe, expect, it } from "vitest";
 import { parseAllowListCreated } from "../../src/parsing/allowListCreatedEvent";
 import { faker } from "@faker-js/faker";
-import { alchemyUrl } from "../resources/alchemyUrl";
 
 describe("allowlistCreatedEvent", () => {
   const tokenID = faker.number.bigInt();
@@ -22,14 +19,6 @@ describe("allowlistCreatedEvent", () => {
     args,
   };
 
-  beforeEach(() => {
-    server.use(
-      http.post(`${alchemyUrl}/*`, () => {
-        return HttpResponse.json(0);
-      }),
-    );
-  });
-
   it("parses allowlistCreated event", async () => {
     const parsed = await parseAllowListCreated(event);
 
@@ -42,7 +31,7 @@ describe("allowlistCreatedEvent", () => {
     expect(parsed.root).toEqual(root);
   });
 
-  it("fails if event is invalid", async () => {
+  it("fails silently  if event is invalid", async () => {
     const parsed1 = await parseAllowListCreated({
       ...event,
       blockNumber: "not a bigint",
@@ -56,7 +45,7 @@ describe("allowlistCreatedEvent", () => {
     expect(parsed2).toBeUndefined();
   });
 
-  it("fails if event args are invalid", async () => {
+  it("fails silently if event args are invalid", async () => {
     const parsed = await parseAllowListCreated({
       ...event,
       args: {
