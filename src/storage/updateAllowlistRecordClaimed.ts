@@ -21,20 +21,28 @@ export const updateAllowlistRecordClaimed = async ({
       .maybeSingle()
       .throwOnError();
 
-    console.log("record", record);
-
     if (!record.data) {
-      console.error(
-        "[UpdateAllowlistRecordClaimed] Could not find unclaimed allowlist record",
-        "tokenId",
-        tokenId,
-        "leaf",
-        leaf,
-        "userAddress",
-        userAddress,
-        record.error?.message,
+      const alreadyClaimedRecord = await supabase
+        .from("hypercert_allow_list_records_with_token_id")
+        .select("*")
+        .eq("leaf", leaf)
+        .eq("user_address", userAddress)
+        .eq("claimed", true)
+        .eq("token_id", tokenId)
+        .maybeSingle()
+        .throwOnError();
+
+      if (alreadyClaimedRecord.data) {
+        console.error(
+          "[UpdateAllowlistRecordClaimed] Allowlist record already claimed",
+          alreadyClaimedRecord.data,
+        );
+        return;
+      }
+
+      throw new Error(
+        `Could not find unclaimed allowlist record for tokenId ${tokenId}, leaf ${leaf} and userAddress ${userAddress}, ${record.error?.message}`,
       );
-      return;
     }
 
     // Update that record to claimed

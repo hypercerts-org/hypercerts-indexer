@@ -44,7 +44,9 @@ export const indexAllowlistRecords = async ({
 
   // Process metadata in batches
   for (let i = 0; i < unparsedAllowLists.length; i += _size) {
-    console.debug(`[IndexAllowlistRecords] Processing batch ${i} - ${i + 1}`);
+    console.debug(
+      `[IndexAllowlistRecords] Processing batch ${i} - ${i + _size - 1}`,
+    );
     const batch = unparsedAllowLists.slice(i, i + _size);
 
     await processAllowListEntriesBatch(batch);
