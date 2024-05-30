@@ -1,27 +1,18 @@
-import { fetchFromHTTPS, fetchFromIPFS } from "@/utils";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
 
-/*
- * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
+/**
+ * This function fetches an allow list from a given URI.
  *
- * Because the uri can be an IPFS URI, an HTTPS URI, or a CID, this function tries to fetch the metadata from the
- * different sources in that order. If the metadata is found, it is validated and returned.
+ * The URI can be an IPFS URI, an HTTPS URI, or a CID. The function tries to fetch the allow list from the
+ * different sources in that order. If the allow list is found, it is validated and returned.
  *
- * @param claim - The claim data.
- * @returns The metadata of the claim.
+ * @param uri - The URI where the allow list is located.
+ * @returns The allow list as an OpenZeppelin Merkle tree if found and valid, otherwise undefined.
  *
  * @example
- * ```js
- *
- * const claim: Claim = {
- *  contract_address: "0x1234...5678",
- *  claim_id: 1n,
- *  uri: "ipfs://QmXZj9Pm4g7Hv3Z6K4Vw2vW"
- *  total_units: 100n,
- *  };
- *
- * const metadata = await fetchMetadataFromUri(claim);
+ * ```typescript
+ * const allowList = await fetchAllowListFromUri({ uri: "ipfs://QmXZj9Pm4g7Hv3Z6K4Vw2vW" });
  * ```
  */
 
@@ -49,7 +40,7 @@ export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
       JSON.parse(fetchResult as string),
     );
   } catch (error) {
-    console.error(
+    console.warn(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
       error,
     );
@@ -62,7 +53,7 @@ export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
     );
     return StandardMerkleTree.load<[string, bigint]>(fetchResult as never);
   } catch (error) {
-    console.error(
+    console.warn(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
       error,
     );

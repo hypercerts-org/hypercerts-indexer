@@ -93,7 +93,7 @@ export const fetchAttestationData = async ({
 
     AttestationSchema.parse(_attestationData);
 
-    return { ...attestedEvent, attestation: _attestationData };
+    return { ...attestedEvent, attestation: _attestationData as Attestation };
   } catch (e) {
     console.error(
       `[FetchAttestationData] Error fetching attestation data for UID ${uid} on contract ${easAddress}:`,

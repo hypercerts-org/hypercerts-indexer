@@ -13,12 +13,12 @@ const selectedNetwork = () => {
   }
 };
 
-const alchemyUrl = (apiKey: string) => {
+const alchemyUrl = () => {
   switch (chainId) {
     case 84532:
-      return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
+      return `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 11155111:
-      return `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`;
+      return `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
@@ -28,7 +28,7 @@ const alchemyUrl = (apiKey: string) => {
 export const client = createPublicClient({
   cacheTime: 10_000,
   chain: selectedNetwork(),
-  transport: http(alchemyUrl(alchemyApiKey)),
+  transport: http(alchemyUrl()),
   batch: {
     multicall: {
       wait: 32,

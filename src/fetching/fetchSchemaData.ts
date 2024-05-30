@@ -3,9 +3,23 @@ import { client } from "@/clients/evmClient";
 import schemaRegistryAbi from "@/abis/schemaRegistry.json";
 import { Hex, isAddress } from "viem";
 import { Tables } from "@/types/database.types";
+import { z } from "zod";
+import { messages } from "@/utils/validation";
+
+/**
+ * Fetches schema data from a contract using the provided schema's EAS ID.
+ *
+ * @param schema - An optional object of type Tables<"supported_schemas">. If provided, it should contain a property `eas_schema_id` which is used to fetch the schema data from the contract.
+ *
+ * @returns If successful, it returns an object of type SchemaRecord containing the fetched schema data. If the schema is not provided, or if the schema does not contain an `eas_schema_id`, or if there is an error during the contract read operation, it returns undefined.
+ *
+ * @example
+ * ```typescript
+ * const schemaData = await fetchSchemaData({ schema: { eas_schema_id: '0x1234...5678' } });
+ * ```
+ */
 
 //github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/ISchemaRegistry.sol
-
 export interface SchemaRecord {
   uid: Hex;
   revocable: boolean;
@@ -13,29 +27,26 @@ export interface SchemaRecord {
   schema: string;
 }
 
-/*
- * This function fetches the attestation data as stored at the provided UID on the contract.
- *
- * @param attestation - The EAS Attested event data.
- * @returns  - The event data with the attestation data attached
- *
- * @example
- * ```js
- *
- * const easData: EASData = {
- * recipient: "0x1234...5678",
- * attester: "0x1234...5678",
- * uid: "0x1234...5678",
- * schema: "0x1234...5678",
- *  };
- *
- * const attestation = await fetchAttestationData(easData);
- * ```
- */
+export const createSchemaRecordSchema = (schema_uid: string) =>
+  z.object({
+    uid: z.string().refine((uid) => uid === schema_uid, {
+      message: `Schema data does not match schema UID ${schema_uid}`,
+    }),
+    revocable: z.boolean(),
+    resolver: z.string().refine(isAddress, {
+      message: messages.INVALID_ADDRESS,
+    }),
+    schema: z.string(),
+  });
+
+export interface FetchSchemaDataArgs {
+  schema?: Pick<Tables<"supported_schemas">, "eas_schema_id">;
+}
+
 export const fetchSchemaData = async ({
   schema,
 }: {
-  schema?: Tables<"supported_schemas">;
+  schema?: Pick<Tables<"supported_schemas">, "eas_schema_id">;
 }) => {
   if (!schema || !schema.eas_schema_id) {
     console.error(`Could not find EAS ID for schema`, schema);
@@ -44,6 +55,7 @@ export const fetchSchemaData = async ({
 
   const { schemaRegistryAddress } = getDeployment();
   const { eas_schema_id } = schema;
+  const validationSchema = createSchemaRecordSchema(eas_schema_id);
 
   try {
     const _schemaData = await client.readContract({
@@ -53,25 +65,7 @@ export const fetchSchemaData = async ({
       args: [eas_schema_id],
     });
 
-    if (!_schemaData || !isSchemaRecord(_schemaData)) {
-      console.error("Invalid schema data", _schemaData);
-      return;
-    }
-
-    if (_schemaData.uid != eas_schema_id) {
-      console.error(
-        `Schema data UID ${_schemaData.uid} does not match schema UID ${eas_schema_id}`,
-      );
-      return;
-    }
-
-    const _schema = schema;
-
-    _schema.schema = _schemaData.schema;
-    _schema.resolver = _schemaData.resolver;
-    _schema.revocable = _schemaData.revocable;
-
-    return _schema;
+    return validationSchema.parse(_schemaData);
   } catch (e) {
     console.error(
       `Error fetching data for schema ${eas_schema_id} on contract ${schemaRegistryAddress}:`,
@@ -79,20 +73,4 @@ export const fetchSchemaData = async ({
     );
     return;
   }
-};
-
-const isSchemaRecord = (data: unknown): data is SchemaRecord => {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "uid" in data &&
-    typeof data.uid === "string" &&
-    "revocable" in data &&
-    typeof data.revocable === "boolean" &&
-    "resolver" in data &&
-    typeof data.resolver === "string" &&
-    isAddress(data.resolver) &&
-    "schema" in data &&
-    typeof data.schema === "string"
-  );
 };

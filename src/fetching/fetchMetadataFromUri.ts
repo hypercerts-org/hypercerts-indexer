@@ -56,7 +56,7 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
     description: _metadata.description,
     external_url: _metadata.external_url,
     image: _metadata.image,
-    properties: fetchResult.properties,
+    properties: _metadata.properties,
     contributors: _metadata.hypercert?.contributors.value,
     impact_scope: _metadata.hypercert?.impact_scope.value,
     impact_timeframe_from: _metadata.hypercert?.impact_timeframe?.value?.[0],
