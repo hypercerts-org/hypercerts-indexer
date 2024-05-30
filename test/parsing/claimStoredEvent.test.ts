@@ -39,22 +39,13 @@ describe("claimStoredEvent", {}, () => {
         }) as any,
     );
 
-    const timestamp = 10;
-    const spy = vi.spyOn(client, "getBlock").mockImplementation(
-      async () =>
-        ({
-          timestamp,
-        }) as any,
-    );
-
     const parsed = await parseClaimStoredEvent(event);
 
-    expect(spy).toHaveBeenCalledWith({ blockNumber });
     expect(parsed).toEqual({
       contract_address: address,
       uri,
-      block_timestamp: timestamp,
       units: totalUnits,
+      block_number: blockNumber,
       creator_address: from,
       token_id: claimID,
     });
