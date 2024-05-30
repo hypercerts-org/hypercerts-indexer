@@ -1,5 +1,4 @@
 import { Hex, isAddress } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 import { NewClaim } from "@/types/types";
 import { client } from "@/clients/evmClient";
 
@@ -40,7 +39,7 @@ export const parseClaimStoredEvent = async (event: unknown) => {
     creator_address: transaction.from,
     token_id: args.claimID,
     uri: args.uri,
-    block_timestamp: await getBlockTimestamp(event.blockNumber),
+    block_number: BigInt(event.blockNumber),
     units: args.totalUnits,
     contract_address: address,
   };

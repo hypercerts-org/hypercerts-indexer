@@ -5,6 +5,8 @@ import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts";
 import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed";
+import { supabase } from "@/clients/supabaseClient";
+import { client } from "@/clients/evmClient";
 
 /*
  * This function indexes the logs of the LeafClaimed event emitted by the HypercertMinter contract. Based on the last
@@ -33,6 +35,39 @@ export const indexAllowlistSingleClaimMinted = async ({
     eventName,
   });
 
+  const currentBlock = await client.getBlockNumber();
+  const currentEventsClaimStored = await getContractEventsForChain({
+    chainId,
+    eventName: "ClaimStored",
+  });
+  const latestIndexedBlockClaimStored = (currentEventsClaimStored || []).reduce(
+    (maxBlock, event) => {
+      return BigInt(event.last_block_indexed) > maxBlock
+        ? BigInt(event.last_block_indexed)
+        : maxBlock;
+    },
+    0n,
+  );
+  const claimStoredIndexingUpToDate =
+    currentBlock === latestIndexedBlockClaimStored;
+
+  // Do batch size based on latest indexed allowlist data for current chain
+  const latestIndexedHypercertAllowlist = await supabase
+    .from("hypercert_allowlists_with_claim")
+    .select("block_number")
+    .like("hypercert_id", `${chainId}-%`)
+    .order("block_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const latestIndexedAllowlistClaimBlock = latestIndexedHypercertAllowlist?.data
+    ?.block_number as number | undefined;
+
+  if (latestIndexedAllowlistClaimBlock === undefined) {
+    // No allowlists known, so nothing to index
+    return;
+  }
+
   if (!contractsWithEvents || contractsWithEvents.length === 0) {
     return;
   }
@@ -40,11 +75,31 @@ export const indexAllowlistSingleClaimMinted = async ({
   const results = await Promise.all(
     contractsWithEvents.flatMap(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
+      const fromBlock = last_block_indexed ? last_block_indexed : 0n;
+      const proposedEndBlock = fromBlock + batchSize;
+
+      let maxEndBlock: bigint | undefined;
+
+      if (claimStoredIndexingUpToDate) {
+        // If we're up-to-date with the chain for ClaimStored event, we can index up to the latest block that had its ClaimStored events parsed
+        maxEndBlock = latestIndexedBlockClaimStored;
+      } else {
+        // Set maxEndBlock to lowest of proposedEndBlock and latestIndexedAllowlistClaimBlock
+        // This is so we only parse LeafClaimed events for hypercert-allowlists that have been fetched from IPFS and indexed
+        maxEndBlock =
+          proposedEndBlock < BigInt(latestIndexedAllowlistClaimBlock)
+            ? proposedEndBlock
+            : BigInt(latestIndexedAllowlistClaimBlock);
+      }
+
+      const adjustedBatchSize = claimStoredIndexingUpToDate
+        ? batchSize
+        : maxEndBlock - fromBlock;
 
       // Get logs in batches
       const logsFound = await getLogsForContractEvents({
-        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : 0n,
-        batchSize,
+        fromBlock,
+        batchSize: adjustedBatchSize,
         contractEvent,
       });
 
