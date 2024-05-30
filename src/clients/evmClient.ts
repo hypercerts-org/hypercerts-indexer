@@ -1,9 +1,11 @@
 import { createPublicClient, http } from "viem";
-import { baseSepolia, sepolia } from "viem/chains";
+import { baseSepolia, optimism, sepolia } from "viem/chains";
 import { alchemyApiKey, chainId } from "@/utils/constants";
 
 const selectedNetwork = () => {
   switch (chainId) {
+    case 10:
+      return optimism;
     case 84532:
       return baseSepolia;
     case 11155111:
@@ -15,6 +17,8 @@ const selectedNetwork = () => {
 
 const alchemyUrl = (apiKey: string) => {
   switch (chainId) {
+    case 10:
+      return `https://opt-mainnet.g.alchemy.com/v2/${apiKey}`;
     case 84532:
       return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
     case 11155111:
