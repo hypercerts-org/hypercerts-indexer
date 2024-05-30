@@ -1,6 +1,6 @@
 import { decodeAbiParameters, isAddress } from "viem";
 import { Tables } from "@/types/database.types";
-import { Attestation, isAttestation } from "@/fetching/fetchAttestationData";
+import { Attestation, AttestationSchema } from "@/fetching/fetchAttestationData";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi";
 import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 
@@ -16,9 +16,9 @@ export const decodeAttestationData = ({
   schema,
 }: {
   attestation?: ParsedAttestedEvent & { attestation: Attestation };
-  schema?: Partial<Tables<"supported_schemas">>;
+  schema?: Pick<Tables<"supported_schemas">, "schema" | "id">;
 }) => {
-  if (!schema || !schema?.schema) {
+  if (!schema?.schema) {
     console.error(
       "[DecodeAttestationData] Schema is missing data for parsing",
       schema,
@@ -36,40 +36,34 @@ export const decodeAttestationData = ({
 
   const attestationData = attestation.attestation;
 
-  if (!isAttestation(attestationData)) {
-    console.error(
-      "[DecodeAttestationData] Invalid attestation data",
-      attestationData,
-    );
-    return;
-  }
-
-  const abiFromSchema = parseSchemaToABI(schema.schema);
-
-  const decodedAttestation = decodeAbiParameters(
-    abiFromSchema[0].outputs,
-    attestationData.data,
-  );
-
-  const keys = abiFromSchema[0].outputs.map((output) => output.name);
-  const values = decodedAttestation;
-  const decodedAttestationObject: Record<string, unknown> = keys.reduce(
-    (acc: Record<string, unknown>, key, index) => {
-      acc[key] = values[index];
-      return acc;
-    },
-    {},
-  );
-
-  if (!decodedAttestationObject) {
-    console.error(
-      "[DecodeAttestationData] Attestation data could not be parsed",
-      attestation,
-    );
-    return;
-  }
-
   try {
+    AttestationSchema.parse(attestationData);
+
+    const abiFromSchema = parseSchemaToABI(schema.schema)[0];
+
+    const decodedAttestation = decodeAbiParameters(
+      abiFromSchema.outputs,
+      attestationData.data,
+    );
+
+    const keys = abiFromSchema.outputs.map((output) => output.name);
+    const values = decodedAttestation;
+    const decodedAttestationObject: Record<string, unknown> = keys.reduce(
+      (acc: Record<string, unknown>, key, index) => {
+        acc[key] = values[index];
+        return acc;
+      },
+      {,
+    );
+
+    if (!decodedAttestationObject) {
+      console.error(
+        "[DecodeAttestationData] Attestation data could not be parsed",
+        attestation
+      );
+      return;
+    }
+
     const _attestation: Partial<Tables<"attestations">> = {};
 
     _attestation.attester = attestationData.attester;
