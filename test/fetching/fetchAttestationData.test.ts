@@ -8,13 +8,13 @@ import { faker } from "@faker-js/faker";
 import sinon from "sinon";
 import { getAddress } from "viem";
 import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
-import { getMockEasAttestation } from "../resources/mockAttestations";
+import { generateEasAttestation } from "../helpers/factories";
 
 describe("fetchAttestationData", () => {
   const readSpy = sinon.stub(client, "readContract");
 
   let attestedEvent = {} as ParsedAttestedEvent;
-  const mockAttestationData = getMockEasAttestation();
+  const mockAttestationData = generateEasAttestation();
 
   beforeEach(() => {
     attestedEvent = {

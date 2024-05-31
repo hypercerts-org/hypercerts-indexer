@@ -2,6 +2,7 @@ import { client } from "@/clients/evmClient";
 import { isAddress, parseAbiItem } from "viem";
 import { getDeployment } from "@/utils/getDeployment";
 import { Tables } from "@/types/database.types";
+import { getBlocksToFetch } from "@/utils/getBlocksToFetch";
 
 /**
  * Fetches the logs of the Attested event from the EAS contract for a specific schema.
@@ -33,24 +34,17 @@ export const getAttestationsForSchema = async ({
   const { startBlock, easAddress } = getDeployment();
 
   if (!isAddress(easAddress)) {
-    console.error(
-      "[getAttestationsForSchema] EAS is not available",
-      easAddress,
-    );
-    return;
+    throw Error(`[GetAttestationForSchema] EAS is not available`);
   }
 
+  const { fromBlock: _fromBlock, toBlock: _toBlock } = await getBlocksToFetch({
+    contractCreationBlock: startBlock,
+    fromBlock,
+    batchSize,
+  });
+
   try {
-    const latestBlock = await client.getBlockNumber();
-
-    const _fromBlock =
-      fromBlock && fromBlock > startBlock ? fromBlock : startBlock;
-    const _toBlock =
-      _fromBlock + batchSize > latestBlock
-        ? latestBlock
-        : _fromBlock + batchSize;
-
-    console.info(
+    console.debug(
       `[getAttestationsForSchema] Fetching attestation logs from ${_fromBlock} to ${_toBlock}`,
     );
 
@@ -77,6 +71,6 @@ export const getAttestationsForSchema = async ({
       "[getAttestationsForSchema] Error fetching attestation logs",
       error,
     );
-    return;
+    throw error;
   }
 };

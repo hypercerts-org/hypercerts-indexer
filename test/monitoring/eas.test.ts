@@ -29,14 +29,16 @@ describe("getAttestationsForSchema", () => {
     sinon.restore();
   });
 
-  it("returns undefined when EAS address is not available", async () => {
+  it("throws when EAS address is not available", async () => {
     mocks.getDeployment.mockReturnValue({ startBlock: 0n, easAddress: null });
 
-    const result = await getAttestationsForSchema({
-      schema: { uid: "0x123" },
-      batchSize: 100n,
-    });
-    expect(result).toBeUndefined();
+    await expect(
+      async () =>
+        await getAttestationsForSchema({
+          schema: { uid: "0x123" },
+          batchSize: 100n,
+        }),
+    ).rejects.toThrowError();
   });
 
   it("returns undefined when EAS address is not valid", async () => {
@@ -45,11 +47,13 @@ describe("getAttestationsForSchema", () => {
       easAddress: "not an address",
     });
 
-    const result = await getAttestationsForSchema({
-      schema: { uid: "0x123" },
-      batchSize: 100n,
-    });
-    expect(result).toBeUndefined();
+    await expect(
+      async () =>
+        await getAttestationsForSchema({
+          schema: { uid: "0x123" },
+          batchSize: 100n,
+        }),
+    ).rejects.toThrowError();
   });
 
   it("returns logs when all parameters are valid", async () => {
@@ -84,17 +88,18 @@ describe("getAttestationsForSchema", () => {
 
     getBlockNumberSpy.throws();
 
-    const result = await getAttestationsForSchema({
-      schema: {
-        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
-      },
-      batchSize: 100n,
-    });
-
-    expect(result).toBeUndefined();
+    await expect(
+      async () =>
+        await getAttestationsForSchema({
+          schema: {
+            uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+          },
+          batchSize: 100n,
+        }),
+    ).rejects.toThrowError();
   });
 
-  it("returns undefined when event filter cannot be created", async () => {
+  it("throws when event filter cannot be created", async () => {
     mocks.getDeployment.mockReturnValue({
       startBlock: 5957292n,
       easAddress: "0xc2679fbd37d54388ce493f1db75320d236e1815e",
@@ -103,17 +108,18 @@ describe("getAttestationsForSchema", () => {
     getBlockNumberSpy.resolves(5957292n);
     createEventFilterSpy.throws();
 
-    const result = await getAttestationsForSchema({
-      schema: {
-        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
-      },
-      batchSize: 100n,
-    });
-
-    expect(result).toBeUndefined();
+    await expect(
+      async () =>
+        await getAttestationsForSchema({
+          schema: {
+            uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+          },
+          batchSize: 100n,
+        }),
+    ).rejects.toThrowError();
   });
 
-  it("returns undefined when logs cannot be fetched", async () => {
+  it("throws when logs cannot be fetched", async () => {
     mocks.getDeployment.mockReturnValue({
       startBlock: 5957292n,
       easAddress: "0xc2679fbd37d54388ce493f1db75320d236e1815e",
@@ -123,13 +129,14 @@ describe("getAttestationsForSchema", () => {
     createEventFilterSpy.resolves(mockFilter);
     getFilterLogsSpy.throws();
 
-    const result = await getAttestationsForSchema({
-      schema: {
-        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
-      },
-      batchSize: 100n,
-    });
-
-    expect(result).toBeUndefined();
+    await expect(
+      async () =>
+        await getAttestationsForSchema({
+          schema: {
+            uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+          },
+          batchSize: 100n,
+        }),
+    ).rejects.toThrowError();
   });
 });

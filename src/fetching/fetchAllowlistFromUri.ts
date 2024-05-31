@@ -1,59 +1,54 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
 
+export interface FetchAllowListFromUriInput {
+  uri?: string;
+}
+
 /**
- * This function fetches an allow list from a given URI.
+ * Fetches an allow list from a given URI.
  *
- * The URI can be an IPFS URI, an HTTPS URI, or a CID. The function tries to fetch the allow list from the
- * different sources in that order. If the allow list is found, it is validated and returned.
+ * This function attempts to fetch data from the provided URI using the `fetchFromHttpsOrIpfs` utility function.
+ * If no data is found, it logs a debug message and returns undefined.
+ * If data is found, it attempts to parse and load the data as a Merkle tree using the `StandardMerkleTree.load` function from the OpenZeppelin library.
+ * It first tries to parse the data as a JSON string, and if that fails, it tries to load the data directly.
+ * If both attempts fail, it logs a debug message for each failure and returns undefined.
  *
- * @param uri - The URI where the allow list is located.
- * @returns The allow list as an OpenZeppelin Merkle tree if found and valid, otherwise undefined.
+ * @param {FetchAllowListFromUriInput} { uri } - An object containing the URI to fetch the allow list from.
+ * @returns {Promise<StandardMerkleTree<[string, bigint]> | undefined>} A promise that resolves to a Merkle tree if the data could be fetched and loaded successfully, otherwise undefined.
  *
  * @example
  * ```typescript
  * const allowList = await fetchAllowListFromUri({ uri: "ipfs://QmXZj9Pm4g7Hv3Z6K4Vw2vW" });
  * ```
- */
-
-interface FetchAllowListFromUri {
-  uri?: string;
-}
-
-export const fetchAllowListFromUri = async ({ uri }: FetchAllowListFromUri) => {
+ * */
+export const fetchAllowListFromUri = async ({
+  uri,
+}: FetchAllowListFromUriInput) => {
   const fetchResult = await fetchFromHttpsOrIpfs(uri);
 
   if (!fetchResult) {
-    console.error(
+    console.debug(
       `[FetchAllowListFromUri] No metadata found on IPFS for URI ${uri}`,
     );
     return;
   }
 
-  // If response object is already a OZ Merkle tree, return it as is
   try {
-    console.debug(
-      "[FetchAllowListFromUri] Loading OZ Merkle tree from response by parsing as JSON",
-    );
-
     return StandardMerkleTree.load<[string, bigint]>(
       JSON.parse(fetchResult as string),
     );
   } catch (error) {
-    console.warn(
+    console.debug(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
       error,
     );
   }
 
-  // If response object is already a OZ Merkle tree, return it as is
   try {
-    console.debug(
-      "[FetchAllowListFromUri] Loading OZ Merkle tree directly from response",
-    );
     return StandardMerkleTree.load<[string, bigint]>(fetchResult as never);
   } catch (error) {
-    console.warn(
+    console.debug(
       `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
       error,
     );
