@@ -23,8 +23,8 @@ export default defineConfig({
       },
       exclude: [
         ...(configDefaults.coverage.exclude as string[]),
-        "**/database-generated.types.ts",
-        "**/database.types.ts",
+        "**/*.types.ts",
+        "**/types.ts",
       ],
     },
   },

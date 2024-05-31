@@ -26,7 +26,7 @@ export const getAttestationsForSchema = async ({
   fromBlock = 0n,
   batchSize,
 }: {
-  schema: Pick<Tables<"supported_schemas">, "eas_schema_id">;
+  schema: Pick<Tables<"supported_schemas">, "uid">;
   fromBlock?: bigint;
   batchSize: bigint;
 }) => {
@@ -54,6 +54,7 @@ export const getAttestationsForSchema = async ({
       `[getAttestationsForSchema] Fetching attestation logs from ${_fromBlock} to ${_toBlock}`,
     );
 
+    // TODO could be it's own schema
     const filter = await client.createEventFilter({
       address: easAddress,
       fromBlock: _fromBlock,
@@ -62,7 +63,7 @@ export const getAttestationsForSchema = async ({
         "event Attested(address indexed recipient, address indexed attester, bytes32 uid, bytes32 indexed schema)",
       ),
       args: {
-        schema: schema.eas_schema_id as `0x${string}`,
+        schema: schema.uid as `0x${string}`,
       },
     });
 

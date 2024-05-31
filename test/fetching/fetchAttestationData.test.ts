@@ -1,6 +1,6 @@
-import { afterAll, afterEach, describe, test } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, test } from "vitest";
 import {
-  Attestation,
+  FetchAttestationData,
   fetchAttestationData,
 } from "@/fetching/fetchAttestationData";
 import { client } from "@/clients/evmClient";
@@ -8,58 +8,48 @@ import { faker } from "@faker-js/faker";
 import sinon from "sinon";
 import { getAddress } from "viem";
 import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
+import { getMockEasAttestation } from "../resources/mockAttestations";
 
 describe("fetchAttestationData", () => {
+  const readSpy = sinon.stub(client, "readContract");
+
+  let attestedEvent = {} as ParsedAttestedEvent;
+  const mockAttestationData = getMockEasAttestation();
+
+  beforeEach(() => {
+    attestedEvent = {
+      attester: getAddress(faker.finance.ethereumAddress()),
+      recipient: getAddress(faker.finance.ethereumAddress()),
+      uid: faker.string.hexadecimal({ length: 32 }),
+      block_timestamp: 1234567890n,
+    };
+  });
+
   afterEach(() => {
-    sinon.restore();
+    sinon.reset();
   });
 
   afterAll(() => {
     sinon.restore();
   });
 
-  test("returns undefined when attestedEvent is not provided", async ({
-    expect,
-  }) => {
-    const result = await fetchAttestationData({});
-    expect(result).toBeUndefined();
+  test("throws when attestedEvent is not provided", async ({ expect }) => {
+    await expect(() =>
+      fetchAttestationData({} as FetchAttestationData),
+    ).rejects.toThrowError();
   });
 
-  test("returns undefined when attestedEvent.uid is not provided", async ({
-    expect,
-  }) => {
-    const result = await fetchAttestationData({
-      attestedEvent: {} as unknown as ParsedAttestedEvent,
-    });
-    expect(result).toBeUndefined();
+  test("throws when attestedEvent.uid is not provided", async ({ expect }) => {
+    await expect(() =>
+      fetchAttestationData({
+        attestedEvent: {} as unknown as ParsedAttestedEvent,
+      }),
+    ).rejects.toThrowError();
   });
 
   test("returns attestation data when attestedEvent and uid are provided", async ({
     expect,
   }) => {
-    const recipient = getAddress(faker.finance.ethereumAddress());
-    const attester = getAddress(faker.finance.ethereumAddress());
-
-    const attestedEvent = {
-      recipient,
-      attester,
-      uid: "0x1234",
-      block_timestamp: BigInt(1234),
-    };
-
-    const mockAttestationData: Attestation = {
-      uid: "0x1234",
-      schema: "0x1234",
-      refUID: "0x1234",
-      time: BigInt(1234),
-      expirationTime: BigInt(1234),
-      revocationTime: BigInt(1234),
-      recipient,
-      revocable: true,
-      attester,
-      data: "0x1234",
-    };
-    const readSpy = sinon.stub(client, "readContract");
     readSpy.resolves(mockAttestationData);
 
     const result = await fetchAttestationData({
@@ -67,31 +57,18 @@ describe("fetchAttestationData", () => {
     });
 
     expect(result).toEqual({
-      ...attestedEvent,
+      event: attestedEvent,
       attestation: mockAttestationData,
     });
   });
 
-  test("returns undefined when an error occurs during contract read", async ({
+  test("throws when an error occurs during contract read", async ({
     expect,
   }) => {
-    const recipient = getAddress(faker.finance.ethereumAddress());
-    const attester = getAddress(faker.finance.ethereumAddress());
-
-    const attestedEvent = {
-      recipient,
-      attester,
-      uid: "0x1234",
-      block_timestamp: BigInt(1234),
-    };
-
-    const readSpy = sinon.stub(client, "readContract");
     readSpy.throws();
 
-    const result = await fetchAttestationData({
-      attestedEvent,
-    });
-
-    expect(result).toBeUndefined();
+    await expect(() =>
+      fetchAttestationData({ attestedEvent }),
+    ).rejects.toThrowError();
   });
 });

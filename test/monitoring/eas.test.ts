@@ -2,7 +2,7 @@ import { getAttestationsForSchema } from "@/monitoring/eas";
 import { client } from "@/clients/evmClient";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import sinon from "sinon";
-import { mockFilter, mockLogs } from "../resources/mockAttestedEvents";
+import { mockFilter, mockLogs } from "../resources/mockAttestations";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -33,7 +33,7 @@ describe("getAttestationsForSchema", () => {
     mocks.getDeployment.mockReturnValue({ startBlock: 0n, easAddress: null });
 
     const result = await getAttestationsForSchema({
-      schema: { eas_schema_id: "0x123" },
+      schema: { uid: "0x123" },
       batchSize: 100n,
     });
     expect(result).toBeUndefined();
@@ -46,7 +46,7 @@ describe("getAttestationsForSchema", () => {
     });
 
     const result = await getAttestationsForSchema({
-      schema: { eas_schema_id: "0x123" },
+      schema: { uid: "0x123" },
       batchSize: 100n,
     });
     expect(result).toBeUndefined();
@@ -64,8 +64,7 @@ describe("getAttestationsForSchema", () => {
 
     const result = await getAttestationsForSchema({
       schema: {
-        eas_schema_id:
-          "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
       },
       batchSize: 100n,
     });
@@ -87,8 +86,7 @@ describe("getAttestationsForSchema", () => {
 
     const result = await getAttestationsForSchema({
       schema: {
-        eas_schema_id:
-          "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
       },
       batchSize: 100n,
     });
@@ -107,8 +105,7 @@ describe("getAttestationsForSchema", () => {
 
     const result = await getAttestationsForSchema({
       schema: {
-        eas_schema_id:
-          "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
       },
       batchSize: 100n,
     });
@@ -128,8 +125,7 @@ describe("getAttestationsForSchema", () => {
 
     const result = await getAttestationsForSchema({
       schema: {
-        eas_schema_id:
-          "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
+        uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
       },
       batchSize: 100n,
     });

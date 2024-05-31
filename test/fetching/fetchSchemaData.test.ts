@@ -18,24 +18,18 @@ describe("fetchSchemaData", () => {
     sinon.restore();
   });
 
-  test("returns undefined when schema is not provided", async ({ expect }) => {
-    const result = await fetchSchemaData({});
-    expect(result).toBeUndefined();
+  test("throws when schema uid is not provided", async ({ expect }) => {
+    await expect(
+      async () => await fetchSchemaData({} as unknown as FetchSchemaDataArgs),
+    ).rejects.toThrowError();
   });
 
-  test("returns undefined when schema.eas_schema_id is not provided", async ({
-    expect,
-  }) => {
-    const result = await fetchSchemaData({} as unknown as FetchSchemaDataArgs);
-    expect(result).toBeUndefined();
-  });
-
-  test("returns schema data when schema and eas_schema_id are provided", async ({
+  test("returns schema data when schema and uid are provided", async ({
     expect,
   }) => {
     const resolver = getAddress(faker.finance.ethereumAddress());
 
-    const schema = { eas_schema_id: "0x5678" };
+    const schema = { uid: "0x5678" };
     const readSpy = sinon.stub(client, "readContract");
 
     const mockSchemaData: SchemaRecord = {
@@ -54,18 +48,16 @@ describe("fetchSchemaData", () => {
     expect(result).toEqual(mockSchemaData);
   });
 
-  test("returns undefined when an error occurs during contract read", async ({
+  test("throws when an error occurs during contract read", async ({
     expect,
   }) => {
-    const schema = { eas_schema_id: "0x5678" };
+    const schema = { uid: "0x5678" };
     const readSpy = sinon.stub(client, "readContract");
 
     readSpy.throws();
 
-    const result = await fetchSchemaData({
-      schema,
-    });
-
-    expect(result).toBeUndefined();
+    await expect(
+      async () => await fetchSchemaData({ schema }),
+    ).rejects.toThrowError();
   });
 });

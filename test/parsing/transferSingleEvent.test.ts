@@ -6,11 +6,15 @@ import { http, HttpResponse } from "msw";
 import { client } from "../../src/clients/evmClient";
 
 import { alchemyUrl } from "../resources/alchemyUrl";
+import { getAddress } from "viem";
 
 describe("transferSingleEvent", {}, () => {
   const from = faker.finance.ethereumAddress();
   const timestamp = 10;
-  const address = faker.finance.ethereumAddress() as `0x${string}`;
+  const contractAddress = getAddress(faker.finance.ethereumAddress());
+  const operatorAddress = getAddress(faker.finance.ethereumAddress());
+  const fromAddress = getAddress(faker.finance.ethereumAddress());
+  const toAddress = getAddress(faker.finance.ethereumAddress());
   const claimID = faker.number.bigInt();
   const blockNumber = 1n;
   const value = 3n;
@@ -38,14 +42,14 @@ describe("transferSingleEvent", {}, () => {
   it("parses a transfer single event", {}, async () => {
     const event = {
       event: "TransferSingle",
-      address,
+      address: contractAddress,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
       args: {
         id: claimID,
-        operator: address,
-        from: address,
-        to: address,
+        operator: operatorAddress,
+        from: fromAddress,
+        to: toAddress,
         value,
       },
     };
@@ -55,7 +59,8 @@ describe("transferSingleEvent", {}, () => {
     expect(parsed).toEqual({
       block_number: blockNumber,
       block_timestamp: timestamp,
-      owner_address: address,
+      from_owner_address: fromAddress,
+      to_owner_address: toAddress,
       token_id: claimID,
       value,
     });
@@ -64,9 +69,9 @@ describe("transferSingleEvent", {}, () => {
   it("should fail when event is not a valid TransferSingleEvent", async () => {
     const args = {
       id: claimID,
-      operator: address,
-      from: address,
-      to: address,
+      operator: operatorAddress,
+      from: fromAddress,
+      to: toAddress,
       value,
     };
     const event = {
@@ -126,9 +131,9 @@ describe("transferSingleEvent", {}, () => {
       ...event,
       args: {
         ...args,
-        operator: address,
-        from: address,
-        to: address,
+        operator: operatorAddress,
+        from: fromAddress,
+        to: toAddress,
         id: 1,
         value: 1,
       },

@@ -6,19 +6,6 @@ import { Tables } from "@/types/database.types";
 import { z } from "zod";
 import { messages } from "@/utils/validation";
 
-/**
- * Fetches schema data from a contract using the provided schema's EAS ID.
- *
- * @param schema - An optional object of type Tables<"supported_schemas">. If provided, it should contain a property `eas_schema_id` which is used to fetch the schema data from the contract.
- *
- * @returns If successful, it returns an object of type SchemaRecord containing the fetched schema data. If the schema is not provided, or if the schema does not contain an `eas_schema_id`, or if there is an error during the contract read operation, it returns undefined.
- *
- * @example
- * ```typescript
- * const schemaData = await fetchSchemaData({ schema: { eas_schema_id: '0x1234...5678' } });
- * ```
- */
-
 //github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/ISchemaRegistry.sol
 export interface SchemaRecord {
   uid: Hex;
@@ -40,37 +27,48 @@ export const createSchemaRecordSchema = (schema_uid: string) =>
   });
 
 export interface FetchSchemaDataArgs {
-  schema?: Pick<Tables<"supported_schemas">, "eas_schema_id">;
+  schema: Pick<Tables<"supported_schemas">, "uid">;
 }
 
+/**
+ * Fetches schema data from a contract using the provided schema's UID.
+ *
+ * This function takes a schema object as input, which should contain a property `uid`.
+ * It uses this UID to fetch the schema data from the contract.
+ * If the schema is not provided, or if the schema does not contain a `uid`, the function will throw an error.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {Object} params.schema - The schema object. It should contain a property `uid`.
+ * @param {string} params.schema.uid - The UID of the schema.
+ *
+ * @returns {Promise<SchemaRecord | undefined>} A promise that resolves to an object of type SchemaRecord containing the fetched schema data. If there is an error during the contract read operation, the promise is rejected with the error.
+ *
+ * @example
+ * ```typescript
+ * const schemaData = await fetchSchemaData({ schema: { uid: '0x1234...5678' } });
+ * console.log(schemaData);
+ * ```
+ */
 export const fetchSchemaData = async ({
-  schema,
-}: {
-  schema?: Pick<Tables<"supported_schemas">, "eas_schema_id">;
-}) => {
-  if (!schema || !schema.eas_schema_id) {
-    console.error(`Could not find EAS ID for schema`, schema);
-    return;
-  }
-
+  schema: { uid },
+}: FetchSchemaDataArgs) => {
   const { schemaRegistryAddress } = getDeployment();
-  const { eas_schema_id } = schema;
-  const validationSchema = createSchemaRecordSchema(eas_schema_id);
+  const validationSchema = createSchemaRecordSchema(uid);
 
   try {
     const _schemaData = await client.readContract({
       address: schemaRegistryAddress as `0x${string}`,
       abi: schemaRegistryAbi,
       functionName: "getSchema",
-      args: [eas_schema_id],
+      args: [uid],
     });
 
     return validationSchema.parse(_schemaData);
   } catch (e) {
     console.error(
-      `Error fetching data for schema ${eas_schema_id} on contract ${schemaRegistryAddress}:`,
+      `[fetchSchemaData] Error fetching data for schema ${uid} on contract ${schemaRegistryAddress}:`,
       e,
     );
-    return;
+    throw e;
   }
 };

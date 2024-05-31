@@ -1,4 +1,22 @@
-import { Address, Hash } from "viem";
+import { Address, getAddress, Hash, Hex } from "viem";
+import { EasAttestation } from "../../src/fetching/fetchAttestationData";
+import { faker } from "@faker-js/faker";
+
+export const getMockEasAttestation = (overrides?: Partial<EasAttestation>) => {
+  return {
+    uid: faker.string.hexadecimal({ length: 32 }) as Hash,
+    schema: faker.string.hexadecimal({ length: 32 }) as Hash,
+    refUID: faker.string.hexadecimal({ length: 32 }) as Hash,
+    time: BigInt(1234),
+    expirationTime: BigInt(1234),
+    revocationTime: BigInt(5678),
+    recipient: getAddress(faker.finance.ethereumAddress()),
+    revocable: true,
+    attester: getAddress(faker.finance.ethereumAddress()),
+    data: faker.string.hexadecimal({ length: 64 }) as Hex,
+    ...overrides,
+  };
+};
 
 export const mockFilter = {
   abi: [{ name: "Attested", type: "event", inputs: [Array] }],

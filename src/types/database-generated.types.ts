@@ -440,30 +440,30 @@ export type Database = {
       supported_schemas: {
         Row: {
           chain_id: number
-          eas_schema_id: string
           id: string
           last_block_indexed: number | null
           resolver: string | null
           revocable: boolean | null
           schema: string | null
+          uid: string
         }
         Insert: {
           chain_id: number
-          eas_schema_id: string
           id?: string
           last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
+          uid: string
         }
         Update: {
           chain_id?: number
-          eas_schema_id?: string
           id?: string
           last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
+          uid?: string
         }
         Relationships: []
       }

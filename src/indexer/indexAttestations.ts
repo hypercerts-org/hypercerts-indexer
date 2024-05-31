@@ -1,22 +1,22 @@
 import { getAttestationsForSchema } from "@/monitoring";
-import { getDeployment } from "@/utils";
 import { decodeAttestationData, parseAttestedEvent } from "@/parsing";
-import { Tables } from "@/types/database.types";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 import { IndexerConfig } from "@/types/types";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
 import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
 import { storeAttestations } from "@/storage/storeAttestations";
 import { fetchAttestationData } from "@/fetching/fetchAttestationData";
 
-/*
+/**
  * Indexes attestation logs for all supported schemas. Attestation logs are fetched from the chain and parsed into attestation data.
  * The attestation data is then stored in the database.
  *
- * @param [batchSize] - The number of logs to fetch and parse in each batch.
+ * @param {IndexerConfig} config - Configuration object for the indexer. It has a batchSize property which determines the number of logs to fetch and parse in each batch.
+ * @param {bigint} config.batchSize - The number of logs to fetch and parse in each batch. Defaults to 10000n.
+ *
+ * @returns {Promise<void>} - Returns a promise that resolves when the indexing operation is complete. If an error occurs during the operation, the promise is rejected with the error.
  *
  * @example
- * ```js
+ * ```typescript
  * await indexAttestations({ batchSize: 1000n });
  * ```
  */
@@ -26,24 +26,19 @@ const defaultConfig = { batchSize: 10000n };
 export const indexAttestations = async ({
   batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
-  const { chainId } = getDeployment();
-  const supportedSchemas = await getSupportedSchemas({ chainId });
+  const supportedSchemas = await getSupportedSchemas();
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
     console.debug("[IndexAttestations] No supported schemas found");
     return;
   }
 
-  // Get schema structure for all supported schemas
-  const schemasToIndex = supportedSchemas.filter((schema) => schema?.schema);
-
   await Promise.all(
-    schemasToIndex.map(async (schema) => {
+    supportedSchemas.map(async (supportedSchema) => {
+      const { id, uid, last_block_indexed } = supportedSchema;
       const attestedEvents = await getAttestationsForSchema({
-        schema,
-        fromBlock: schema?.last_block_indexed
-          ? BigInt(schema?.last_block_indexed)
-          : undefined,
+        schema: { uid },
+        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : undefined,
         batchSize,
       });
 
@@ -55,38 +50,33 @@ export const indexAttestations = async ({
 
       if (!logs || logs.length === 0) {
         console.debug(
-          "[IndexAttestations] No logs found for supported schemas",
-          schemasToIndex.map((schema) => schema?.id),
+          "[IndexAttestations] No logs found for supported schema",
+          { supported_schema_id: id, uid },
         );
 
         return await storeSupportedSchemas({
           supportedSchemas: [
             {
-              ...schema,
+              ...supportedSchema,
               last_block_indexed: toBlock,
             },
           ],
         });
       }
 
-      const parsedEvents = (
-        await Promise.all(logs.map(parseAttestedEvent))
-      ).filter(
-        (attestation): attestation is ParsedAttestedEvent =>
-          attestation !== null,
-      );
+      const parsedEvents = await Promise.all(logs.map(parseAttestedEvent));
 
-      const attestations = (
-        await Promise.all(
-          parsedEvents.map(async (event) =>
-            fetchAttestationData({ attestedEvent: event }).then((attestation) =>
-              decodeAttestationData({ attestation, schema }),
-            ),
+      const attestations = await Promise.all(
+        parsedEvents.map(async (event) =>
+          fetchAttestationData({ attestedEvent: event }).then(
+            ({ attestation, event }) =>
+              decodeAttestationData({
+                attestation,
+                event,
+                schema: supportedSchema,
+              }),
           ),
-        )
-      ).filter(
-        (attestation): attestation is Tables<"attestations"> =>
-          attestation !== null && attestation !== undefined,
+        ),
       );
 
       return await storeAttestations({
@@ -96,7 +86,7 @@ export const indexAttestations = async ({
           await storeSupportedSchemas({
             supportedSchemas: [
               {
-                ...schema,
+                ...supportedSchema,
                 last_block_indexed: attestedEvents.toBlock,
               },
             ],

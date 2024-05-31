@@ -90,25 +90,25 @@ export type Database = MergeDeep<
         };
         attestations: {
           Row: {
-            chain_id: bigint | number | string | null;
+            chain_id: bigint | number | string;
             token_id: bigint | number | string;
             block_timestamp: bigint | number | string;
           };
           Insert: {
-            chain_id: bigint | number | string | null;
+            chain_id: bigint | number | string;
             token_id: bigint | number | string;
             block_timestamp: bigint | number | string;
           };
           Update: {
-            chain_id: bigint | number | string | null;
+            chain_id: bigint | number | string;
             token_id: bigint | number | string;
             block_timestamp: bigint | number | string;
           };
         };
         claims: {
           Row: {
-            value: bigint | number | string | null | undefined;
-            units: bigint | number | string | null | undefined;
+            value: bigint | number | string | undefined;
+            units: bigint | number | string | undefined;
             token_id: bigint | number | string;
             creation_block_timestamp: bigint | number | string;
             last_block_update_timestamp: bigint | number | string;

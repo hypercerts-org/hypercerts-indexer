@@ -56,5 +56,5 @@ $$
     END
 $$;
 
-insert into public.supported_schemas (chain_id, eas_schema_id, last_block_indexed)
+insert into public.supported_schemas (chain_id, uid, last_block_indexed)
 values (11155111, '0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f', 5484610);

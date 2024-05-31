@@ -9,6 +9,7 @@
     "start": "node -r dotenv/config dist/server.js",
     "lint": "next lint",
     "test": "vitest",
+    "test:coverage": "vitest --coverage",
     "reset:supabase:local": "npx supabase db reset",
     "update:sentry:sourcemaps": "npx @sentry/wizard@latest -i sourcemaps",
     "update:supabase:types": "npx supabase gen types typescript --local > src/types/database-generated.types.ts"
