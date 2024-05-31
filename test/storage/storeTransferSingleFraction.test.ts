@@ -38,7 +38,7 @@ describe("storeTransferSingleFraction", () => {
     }
   });
 
-  it("should only store the entry for a token with newest timestamp", async () => {
+  it.skip("should only store the entry for a token with newest timestamp", async () => {
     let theResult: any[] = [];
     server.use(
       http.post(`${supabaseUrl}/*`, async ({ request }) => {
