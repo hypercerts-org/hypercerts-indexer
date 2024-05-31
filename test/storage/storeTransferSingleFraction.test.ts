@@ -37,4 +37,43 @@ describe("storeTransferSingleFraction", () => {
       expect.fail("response undefined");
     }
   });
+
+  it("should only store the entry for a token with newest timestamp", async () => {
+    let theResult: any[] = [];
+    server.use(
+      http.post(`${supabaseUrl}/*`, async ({ request }) => {
+        const data = await request.json();
+        console.log("data", data);
+        // @ts-ignore
+        theResult = data._fractions;
+        return HttpResponse.json(data);
+      }),
+    );
+    const transferOld = {
+      ...transfer,
+      block_timestamp: transfer.block_timestamp - 1n,
+      value: transfer.value - 1n,
+    };
+
+    await storeTransferSingleFraction({
+      transfers: [transferOld, transfer],
+    });
+
+    if (!theResult) {
+      expect.fail("result undefined");
+    }
+
+    expect(theResult.length).toBe(1);
+    expect(theResult[0].value).toBe(transfer.value.toString());
+
+    await storeTransferSingleFraction({
+      transfers: [transfer, transferOld],
+    });
+    if (!theResult) {
+      expect.fail("resultReversed undefined");
+    }
+
+    expect(theResult.length).toBe(1);
+    expect(theResult[0].value).toBe(transfer.value.toString());
+  });
 });

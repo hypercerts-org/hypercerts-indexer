@@ -1,5 +1,4 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
 import { NewClaim } from "@/types/types";
 import { isAddress } from "viem";
 import { z } from "zod";
@@ -41,7 +40,7 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
       contracts_id: z.string().uuid(),
       creator_address: z.string(),
       token_id: z.bigint(),
-      block_timestamp: z.bigint(),
+      block_number: z.bigint(),
       units: z.bigint(),
       uri: z.string(),
     })
@@ -56,8 +55,7 @@ export const storeClaim = async ({ claims }: StoreClaim) => {
       owner_address: claim.creator_address,
       contracts_id: claim.contracts_id,
       token_id: claim.token_id.toString(),
-      creation_block_timestamp: claim.block_timestamp.toString(),
-      last_block_update_timestamp: claim.block_timestamp.toString(),
+      block_number: claim.block_number.toString(),
       units: claim.units.toString(),
       uri: claim.uri,
       value: 1,

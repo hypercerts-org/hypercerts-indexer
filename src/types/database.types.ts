@@ -110,8 +110,7 @@ export type Database = MergeDeep<
             value: bigint | number | string | undefined;
             units: bigint | number | string | undefined;
             token_id: bigint | number | string;
-            creation_block_timestamp: bigint | number | string;
-            last_block_update_timestamp: bigint | number | string;
+            block_number: bigint | number | string;
           };
           Insert: {
             value: bigint | number | string | null | undefined;

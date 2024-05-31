@@ -17,7 +17,7 @@ export type NewClaim = {
   creator_address: string;
   contract_address: string;
   token_id: bigint;
-  block_timestamp: bigint;
+  block_number: bigint;
   units: bigint;
   uri: string;
 };

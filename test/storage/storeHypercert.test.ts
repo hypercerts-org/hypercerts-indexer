@@ -16,7 +16,7 @@ describe("storeHypercert", {}, async () => {
     creator_address: faker.finance.ethereumAddress(),
     token_id: 1n,
     units: 1n,
-    block_timestamp: 1n,
+    block_number: 1n,
   };
 
   it("store hypercert data  in DB", {}, async () => {
