@@ -33,7 +33,7 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
   const fetchResult = await fetchFromHttpsOrIpfs(uri);
 
   if (!fetchResult) {
-    console.error(
+    console.warn(
       `[FetchMetadataFromUri] No metadata found on IPFS for URI ${uri}`,
     );
     return;
@@ -42,7 +42,7 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
   const { valid, data, errors } = validateMetaData(fetchResult);
 
   if (!valid) {
-    console.error(
+    console.warn(
       `[FetchMetadataFromUri] Invalid metadata for URI ${uri}`,
       errors,
     );

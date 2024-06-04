@@ -18,7 +18,7 @@ const selectedNetwork = () => {
 const alchemyUrl = () => {
   switch (chainId) {
     case 10:
-      return `https://opt-mainnet.g.alchemy.com/v2/${apiKey}`;
+      return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 84532:
       return `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 11155111:
@@ -29,6 +29,7 @@ const alchemyUrl = () => {
 };
 
 /* Returns a PublicClient instance for the configured network. */
+// @ts-ignose viem client type to complex to type
 export const client = createPublicClient({
   cacheTime: 10_000,
   chain: selectedNetwork(),

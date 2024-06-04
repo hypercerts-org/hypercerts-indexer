@@ -31,13 +31,11 @@ export const indexAllowlistSingleClaimMinted = async ({
 }: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const contractsWithEvents = await getContractEventsForChain({
-    chainId,
     eventName,
   });
 
   const currentBlock = await client.getBlockNumber();
   const currentEventsClaimStored = await getContractEventsForChain({
-    chainId,
     eventName: "ClaimStored",
   });
   const latestIndexedBlockClaimStored = (currentEventsClaimStored || []).reduce(

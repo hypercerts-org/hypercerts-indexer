@@ -1,4 +1,4 @@
-import { isAddress, isHex, parseAbi, parseAbiItem } from "viem";
+import { isAddress, isHex, parseAbi } from "viem";
 import { client } from "@/clients/evmClient";
 import { z } from "zod";
 
@@ -25,7 +25,6 @@ export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
 export const parseClaimStoredEvent = async (event: unknown) => {
-  console.log(event);
   const { args, address, transactionHash, blockNumber } =
     ClaimStoredEventSchema.parse(event);
 

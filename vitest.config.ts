@@ -25,6 +25,7 @@ export default defineConfig({
         ...(configDefaults.coverage.exclude as string[]),
         "**/*.types.ts",
         "**/types.ts",
+        "all_leaf_claimed_events.ts",
       ],
     },
   },

@@ -11,7 +11,7 @@ interface GetLogsForEventInput {
 }
 
 /**
- * Fetches logs for a specific contract event from the Ethereum Virtual Machine (EVM).
+ * Fetches logs for a specific contract event.
  *
  * This function first gets the address and start block of the HypercertMinterUUPS from the deployment.
  * It then calculates the range of blocks to fetch based on the contract creation block, the from block, and the batch size.
