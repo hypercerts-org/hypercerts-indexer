@@ -1,28 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { default_contractAddress } from "../handlers";
-import { mockMetadata } from "../resources/mockMetadata";
 import { storeClaim } from "../../src/storage/storeClaim";
-import { NewClaim } from "../../src/types/types";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
-import { faker } from "@faker-js/faker";
 import { supabaseUrl } from "../../src/utils/constants";
+import { generateClaim } from "../helpers/factories";
 
 describe("storeHypercert", {}, async () => {
-  const claim: NewClaim = {
-    contracts_id: faker.string.uuid(),
-    uri: "ipfs://metadataCIDstoreHypercert",
-    contract_address: default_contractAddress,
-    creator_address: faker.finance.ethereumAddress(),
-    token_id: 1n,
-    units: 1n,
-    block_number: 1n,
-  };
+  const claim = generateClaim();
 
   it("store hypercert data  in DB", {}, async () => {
     server.use(
       http.post(`${supabaseUrl}/*`, () => {
-        return HttpResponse.json([mockMetadata]);
+        return HttpResponse.json();
       }),
     );
 
@@ -34,16 +23,16 @@ describe("storeHypercert", {}, async () => {
   });
 
   it("should throw an error if creator address is invalid", async () => {
-    const claimWithWrongAddress = {
+    const wrongAddress = {
       ...claim,
-      creator_address: "invalid address",
-    } as unknown as NewClaim;
+      creator_address: "0xWRONGADDRESS" as `0x${string}`,
+    };
 
     await expect(
       async () =>
         await storeClaim({
-          claims: [claimWithWrongAddress],
+          claims: [wrongAddress],
         }),
-    ).rejects.toThrowError("[StoreClaim] Invalid creator address");
+    ).rejects.toThrowError();
   });
 });

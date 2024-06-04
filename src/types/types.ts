@@ -12,16 +12,6 @@ export type EventToFetch = {
   last_block_indexed: bigint;
 };
 
-export type NewClaim = {
-  contracts_id: string;
-  creator_address: string;
-  contract_address: string;
-  token_id: bigint;
-  block_number: bigint;
-  units: bigint;
-  uri: string;
-};
-
 export type LeafClaimed = {
   contracts_id: string;
   creator_address: string;

@@ -1,10 +1,19 @@
 import { chainId } from "@/utils/constants";
 import { Deployment, deployments } from "@hypercerts-org/sdk";
-/*
- * This function returns the deployment for the current chain ID.
+
+/**
+ * Returns the deployment for the current chain ID.
  *
- * @returns The deployment for the current chain ID.
- * @throws Error if the chain ID is not supported.
+ * @returns An object containing the deployment details for the current chain ID. The object includes the start block number, the EAS address, the schema registry address, and the chain ID.
+ * @throws {Error} If the chain ID is not supported, it throws an error.
+ *
+ * @example
+ * ```typescript
+ * const deployment = getDeployment();
+ * console.log(deployment.startBlock); // Outputs the start block number
+ * console.log(deployment.easAddress); // Outputs the EAS address
+ * console.log(deployment.schemaRegistryAddress); // Outputs the schema registry address
+ * console.log(deployment.chainId); // Outputs the chain ID
  */
 
 export const getDeployment = (): Partial<Deployment> & {

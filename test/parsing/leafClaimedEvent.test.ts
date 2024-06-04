@@ -6,6 +6,7 @@ import { http, HttpResponse } from "msw";
 import { client } from "../../src/clients/evmClient";
 
 import { alchemyUrl } from "../resources/alchemyUrl";
+import { getAddress } from "viem";
 
 describe("leafClaimedEvent", {}, () => {
   it("parses a leaf claimed event", {}, async () => {
@@ -14,7 +15,7 @@ describe("leafClaimedEvent", {}, () => {
         return HttpResponse.json(0);
       }),
     );
-    const address = faker.finance.ethereumAddress() as `0x${string}`;
+    const address = getAddress(faker.finance.ethereumAddress());
     const tokenID = faker.number.bigInt();
     const leaf = faker.string.alphanumeric("10");
     const blockNumber = faker.number.bigInt();
@@ -29,7 +30,7 @@ describe("leafClaimedEvent", {}, () => {
       },
     };
 
-    const from = faker.finance.ethereumAddress();
+    const from = getAddress(faker.finance.ethereumAddress());
     vi.spyOn(client, "getTransaction").mockImplementation(
       async () =>
         ({
@@ -57,7 +58,7 @@ describe("leafClaimedEvent", {}, () => {
     });
   });
 
-  it("returns undefined when the event is missing leaf", async () => {
+  it("throws when the event is missing leaf", async () => {
     const address = faker.finance.ethereumAddress() as `0x${string}`;
     const tokenID = faker.number.bigInt();
     const blockNumber = faker.number.bigInt();
@@ -71,12 +72,12 @@ describe("leafClaimedEvent", {}, () => {
       },
     };
 
-    const parsed = await parseLeafClaimedEvent(event);
-
-    expect(parsed).toBe(undefined);
+    await expect(
+      async () => await parseLeafClaimedEvent(event),
+    ).rejects.toThrowError();
   });
 
-  it("returns undefined when the event is missing tokenID", async () => {
+  it("throws when the event is missing tokenID", async () => {
     const address = faker.finance.ethereumAddress() as `0x${string}`;
     const leaf = faker.string.alphanumeric("10");
     const blockNumber = faker.number.bigInt();
@@ -90,12 +91,12 @@ describe("leafClaimedEvent", {}, () => {
       },
     };
 
-    const parsed = await parseLeafClaimedEvent(event);
-
-    expect(parsed).toBe(undefined);
+    await expect(
+      async () => await parseLeafClaimedEvent(event),
+    ).rejects.toThrowError();
   });
 
-  it("returns undefined when the event address is invalid", {}, async () => {
+  it("throws when the event address is invalid", {}, async () => {
     const address = "invalid";
     const event = {
       id: "0x3e7d7e4c4f3d5a7f2b3d6c5",
@@ -107,8 +108,8 @@ describe("leafClaimedEvent", {}, () => {
       },
     };
 
-    const parsed = await parseLeafClaimedEvent(event);
-
-    expect(parsed).toBe(undefined);
+    await expect(
+      async () => await parseLeafClaimedEvent(event),
+    ).rejects.toThrowError();
   });
 });

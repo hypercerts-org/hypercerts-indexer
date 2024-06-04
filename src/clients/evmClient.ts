@@ -15,24 +15,25 @@ const selectedNetwork = () => {
   }
 };
 
-const alchemyUrl = (apiKey: string) => {
+const alchemyUrl = () => {
   switch (chainId) {
     case 10:
-      return `https://opt-mainnet.g.alchemy.com/v2/${apiKey}`;
+      return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 84532:
-      return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
+      return `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 11155111:
-      return `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`;
+      return `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
 };
 
 /* Returns a PublicClient instance for the configured network. */
+// @ts-ignose viem client type to complex to type
 export const client = createPublicClient({
   cacheTime: 10_000,
   chain: selectedNetwork(),
-  transport: http(alchemyUrl(alchemyApiKey)),
+  transport: http(alchemyUrl()),
   batch: {
     multicall: {
       wait: 32,

@@ -1,21 +1,22 @@
 import { IndexerConfig } from "@/types/types";
 import { storeAllowListRecords } from "@/storage/storeAllowListRecords";
-import {
-  getUnparsedAllowListRecords,
-  UnparsedAllowListRecord,
-} from "@/storage/getUnparsedAllowListsRecords";
-import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
+import { getUnparsedAllowListRecords } from "@/storage/getUnparsedAllowListsRecords";
+import { Database } from "@/types/database.types";
+import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree";
 
-/*
- * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the hypercerts in the
- * database.
+/**
+ * This function indexes the unparsed allow lists in batches.
  *
- * @param [batchSize] - The number of logs to fetch and parse in each batch.
+ * It fetches the unparsed allow lists from the database and processes them in batches. The size of the batches is determined by the `batchSize` parameter.
+ * If no unparsed allow lists are found, the function logs a debug message and returns.
+ * For each batch, it calls the `processAllowListEntriesBatch` function to process the allow list entries.
+ *
+ * @param {IndexerConfig} config - The configuration for the indexer. It has a `batchSize` property that defaults to `defaultConfig.batchSize`.
+ * @returns {Promise<void>} A promise that resolves when all batches have been processed.
  *
  * @example
- * ```js
- * await indexClaimsStoredEvents({ batchSize: 1000n });
+ * ```typescript
+ * await indexAllowlistRecords({ batchSize: 1000n });
  * ```
  */
 
@@ -54,15 +55,15 @@ export const indexAllowlistRecords = async ({
 };
 
 const processAllowListEntriesBatch = async (
-  batch: UnparsedAllowListRecord[],
+  batch: Database["public"]["Functions"]["get_unparsed_hypercert_allow_lists"]["Returns"],
 ) => {
   const allowListsToStore = await Promise.all(
     batch.map(async (allowList) => {
-      const tree = StandardMerkleTree.load(allowList.data);
-
+      // TODO
+      const tree = parseToOzMerkleTree(allowList?.data);
       if (!tree) {
         console.error(
-          "[IndexAllowlistRecords] Failed to load tree from data",
+          "[IndexAllowlistRecords] Error while loading tree from data",
           allowList,
         );
         return;
@@ -87,13 +88,20 @@ const processAllowListEntriesBatch = async (
 
   try {
     await Promise.all(
-      allowListsToStore.map((data) =>
+      allowListsToStore.map((data) => {
+        if (!data || !data.records) {
+          console.debug(
+            "[IndexAllowlistRecords] No records found for allow list",
+            data,
+          );
+          return;
+        }
         storeAllowListRecords({
           claim_id: data?.claim_id,
           allow_list_data_id: data?.al_data_id,
           records: data?.records,
-        }),
-      ),
+        });
+      }),
     );
   } catch (error) {
     console.error(

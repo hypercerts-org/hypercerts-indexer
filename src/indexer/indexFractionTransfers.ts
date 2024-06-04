@@ -31,7 +31,6 @@ export const indexTransferSingleEvents = async ({
 }: IndexerConfig = defaultConfig) => {
   const { chainId } = getDeployment();
   const contractsWithEvents = await getContractEventsForChain({
-    chainId,
     eventName,
   });
 

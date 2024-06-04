@@ -1,5 +1,4 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
 import { NewUnitTransfer } from "@/types/types";
 import { getClaimTokenId } from "@/utils/tokenIds";
 

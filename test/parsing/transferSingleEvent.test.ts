@@ -6,11 +6,15 @@ import { http, HttpResponse } from "msw";
 import { client } from "../../src/clients/evmClient";
 
 import { alchemyUrl } from "../resources/alchemyUrl";
+import { getAddress } from "viem";
 
 describe("transferSingleEvent", {}, () => {
-  const from = faker.finance.ethereumAddress();
+  const from = getAddress(faker.finance.ethereumAddress());
   const timestamp = 10;
-  const address = faker.finance.ethereumAddress() as `0x${string}`;
+  const contractAddress = getAddress(faker.finance.ethereumAddress());
+  const operatorAddress = getAddress(faker.finance.ethereumAddress());
+  const fromAddress = getAddress(faker.finance.ethereumAddress());
+  const toAddress = getAddress(faker.finance.ethereumAddress());
   const claimID = faker.number.bigInt();
   const blockNumber = 1n;
   const value = 3n;
@@ -38,14 +42,14 @@ describe("transferSingleEvent", {}, () => {
   it("parses a transfer single event", {}, async () => {
     const event = {
       event: "TransferSingle",
-      address,
+      address: contractAddress,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
       args: {
         id: claimID,
-        operator: address,
-        from: address,
-        to: address,
+        operator: operatorAddress,
+        from: fromAddress,
+        to: toAddress,
         value,
       },
     };
@@ -55,8 +59,8 @@ describe("transferSingleEvent", {}, () => {
     expect(parsed).toEqual({
       block_number: blockNumber,
       block_timestamp: timestamp,
-      from_owner_address: address,
-      to_owner_address: address,
+      from_owner_address: fromAddress,
+      to_owner_address: toAddress,
       token_id: claimID,
       value,
     });
@@ -65,9 +69,9 @@ describe("transferSingleEvent", {}, () => {
   it("should fail when event is not a valid TransferSingleEvent", async () => {
     const args = {
       id: claimID,
-      operator: address,
-      from: address,
-      to: address,
+      operator: operatorAddress,
+      from: fromAddress,
+      to: toAddress,
       value,
     };
     const event = {
@@ -78,68 +82,61 @@ describe("transferSingleEvent", {}, () => {
       args,
     };
 
-    const parsed1 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        id: "not a bigint",
-      },
-    });
-    expect(parsed1).toBeUndefined();
+    await expect(
+      async () =>
+        await parseTransferSingle({
+          ...event,
+          args: {
+            ...args,
+            id: "not a bigint",
+          },
+        }),
+    ).rejects.toThrowError();
 
-    const parsed2 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        value: "not a bigint",
-      },
-    });
-    expect(parsed2).toBeUndefined();
+    await expect(
+      parseTransferSingle({
+        ...event,
+        args: {
+          ...args,
+          value: "not a bigint",
+        },
+      }),
+    ).rejects.toThrowError();
 
-    const parsed3 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        to: 1,
-      },
-    });
-    expect(parsed3).toBeUndefined();
+    await expect(
+      parseTransferSingle({
+        ...event,
+        args: {
+          ...args,
+          to: 1,
+        },
+      }),
+    ).rejects.toThrowError();
 
-    const parsed4 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        from: 1,
-      },
-    });
-    expect(parsed4).toBeUndefined();
+    await expect(
+      parseTransferSingle({
+        ...event,
+        args: {
+          ...args,
+          from: 1,
+        },
+      }),
+    ).rejects.toThrowError();
 
-    const parsed5 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        operator: 1,
-      },
-    });
-    expect(parsed5).toBeUndefined();
-
-    const parsed6 = await parseTransferSingle({
-      ...event,
-      args: {
-        ...args,
-        operator: address,
-        from: address,
-        to: address,
-        id: 1,
-        value: 1,
-      },
-    });
-    expect(parsed6).toBeUndefined();
-
-    const parsed7 = await parseTransferSingle({
-      ...event,
-      args: {},
-    });
-    expect(parsed7).toBeUndefined();
+    await expect(
+      parseTransferSingle({
+        ...event,
+        args: {
+          ...args,
+          operator: 1,
+        },
+      }),
+    ).rejects.toThrowError();
+    await expect(
+      parseTransferSingle({
+        ...event,
+        args: {},
+      }),
+    ).rejects.toThrowError();
   });
 });

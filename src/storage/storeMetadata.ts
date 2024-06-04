@@ -1,5 +1,5 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { Database, Tables } from "@/types/database.types";
 import { z } from "zod";
 
 /* 
@@ -25,7 +25,7 @@ import { z } from "zod";
  */
 
 interface StoreMetadata {
-  metadata?: Partial<Tables<"metadata">>[];
+  metadata?: Database["public"]["Tables"]["metadata"]["Update"][];
 }
 
 export const storeMetadata = async ({ metadata }: StoreMetadata) => {

@@ -1,5 +1,4 @@
 import { IndexerConfig } from "@/types/types";
-import { getIncompleteAllowLists } from "@/storage/getIncompleteAllowLists";
 import { fetchAllowListFromUri } from "@/fetching/fetchAllowlistFromUri";
 import { storeAllowListData } from "@/storage/storeAllowListData";
 import { Tables } from "@/types/database.types";

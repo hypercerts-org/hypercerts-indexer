@@ -1,14 +1,10 @@
 import { supabase } from "@/clients/supabaseClient";
 import { Database } from "@/types/database.types";
 
-interface StoreHypercertAllowList {
-  batchToStore: Database["public"]["CompositeTypes"]["allow_list_data_type"][];
-}
-
 export const storeHypercertAllowList = async ({
-  batchToStore,
-}: StoreHypercertAllowList) => {
-  if (batchToStore.length === 0) {
+  p_hc_allow_list_roots,
+}: Database["public"]["Functions"]["store_hypercert_allow_list_roots"]["Args"]) => {
+  if (p_hc_allow_list_roots.length === 0) {
     console.debug(
       "[StoreHypercertAllowList] No hypercert and allow list data to store",
     );
@@ -17,7 +13,7 @@ export const storeHypercertAllowList = async ({
 
   await supabase
     .rpc("store_hypercert_allow_list_roots", {
-      p_hc_allow_list_roots: batchToStore,
+      p_hc_allow_list_roots,
     })
     .throwOnError();
 };

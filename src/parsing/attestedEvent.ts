@@ -2,17 +2,36 @@ import { isAddress } from "viem";
 import { Tables } from "@/types/database.types";
 import { getDeployment } from "@/utils";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
+import { z } from "zod";
 
-type AttestedEvent = {
-  address: string;
-  args: {
-    recipient: `0x${string}`;
-    attester: `0x${string}`;
-    uid: string;
-    schema: string;
-  };
-  blockNumber: bigint;
-  [key: string]: unknown;
+export const AttestationSchema = z.object({
+  uid: z.string(),
+  schema: z.string(),
+  recipient: z.string().refine(isAddress),
+  attester: z.string().refine(isAddress),
+});
+
+export type Attestation = z.infer<typeof AttestationSchema>;
+
+export const AttestedEventSchema = z.object({
+  address: z.string().refine(isAddress),
+  args: z.object({
+    recipient: z.string().refine(isAddress),
+    attester: z.string().refine(isAddress),
+    uid: z.string(),
+    schema: z.string(),
+  }),
+  blockNumber: z.bigint(),
+});
+
+const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
+  return AttestedEventSchema.extend({
+    address: z
+      .string()
+      .refine((address) => address.toLowerCase() == easAddress.toLowerCase(), {
+        message: "[parseAttestedEvent] Address does not match EAS address",
+      }),
+  });
 };
 
 export type ParsedAttestedEvent = Pick<
@@ -20,60 +39,43 @@ export type ParsedAttestedEvent = Pick<
   "attester" | "recipient" | "uid" | "block_timestamp"
 >;
 
-/*
- * Helper method to get the recipient, attester, attestation UID and schema ID from the event. Will return undefined when the event is
- * missing data.
+/**
+ * Parses an attested event to extract the recipient, attester, attestation UID and block timestamp.
  *
- * @param event - The event object.
+ * This function attempts to parse the event object after validation.
+ * If the event object is valid, it extracts the recipient, attester, attestation UID and block timestamp from the event's args property,
+ * and returns them in a new object. If the event object is not valid or the contract address is invalid, it logs an error and returns undefined.
  *
- * @returns {EASdata} - The recipient, attester, attestation UID and schema ID.
- * */
-export const parseAttestedEvent = async (log: unknown) => {
-  if (!log || !isAttestedEvent(log)) {
-    console.error(
-      `Invalid event or event args for parsing Attested event: `,
-      log,
-    );
-    return;
-  }
-
-  const { args, address } = log;
+ * @param log - The event object to parse. Its structure should match the schema created with the `createAttestedEventSchema` function.
+ *
+ * @returns An object containing the recipient, attester, attestation UID and block timestamp from the event's args property, or undefined if the event object is not valid or the contract address is invalid.
+ *
+ * @example
+ * ```typescript
+ * const log = {
+ *   address: "0x1234",
+ *   args: {
+ *     recipient: "0x5678",
+ *     attester: "0x9abc",
+ *     uid: "abcdef",
+ *   },
+ *   blockNumber: 1234n,
+ * };
+ * const parsedEvent = parseAttestedEvent(log);
+ * console.log(parsedEvent); // { recipient: "0x5678", attester: "0x9abc", uid: "abcdef", block_timestamp: 1234567890n }
+ * ```
+ */
+export const parseAttestedEvent = async (
+  log: unknown,
+): Promise<ParsedAttestedEvent> => {
   const { easAddress } = getDeployment();
+  const validator = createAttestedEventSchema({ easAddress });
+  const { args, blockNumber } = validator.parse(log);
 
-  if (
-    easAddress.toLowerCase() != address.toLowerCase() ||
-    !isAddress(address)
-  ) {
-    console.error(
-      `Invalid contract address for parsing Attested event: `,
-      easAddress,
-      address,
-    );
-    return;
-  }
-
-  const res: ParsedAttestedEvent = {
+  return {
     recipient: args.recipient,
     attester: args.attester,
     uid: args.uid,
-    block_timestamp: await getBlockTimestamp(log.blockNumber),
+    block_timestamp: await getBlockTimestamp(blockNumber),
   };
-
-  return res;
 };
-
-function isAttestedEvent(event: unknown): event is AttestedEvent {
-  const e = event as Partial<AttestedEvent>;
-
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    typeof e.args === "object" &&
-    e.args !== null &&
-    isAddress(e.args.recipient) &&
-    isAddress(e.args.attester) &&
-    typeof e.address === "string" &&
-    isAddress(e.address) &&
-    typeof e.blockNumber === "bigint"
-  );
-}

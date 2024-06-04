@@ -1,57 +1,59 @@
 import { supabase } from "@/clients/supabaseClient";
 import * as console from "console";
-import { EventToFetch } from "@/types/types";
+import { chainId } from "@/utils/constants";
 
 export type ContractEvents = {
   eventName: string;
-  chainId: number;
 };
 
 export const getContractEventsForChain = async ({
-  chainId,
   eventName,
 }: ContractEvents) => {
-  if (!chainId || !Number.isInteger(chainId)) {
-    console.error(`[GetContractEvents] Invalid chain ID: ${chainId}`);
-    return;
-  }
+  try {
+    const { data } = await supabase
+      .from("contract_events")
+      .select(
+        "contract:contracts!inner(id,contract_address,start_block),event:events!inner(id,name,abi),last_block_indexed",
+      )
+      .eq("contracts.chain_id", chainId)
+      .eq("events.name", eventName)
+      .throwOnError();
 
-  const { data, error } = await supabase
-    .from("contract_events")
-    .select(
-      "contract:contracts!inner(id,contract_address),event:events!inner(id,name,abi),last_block_indexed",
-    )
-    .eq("contracts.chain_id", chainId)
-    .eq("events.name", eventName);
+    if (!data) {
+      console.debug(
+        `[GetContractEvents] No contract events found for ${eventName} on chain ${chainId}`,
+      );
+      return;
+    }
 
-  if (!data || error) {
+    console.debug(
+      `[GetContractEvents] Found ${data.length} contract events for ${eventName} on chain ${chainId}`,
+    );
+
+    return data.map((contractEvent) => ({
+      // @ts-expect-error incorrect typing as array
+      contracts_id: contractEvent.contract.id,
+      // @ts-expect-error incorrect typing as array
+      contract_address: contractEvent.contract.contract_address,
+      // @ts-expect-error incorrect typing as array
+      events_id: contractEvent.event.id,
+      // @ts-expect-error incorrect typing as array
+      event_name: contractEvent.event.name,
+      // @ts-expect-error incorrect typing as array
+      abi: contractEvent.event.abi,
+      last_block_indexed: contractEvent.last_block_indexed
+        ? BigInt(contractEvent.last_block_indexed)
+        : // @ts-expect-error incorrect typing as array
+          contractEvent.contract.start_block
+          ? // @ts-expect-error incorrect typing as array
+            BigInt(contractEvent.contract.start_block)
+          : 0n,
+    }));
+  } catch (error) {
     console.error(
       `[GetContractEvents] Error while fetching supported contracts for ${eventName} on chain ${chainId}`,
       error,
     );
-    return;
+    throw error;
   }
-
-  console.debug(
-    `[GetContractEvents] Found ${data.length} contract events for ${eventName} on chain ${chainId}`,
-  );
-
-  return data.map(
-    (contractEvent) =>
-      ({
-        // @ts-expect-error incorrect typing as array
-        contracts_id: contractEvent.contract.id,
-        // @ts-expect-error incorrect typing as array
-        contract_address: contractEvent.contract.contract_address,
-        // @ts-expect-error incorrect typing as array
-        events_id: contractEvent.event.id,
-        // @ts-expect-error incorrect typing as array
-        event_name: contractEvent.event.name,
-        // @ts-expect-error incorrect typing as array
-        abi: contractEvent.event.abi,
-        last_block_indexed: contractEvent.last_block_indexed
-          ? BigInt(contractEvent.last_block_indexed)
-          : null,
-      }) as EventToFetch,
-  );
 };

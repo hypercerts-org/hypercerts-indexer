@@ -129,6 +129,7 @@ export type Database = {
         Row: {
           block_number: number | null
           contracts_id: string
+          creator_address: string | null
           hypercert_id: string | null
           id: string
           owner_address: string | null
@@ -141,6 +142,7 @@ export type Database = {
         Insert: {
           block_number?: number | null
           contracts_id: string
+          creator_address?: string | null
           hypercert_id?: string | null
           id?: string
           owner_address?: string | null
@@ -152,6 +154,7 @@ export type Database = {
         Update: {
           block_number?: number | null
           contracts_id?: string
+          creator_address?: string | null
           hypercert_id?: string | null
           id?: string
           owner_address?: string | null
@@ -465,30 +468,30 @@ export type Database = {
       supported_schemas: {
         Row: {
           chain_id: number
-          eas_schema_id: string
           id: string
           last_block_indexed: number | null
           resolver: string | null
           revocable: boolean | null
           schema: string | null
+          uid: string
         }
         Insert: {
           chain_id: number
-          eas_schema_id: string
           id?: string
           last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
+          uid: string
         }
         Update: {
           chain_id?: number
-          eas_schema_id?: string
           id?: string
           last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
+          uid?: string
         }
         Relationships: []
       }
@@ -545,6 +548,7 @@ export type Database = {
             Returns: {
               block_number: number | null
               contracts_id: string
+              creator_address: string | null
               hypercert_id: string | null
               id: string
               owner_address: string | null

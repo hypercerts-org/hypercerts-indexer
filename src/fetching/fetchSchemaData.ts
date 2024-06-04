@@ -3,9 +3,10 @@ import { client } from "@/clients/evmClient";
 import schemaRegistryAbi from "@/abis/schemaRegistry.json";
 import { Hex, isAddress } from "viem";
 import { Tables } from "@/types/database.types";
+import { z } from "zod";
+import { messages } from "@/utils/validation";
 
 //github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/ISchemaRegistry.sol
-
 export interface SchemaRecord {
   uid: Hex;
   revocable: boolean;
@@ -13,86 +14,61 @@ export interface SchemaRecord {
   schema: string;
 }
 
-/*
- * This function fetches the attestation data as stored at the provided UID on the contract.
+export const createSchemaRecordSchema = (schema_uid: string) =>
+  z.object({
+    uid: z.string().refine((uid) => uid === schema_uid, {
+      message: `Schema data does not match schema UID ${schema_uid}`,
+    }),
+    revocable: z.boolean(),
+    resolver: z.string().refine(isAddress, {
+      message: messages.INVALID_ADDRESS,
+    }),
+    schema: z.string(),
+  });
+
+export interface FetchSchemaDataArgs {
+  schema: Pick<Tables<"supported_schemas">, "uid">;
+}
+
+/**
+ * Fetches schema data from a contract using the provided schema's UID.
  *
- * @param attestation - The EAS Attested event data.
- * @returns  - The event data with the attestation data attached
+ * This function takes a schema object as input, which should contain a property `uid`.
+ * It uses this UID to fetch the schema data from the contract.
+ * If the schema is not provided, or if the schema does not contain a `uid`, the function will throw an error.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {Object} params.schema - The schema object. It should contain a property `uid`.
+ * @param {string} params.schema.uid - The UID of the schema.
+ *
+ * @returns {Promise<SchemaRecord | undefined>} A promise that resolves to an object of type SchemaRecord containing the fetched schema data. If there is an error during the contract read operation, the promise is rejected with the error.
  *
  * @example
- * ```js
- *
- * const easData: EASData = {
- * recipient: "0x1234...5678",
- * attester: "0x1234...5678",
- * uid: "0x1234...5678",
- * schema: "0x1234...5678",
- *  };
- *
- * const attestation = await fetchAttestationData(easData);
+ * ```typescript
+ * const schemaData = await fetchSchemaData({ schema: { uid: '0x1234...5678' } });
+ * console.log(schemaData);
  * ```
  */
 export const fetchSchemaData = async ({
-  schema,
-}: {
-  schema?: Tables<"supported_schemas">;
-}) => {
-  if (!schema || !schema.eas_schema_id) {
-    console.error(`Could not find EAS ID for schema`, schema);
-    return;
-  }
-
+  schema: { uid },
+}: FetchSchemaDataArgs) => {
   const { schemaRegistryAddress } = getDeployment();
-  const { eas_schema_id } = schema;
+  const validationSchema = createSchemaRecordSchema(uid);
 
   try {
     const _schemaData = await client.readContract({
       address: schemaRegistryAddress as `0x${string}`,
       abi: schemaRegistryAbi,
       functionName: "getSchema",
-      args: [eas_schema_id],
+      args: [uid],
     });
 
-    if (!_schemaData || !isSchemaRecord(_schemaData)) {
-      console.error("Invalid schema data", _schemaData);
-      return;
-    }
-
-    if (_schemaData.uid != eas_schema_id) {
-      console.error(
-        `Schema data UID ${_schemaData.uid} does not match schema UID ${eas_schema_id}`,
-      );
-      return;
-    }
-
-    const _schema = schema;
-
-    _schema.schema = _schemaData.schema;
-    _schema.resolver = _schemaData.resolver;
-    _schema.revocable = _schemaData.revocable;
-
-    return _schema;
+    return validationSchema.parse(_schemaData);
   } catch (e) {
     console.error(
-      `Error fetching data for schema ${eas_schema_id} on contract ${schemaRegistryAddress}:`,
+      `[fetchSchemaData] Error fetching data for schema ${uid} on contract ${schemaRegistryAddress}:`,
       e,
     );
-    return;
+    throw e;
   }
-};
-
-const isSchemaRecord = (data: unknown): data is SchemaRecord => {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "uid" in data &&
-    typeof data.uid === "string" &&
-    "revocable" in data &&
-    typeof data.revocable === "boolean" &&
-    "resolver" in data &&
-    typeof data.resolver === "string" &&
-    isAddress(data.resolver) &&
-    "schema" in data &&
-    typeof data.schema === "string"
-  );
 };
