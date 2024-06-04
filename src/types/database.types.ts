@@ -175,6 +175,17 @@ export type Database = MergeDeep<
           block_timestamp: bigint | number | string | null;
         };
       };
+      hypercert_allow_list_records: {
+        Row: {
+          units: bigint | number | string | null;
+        };
+        Insert: {
+          units: bigint | number | string | null;
+        };
+        Update: {
+          units: bigint | number | string | null;
+        };
+      };
     };
   }
 >;

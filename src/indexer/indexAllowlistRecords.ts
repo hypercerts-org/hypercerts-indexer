@@ -99,6 +99,7 @@ const processAllowListEntriesBatch = async (
         storeAllowListRecords({
           claim_id: data?.claim_id,
           allow_list_data_id: data?.al_data_id,
+          // @ts-expect-error Typing issue with records
           records: data?.records,
         });
       }),

@@ -56,6 +56,9 @@ export const storeClaim = async ({ claims }: StoreClaimInput) => {
   const _claims = claims.map((claim) => ({
     ...ClaimSchema.parse(claim),
     value: 1,
+    token_id: claim.token_id.toString(),
+    block_number: claim.block_number.toString(),
+    units: claim.units.toString(),
   }));
 
   try {
