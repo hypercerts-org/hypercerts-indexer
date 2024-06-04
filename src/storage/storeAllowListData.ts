@@ -1,9 +1,9 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { Database } from "@/types/database.types";
 import _ from "lodash";
 
 interface StoreAllowListData {
-  allowListData: Partial<Tables<"allow_list_data">>[];
+  allowListData: Database["public"]["Tables"]["allow_list_data"]["Update"][];
 }
 
 export const storeAllowListData = async ({

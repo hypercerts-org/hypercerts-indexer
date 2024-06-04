@@ -1,5 +1,5 @@
-import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
+import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree";
 
 export interface FetchAllowListFromUriInput {
   uri?: string;
@@ -33,24 +33,5 @@ export const fetchAllowListFromUri = async ({
     );
     return;
   }
-
-  try {
-    return StandardMerkleTree.load<[string, bigint]>(
-      JSON.parse(fetchResult as string),
-    );
-  } catch (error) {
-    console.debug(
-      `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
-      error,
-    );
-  }
-
-  try {
-    return StandardMerkleTree.load<[string, bigint]>(fetchResult as never);
-  } catch (error) {
-    console.debug(
-      `[FetchAllowListFromUri] Allow list at ${uri} is not a valid OZ Merkle tree`,
-      error,
-    );
-  }
+  return parseToOzMerkleTree(fetchResult, uri);
 };

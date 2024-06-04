@@ -1,6 +1,10 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { Database, Tables } from "@/types/database.types";
 import * as console from "node:console";
+
+interface StoreAttestations {
+  attestations: Database["public"]["Tables"]["attestations"]["Update"][];
+}
 
 /*
  *  Stores the provided attestation data in the database.
@@ -12,12 +16,7 @@ import * as console from "node:console";
  */
 export const storeAttestations = async ({
   attestations,
-}: {
-  attestations: (
-    | Omit<Tables<"attestations">, "id" | "claims_id">
-    | undefined
-  )[];
-}) => {
+}: StoreAttestations) => {
   const _attestations = (attestations = attestations.filter(
     (attestation) => attestation !== null && attestation !== undefined,
   ));
