@@ -45,7 +45,6 @@ export const getLogsForContractEvents = async ({
 }: GetLogsForEventInput) => {
   const { address, startBlock } = getMinterAddressAndStartBlock();
 
-  console.log(address, startBlock);
   const { fromBlock: from, toBlock: to } = await getBlocksToFetch({
     contractCreationBlock: startBlock,
     fromBlock,
