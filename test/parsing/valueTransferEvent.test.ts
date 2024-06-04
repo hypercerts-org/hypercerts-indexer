@@ -5,13 +5,14 @@ import { http, HttpResponse } from "msw";
 import { parseValueTransfer } from "../../src/parsing/valueTransferEvent";
 import { client } from "../../src/clients/evmClient";
 import { alchemyUrl } from "../resources/alchemyUrl";
+import { getAddress } from "viem";
 
 describe("valueTransferEvent", () => {
   const claimID = faker.number.bigInt();
   const fromTokenID = faker.number.bigInt();
   const toTokenID = faker.number.bigInt();
   const value = faker.number.bigInt();
-  const address = faker.finance.ethereumAddress();
+  const address = getAddress(faker.finance.ethereumAddress());
   const blockNumber = faker.number.bigInt();
   const timestamp = faker.number.int();
 
@@ -55,54 +56,60 @@ describe("valueTransferEvent", () => {
   });
 
   it("fails if event is invalid", async () => {
-    const parsed1 = await parseValueTransfer({
-      ...event,
-      address: "not an address",
-    });
-    expect(parsed1).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        address: "not an address",
+      }),
+    ).rejects.toThrow();
 
-    const parsed2 = await parseValueTransfer({
-      ...event,
-      blockNumber: "not an int",
-    });
-    expect(parsed2).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        blockNumber: "not an int",
+      }),
+    ).rejects.toThrow();
   });
 
   it("fails if args are invalid", async () => {
-    const parsed1 = await parseValueTransfer({
-      ...event,
-      args: {
-        ...event.args,
-        fromTokenID: "not an int",
-      },
-    });
-    expect(parsed1).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        args: {
+          ...event.args,
+          claimID: "not an int",
+        },
+      }),
+    ).rejects.toThrow();
 
-    const parsed2 = await parseValueTransfer({
-      ...event,
-      args: {
-        ...event.args,
-        claimID: "not a int",
-      },
-    });
-    expect(parsed2).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        args: {
+          ...event.args,
+          fromTokenID: "not an int",
+        },
+      }),
+    ).rejects.toThrow();
 
-    const parsed3 = await parseValueTransfer({
-      ...event,
-      args: {
-        ...event.args,
-        toTokenID: "not a int",
-      },
-    });
-    expect(parsed3).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        args: {
+          ...event.args,
+          toTokenID: "not an int",
+        },
+      }),
+    ).rejects.toThrow();
 
-    const parsed4 = await parseValueTransfer({
-      ...event,
-      args: {
-        ...event.args,
-        value: "not a int",
-      },
-    });
-    expect(parsed4).toBeUndefined();
+    await expect(
+      parseValueTransfer({
+        ...event,
+        args: {
+          ...event.args,
+          value: "not an int",
+        },
+      }),
+    ).rejects.toThrow();
   });
 });

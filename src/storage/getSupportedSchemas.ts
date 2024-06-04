@@ -1,23 +1,34 @@
 import { supabase } from "@/clients/supabaseClient";
+import { chainId } from "@/utils/constants";
+import { Tables } from "@/types/database.types";
 
-export const getSupportedSchemas = async ({ chainId }: { chainId: number }) => {
-  if (!chainId || !Number.isInteger(chainId)) {
-    console.error(`[GetSupportedSchema] Invalid chain ID: ${chainId}`);
-    return;
-  }
+/**
+ * getSupportedSchemas is an async function that fetches supported EAS schemas for a given chain ID from the "supported_schemas" table in the database.
+ * It uses the supabase client to read from the database.
+ *
+ * @returns {Promise<Tables<"supported_schemas">[] | undefined>} - The supported EAS schemas for the given chain ID, or undefined if an error occurs or no data is found.
+ *
+ * @throws {Error} - Throws an error if there is an error in the fetch operation.
+ */
+export const getSupportedSchemas = async () => {
+  console.debug(
+    `[GetSupportedSchema] Fetching supported EAS schema for chain ID ${chainId}`,
+  );
 
-  const { data, error } = await supabase
-    .from("supported_schemas")
-    .select()
-    .eq("chain_id", chainId);
+  try {
+    const { data } = await supabase
+      .from("supported_schemas")
+      .select("*")
+      .eq("chain_id", chainId)
+      .returns<Tables<"supported_schemas">[]>()
+      .throwOnError();
 
-  if (!data) {
-    console.debug(
+    return data;
+  } catch (error) {
+    console.error(
       `[GetSupportedSchema] Error while fetching supported EAS schema for chain ID ${chainId}`,
       error,
     );
-    return;
+    throw error;
   }
-
-  return data;
 };

@@ -13,23 +13,37 @@ import * as console from "node:console";
 export const storeAttestations = async ({
   attestations,
 }: {
-  attestations?: Tables<"attestations">[];
+  attestations: (
+    | Omit<Tables<"attestations">, "id" | "claims_id">
+    | undefined
+  )[];
 }) => {
-  if (!attestations) {
+  const _attestations = (attestations = attestations.filter(
+    (attestation) => attestation !== null && attestation !== undefined,
+  ));
+
+  if (!_attestations || _attestations.length === 0) {
     console.debug("[StoreAttestations] No attestation data provided");
     return;
   }
 
-  if (attestations.length === 0) return;
-
   console.debug(
-    `[StoreAttestations] Storing ${attestations.length} attestations`,
+    `[StoreAttestations] Storing ${_attestations.length} attestations`,
   );
 
-  await supabase
-    .from("attestations")
-    .upsert(attestations, {
-      onConflict: "supported_schemas_id, uid",
-    })
-    .throwOnError();
+  try {
+    await supabase
+      .from("attestations")
+      .upsert(_attestations, {
+        onConflict: "supported_schemas_id, uid",
+      })
+      .throwOnError();
+  } catch (error) {
+    console.error(
+      "[StoreAttestations] Error while storing attestations",
+      error,
+    );
+
+    throw error;
+  }
 };

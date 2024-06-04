@@ -29,9 +29,7 @@ export const indexAllowListCreated = async ({
   batchSize = defaultConfig.batchSize,
   eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
-  const { chainId } = getDeployment();
   const contractsWithEvents = await getContractEventsForChain({
-    chainId,
     eventName,
   });
 

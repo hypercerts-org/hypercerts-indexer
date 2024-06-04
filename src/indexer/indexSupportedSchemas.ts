@@ -1,20 +1,23 @@
-import { getDeployment } from "@/utils";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
 import { IndexerConfig } from "@/types/types";
 import { fetchSchemaData } from "@/fetching/fetchSchemaData";
-import { Tables } from "@/types/database.types";
 import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
 
-/*
- * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the hypercerts in the
- * database.
+/**
+ * Indexes supported schemas and stores them in the database.
  *
- * @param [batchSize] - The number of logs to fetch and parse in each batch.
+ * This function fetches the supported schemas and filters out any that are incomplete.
+ * An incomplete schema is one that does not have a `schema`, `resolver`, or `revocable` property.
+ * The function then processes the incomplete schemas in batches, fetching additional data for each schema and storing the updated schemas in the database.
+ *
+ * @param {Object} config - The configuration for the function.
+ * @param {bigint} config.batchSize - The number of schemas to process in each batch. Defaults to `defaultConfig.batchSize`.
+ *
+ * @returns {Promise<void>} A promise that resolves when all supported schemas have been processed and stored. If there is an error during the process, the promise is rejected with the error.
  *
  * @example
- * ```js
- * await indexClaimsStoredEvents({ batchSize: 1000n });
+ * ```typescript
+ * await indexSupportedSchemas({ batchSize: 5n });
  * ```
  */
 
@@ -25,8 +28,7 @@ const defaultConfig = {
 export const indexSupportedSchemas = async ({
   batchSize = defaultConfig.batchSize,
 }: IndexerConfig = defaultConfig) => {
-  const { chainId } = getDeployment();
-  const supportedSchemas = await getSupportedSchemas({ chainId });
+  const supportedSchemas = await getSupportedSchemas();
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
     console.debug("[IndexSupportedSchema] No supported schemas found");
@@ -34,22 +36,35 @@ export const indexSupportedSchemas = async ({
   }
 
   const incompleteSchemas = supportedSchemas.filter(
-    (schema) => !schema.schema || !schema.resolver || !schema.revocable,
+    (schema) =>
+      !schema.schema ||
+      !schema.resolver ||
+      schema.revocable === null ||
+      schema.revocable === undefined,
   );
 
   const _size = Number(batchSize);
 
   for (let i = 0; i < incompleteSchemas.length; i += _size) {
     const batch = incompleteSchemas.slice(i, i + _size);
-    const schemaData = (
-      await Promise.all(batch.map((schema) => fetchSchemaData({ schema })))
-    ).filter(
-      (schema): schema is Tables<"supported_schemas"> =>
-        schema !== null && schema !== undefined,
-    );
 
-    await storeSupportedSchemas({
-      supportedSchemas: schemaData,
-    });
+    try {
+      const schemaData = await Promise.all(
+        batch.map(async (schema) => ({
+          ...schema,
+          ...(await fetchSchemaData({ schema })),
+        })),
+      );
+
+      await storeSupportedSchemas({
+        supportedSchemas: schemaData,
+      });
+    } catch (error) {
+      console.error("[IndexSupportedSchema] Error processing batch: ", {
+        error,
+        batch,
+      });
+      throw error;
+    }
   }
 };

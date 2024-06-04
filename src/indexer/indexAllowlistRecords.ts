@@ -61,7 +61,7 @@ const processAllowListEntriesBatch = async (
       const tree = StandardMerkleTree.load(allowList.data);
 
       if (!tree) {
-        console.error(
+        console.debug(
           "[IndexAllowlistRecords] Failed to load tree from data",
           allowList,
         );

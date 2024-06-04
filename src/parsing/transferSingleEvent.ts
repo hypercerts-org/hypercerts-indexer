@@ -1,41 +1,33 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
 import { NewTransfer } from "@/types/types";
+import { z } from "zod";
 
-type TransferSingleEvent = {
-  address: string;
-  args: {
-    operator: string;
-    from: string;
-    to: string;
-    id: bigint;
-    value: bigint;
-  };
-  blockNumber: bigint;
-  [key: string]: unknown;
-};
+const TransferSingleEventSchema = z.object({
+  address: z.string().refine(isAddress),
+  args: z.object({
+    operator: z.string().refine(isAddress),
+    from: z.string().refine(isAddress),
+    to: z.string().refine(isAddress),
+    id: z.bigint(),
+    value: z.bigint(),
+  }),
+  blockNumber: z.bigint(),
+});
 
 /*
- * Helper method to get the sender, recipient, tokenID and value from the event. Will return undefined when the event is
+ * Helper method to get the sender, recipient, tokenID and value from the event. Will throw when the event is
  * missing any of the required fields.
  *
  * @param event - The event object.
  * */
 export const parseTransferSingle = async (event: unknown) => {
-  if (!isTransferSingleEvent(event)) {
-    console.error(
-      `Invalid event or event args for parsing TransferSingle event: `,
-      event,
-    );
-    return;
-  }
-
-  const { args } = event;
+  const { args, blockNumber } = TransferSingleEventSchema.parse(event);
 
   const row: Partial<NewTransfer> = {
     token_id: args.id,
-    block_timestamp: await getBlockTimestamp(event.blockNumber),
-    block_number: event.blockNumber,
+    block_timestamp: await getBlockTimestamp(blockNumber),
+    block_number: blockNumber,
     value: args.value,
     to_owner_address: args.to,
     from_owner_address: args.from,
@@ -43,25 +35,3 @@ export const parseTransferSingle = async (event: unknown) => {
 
   return row;
 };
-
-function isTransferSingleEvent(event: unknown): event is TransferSingleEvent {
-  const e = event as Partial<TransferSingleEvent>;
-
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    e?.args !== null &&
-    typeof e?.args === "object" &&
-    typeof e?.args.operator === "string" &&
-    isAddress(e?.args.operator) &&
-    typeof e?.args.from === "string" &&
-    isAddress(e?.args.from) &&
-    typeof e?.args.to === "string" &&
-    isAddress(e?.args.to) &&
-    typeof e?.args.id === "bigint" &&
-    typeof e?.args.value === "bigint" &&
-    typeof e.address === "string" &&
-    isAddress(e.address) &&
-    typeof e.blockNumber === "bigint"
-  );
-}

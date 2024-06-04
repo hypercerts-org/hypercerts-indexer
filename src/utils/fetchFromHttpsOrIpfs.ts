@@ -2,7 +2,7 @@ import { fetchFromHTTPS, fetchFromIPFS } from "@/utils/fetching";
 
 export const fetchFromHttpsOrIpfs = async (uri?: string): Promise<unknown> => {
   if (!uri || uri === "ipfs://null" || uri === "ipfs://") {
-    console.error("[FetchMetadataFromUri] URI is missing");
+    console.error("[fetchFromHttpsOrIpfs] URI is missing");
     return;
   }
 
