@@ -1,10 +1,10 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { Database } from "@/types/database.types";
 
 interface StoreAllowListRecords {
   claim_id?: string;
   allow_list_data_id?: string;
-  records?: Partial<Tables<"hypercert_allow_list_records">>[];
+  records: Database["public"]["Tables"]["hypercert_allow_list_records"]["Update"][];
 }
 
 export const storeAllowListRecords = async ({

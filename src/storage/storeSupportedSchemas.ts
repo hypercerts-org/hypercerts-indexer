@@ -1,8 +1,8 @@
 import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { Database, Tables } from "@/types/database.types";
 
 interface StoreSupportedSchemas {
-  supportedSchemas: Tables<"supported_schemas">[];
+  supportedSchemas: Database["public"]["Tables"]["supported_schemas"]["Update"][];
 }
 
 /**
