@@ -1,7 +1,7 @@
 import { MergeDeep } from "type-fest";
-import { Database as DatabaseGenerated } from "./database-generated.types";
+import { Database as DatabaseGenerated } from "./database-generated.types.js";
 
-export type { Json } from "./database-generated.types";
+export type { Json } from "./database-generated.types.js";
 
 // Override the type for a specific column in a view:
 export type Database = MergeDeep<

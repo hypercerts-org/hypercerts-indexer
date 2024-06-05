@@ -1,4 +1,4 @@
-import { assertExists } from "./assertExists";
+import { assertExists } from "./assertExists.js";
 
 export const chainId = Number(assertExists(process.env.CHAIN_ID, "Chain ID"));
 

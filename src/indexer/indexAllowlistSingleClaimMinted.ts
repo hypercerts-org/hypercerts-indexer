@@ -1,12 +1,12 @@
-import { parseLeafClaimedEvent } from "@/parsing";
-import { getDeployment } from "@/utils";
-import { IndexerConfig, LeafClaimed } from "@/types/types";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
-import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed";
-import { supabase } from "@/clients/supabaseClient";
-import { client } from "@/clients/evmClient";
+import { parseLeafClaimedEvent } from "@/parsing/leafClaimedEvent.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { IndexerConfig, LeafClaimed } from "@/types/types.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed.js";
+import { supabase } from "@/clients/supabaseClient.js";
+import { client } from "@/clients/evmClient.js";
 
 /*
  * This function indexes the logs of the LeafClaimed event emitted by the HypercertMinter contract. Based on the last

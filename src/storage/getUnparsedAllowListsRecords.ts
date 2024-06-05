@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Database } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Database } from "@/types/database.types.js";
 
 export const getUnparsedAllowListRecords = async () => {
   const { data, error } = await supabase

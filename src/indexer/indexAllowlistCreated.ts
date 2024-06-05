@@ -1,11 +1,10 @@
-import { IndexerConfig, NewAllowList } from "@/types/types";
-import { getDeployment } from "@/utils";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
-import { getLogsForContractEvents } from "@/monitoring";
-import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { parseAllowListCreated } from "@/parsing/allowListCreatedEvent";
-import { storeHypercertAllowList } from "@/storage/storeHypercertAllowList";
-import { Database } from "@/types/database.types";
+import { IndexerConfig, NewAllowList } from "@/types/types.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { getLogsForContractEvents } from "@/monitoring/index.js";
+import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
+import { parseAllowListCreated } from "@/parsing/allowListCreatedEvent.js";
+import { storeHypercertAllowList } from "@/storage/storeHypercertAllowList.js";
+import { Database } from "@/types/database.types.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last

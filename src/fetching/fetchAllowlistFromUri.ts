@@ -1,5 +1,5 @@
-import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
-import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree";
+import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
+import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 
 export interface FetchAllowListFromUriInput {
   uri?: string;

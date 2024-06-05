@@ -1,6 +1,6 @@
 import { expect, it, describe } from "vitest";
 
-import { isClaimToken, getClaimTokenId } from "../../src/utils/tokenIds.js";
+import { isClaimToken, getClaimTokenId } from "@/utils/tokenIds.js";
 
 const claimTokenId = 18664487825613474720966097217632486398361600n;
 const fractionTokenId = 18664487825613474720966097217632486398361602n;

@@ -1,5 +1,5 @@
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { client } from "@/clients/evmClient";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { client } from "@/clients/evmClient.js";
 import {
   afterAll,
   afterEach,

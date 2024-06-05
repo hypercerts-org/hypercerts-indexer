@@ -1,10 +1,10 @@
-import { getDeployment } from "@/utils";
-import { client } from "@/clients/evmClient";
-import schemaRegistryAbi from "@/abis/schemaRegistry.json";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { client } from "@/clients/evmClient.js";
+import schemaRegistryAbi from "@/abis/schemaRegistry.json" assert { type: "json" };
 import { Hex, isAddress } from "viem";
-import { Tables } from "@/types/database.types";
+import { Tables } from "@/types/database.types.js";
 import { z } from "zod";
-import { messages } from "@/utils/validation";
+import { messages } from "@/utils/validation.js";
 
 //github.com/ethereum-attestation-service/eas-contracts/blob/master/contracts/ISchemaRegistry.sol
 export interface SchemaRecord {

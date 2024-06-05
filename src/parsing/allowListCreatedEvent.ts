@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
-import { NewAllowList } from "@/types/types";
+import { NewAllowList } from "@/types/types.js";
 import { z } from "zod";
-import { messages } from "@/utils/validation";
+import { messages } from "@/utils/validation.js";
 
 /**
  * Parses an event object to extract the tokenID and root.

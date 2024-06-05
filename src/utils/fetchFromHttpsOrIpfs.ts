@@ -1,4 +1,4 @@
-import { fetchFromHTTPS, fetchFromIPFS } from "@/utils/fetching";
+import { fetchFromHTTPS, fetchFromIPFS } from "@/utils/fetching.js";
 
 export const fetchFromHttpsOrIpfs = async (uri?: string): Promise<unknown> => {
   if (!uri || uri === "ipfs://null" || uri === "ipfs://") {

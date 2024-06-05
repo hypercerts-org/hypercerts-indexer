@@ -21,6 +21,7 @@ export default defineConfig({
         functions: 55,
         statements: 55,
       },
+      include: ["test/**/*.test.ts", "!integration/**/*.test.ts"],
       exclude: [
         ...(configDefaults.coverage.exclude as string[]),
         "**/*.types.ts",

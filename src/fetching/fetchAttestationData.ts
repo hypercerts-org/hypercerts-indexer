@@ -1,10 +1,10 @@
-import { getDeployment } from "@/utils";
-import { client } from "@/clients/evmClient";
-import easAbi from "@/abis/eas.json";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { client } from "@/clients/evmClient.js";
+import easAbi from "@/abis/eas.json" assert { type: "json" };
 import { isAddress, isHex } from "viem";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
 import * as z from "zod";
-import { messages } from "@/utils/validation";
+import { messages } from "@/utils/validation.js";
 
 //https://github.com/ethereum-attestation-service/eas-sdk/blob/master/src/eas.ts#L87
 // Zod validation of Attestation

@@ -1,8 +1,8 @@
-import { IndexerConfig } from "@/types/types";
-import { storeAllowListRecords } from "@/storage/storeAllowListRecords";
-import { getUnparsedAllowListRecords } from "@/storage/getUnparsedAllowListsRecords";
-import { Database } from "@/types/database.types";
-import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree";
+import { IndexerConfig } from "@/types/types.js";
+import { storeAllowListRecords } from "@/storage/storeAllowListRecords.js";
+import { getUnparsedAllowListRecords } from "@/storage/getUnparsedAllowListsRecords.js";
+import { Database } from "@/types/database.types.js";
+import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 
 /**
  * This function indexes the unparsed allow lists in batches.

@@ -1,8 +1,8 @@
-import { client } from "@/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 import { parseAbiItem } from "viem";
-import { EventToFetch } from "@/types/types";
-import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock";
-import { getBlocksToFetch } from "@/utils/getBlocksToFetch";
+import { EventToFetch } from "@/types/types.js";
+import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock.js";
+import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
 
 interface GetLogsForEventInput {
   fromBlock?: bigint;

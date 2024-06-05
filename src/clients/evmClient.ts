@@ -1,6 +1,6 @@
 import { createPublicClient, http } from "viem";
 import { baseSepolia, optimism, sepolia } from "viem/chains";
-import { alchemyApiKey, chainId } from "@/utils/constants";
+import { alchemyApiKey, chainId } from "@/utils/constants.js";
 
 const selectedNetwork = () => {
   switch (chainId) {
