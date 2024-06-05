@@ -61,7 +61,5 @@ export const isClaimToken = (tokenId?: bigint) => {
  * @returns {BigInt} - Returns the claim token ID.
  */
 export const getClaimTokenId = (tokenId: bigint) => {
-  const id = tokenId & TYPE_MASK;
-  console.debug(`[getClaimTokenId] ${tokenId} -> ${id}`);
-  return id;
+  return tokenId & TYPE_MASK;
 };
