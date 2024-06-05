@@ -3,7 +3,7 @@ import { IndexerConfig } from "@/types/types";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { Claim, storeClaim } from "@/storage/storeClaim";
+import { storeClaim } from "@/storage/storeClaim";
 
 const defaultConfig = {
   batchSize: 10000n,
@@ -68,9 +68,7 @@ export const indexClaimsStoredEvents = async ({
     }),
   );
 
-  const claims = results
-    .flatMap((result) => result.claims)
-    .filter((claim): claim is Claim => claim !== null && claim !== undefined);
+  const claims = results.flatMap((result) => result.claims);
 
   const contractEventUpdates = results.flatMap((result) => [
     result.contractEventUpdate,

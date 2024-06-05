@@ -29,7 +29,7 @@ const alchemyUrl = () => {
 };
 
 /* Returns a PublicClient instance for the configured network. */
-// @ts-ignose viem client type to complex to type
+// @ts-expect-error viem typings
 export const client = createPublicClient({
   cacheTime: 10_000,
   chain: selectedNetwork(),
