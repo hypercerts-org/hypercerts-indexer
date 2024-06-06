@@ -17,9 +17,11 @@ import { submitMintClaimTransaction } from "../test/helpers/transactions";
 import { createClient } from "@supabase/supabase-js";
 import { alchemyApiKey, supabaseUrl } from "../src/utils/constants";
 
-vi.mock("../../src/clients/evmClient", () => ({
-  client: publicClient,
-}));
+vi.mock("../src/clients/evmClient", () => {
+  return {
+    client: publicClient,
+  };
+});
 
 describe("index claimStored events", async () => {
   const supabaseAdmin = createClient<Database>(
@@ -64,6 +66,8 @@ describe("index claimStored events", async () => {
     });
 
     await publicClient.waitForTransactionReceipt({ hash: tx });
+
+    await testClient.mine({ blocks: 5 });
 
     await indexClaimsStoredEvents({
       batchSize: 1000n,

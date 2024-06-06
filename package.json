@@ -11,7 +11,7 @@
     "snaplet:restore": "snaplet snapshot restore --no-reset",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "test:integration": "vitest run --config ./vitest.integration.config.ts",
+    "test:integration": "pnpm supabase:seed && vitest run --config ./vitest.integration.config.ts",
     "supabase:reset": "npx supabase db reset",
     "supabase:seed": "npx supabase db reset && npx tsx seed.ts",
     "update:sentry:sourcemaps": "npx @sentry/wizard@latest -i sourcemaps",
@@ -47,6 +47,7 @@
     "nodemon": "^3.0.3",
     "postgres": "^3.4.4",
     "prettier": "3.2.5",
+    "prool": "^0.0.11",
     "rimraf": "^5.0.5",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-esbuild": "^6.1.1",
@@ -82,5 +83,5 @@
     "viem": "^2.13.5",
     "zod": "^3.23.6"
   },
-  "packageManager": "pnpm@9.0.6"
+  "packageManager": "pnpm@9.2.0+sha256.94fab213df221c55b6956b14a2264c21c6203cca9f0b3b95ff2fe9b84b120390"
 }

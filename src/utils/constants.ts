@@ -7,6 +7,11 @@ export const alchemyApiKey = assertExists(
   "Alchemy API key",
 );
 
+export const infuraApiKey = assertExists(
+  process.env.INFURA_API_KEY,
+  "Infura API key",
+);
+
 export const port = Number(assertExists(process.env.PORT, "Port"));
 
 export const supabaseApiKey = assertExists(

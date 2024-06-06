@@ -70,6 +70,7 @@ export const indexClaimsStoredEvents = async ({
 
   const claims = results.flatMap((result) => result.claims);
 
+  console.log(claims);
   const contractEventUpdates = results.flatMap((result) => [
     result.contractEventUpdate,
   ]);
