@@ -1,11 +1,11 @@
-import { parseTransferSingle } from "@/parsing";
-import { getDeployment } from "@/utils";
-import { IndexerConfig, NewTransfer } from "@/types/types";
-import { storeTransferSingleFraction } from "@/storage/storeTransferSingleFraction";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
-import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { isClaimToken } from "@/utils/tokenIds";
+import { parseTransferSingle } from "@/parsing/transferSingleEvent.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { IndexerConfig, NewTransfer } from "@/types/types.js";
+import { storeTransferSingleFraction } from "@/storage/storeTransferSingleFraction.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { isClaimToken } from "@/utils/tokenIds.js";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last

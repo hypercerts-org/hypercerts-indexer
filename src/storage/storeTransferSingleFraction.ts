@@ -1,6 +1,6 @@
-import { supabase } from "@/clients/supabaseClient";
-import { NewTransfer } from "@/types/types";
-import { getClaimTokenId } from "@/utils/tokenIds";
+import { supabase } from "@/clients/supabaseClient.js";
+import { NewTransfer } from "@/types/types.js";
+import { getClaimTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 
 /* 

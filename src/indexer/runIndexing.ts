@@ -1,4 +1,4 @@
-import { IndexerConfig } from "@/types/types";
+import { IndexerConfig } from "@/types/types.js";
 
 let isRunning = false;
 

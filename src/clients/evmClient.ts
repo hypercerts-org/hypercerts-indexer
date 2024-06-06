@@ -1,6 +1,6 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient, fallback, http } from "viem";
 import { baseSepolia, optimism, sepolia } from "viem/chains";
-import { alchemyApiKey, chainId } from "@/utils/constants";
+import { alchemyApiKey, chainId, infuraApiKey } from "@/utils/constants.js";
 
 const selectedNetwork = () => {
   switch (chainId) {
@@ -28,12 +28,29 @@ const alchemyUrl = () => {
   }
 };
 
+const infuraUrl = () => {
+  switch (chainId) {
+    case 10:
+      return `https://optimism-mainnet.infura.io/v3/${infuraApiKey}`;
+    case 84532:
+      return;
+    case 11155111:
+      return `https://sepolia.infura.io/v3/${infuraApiKey}`;
+    default:
+      throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+};
+
+const fallBackProvider = () => {
+  return fallback([http(infuraUrl()), http(alchemyUrl())]);
+};
+
 /* Returns a PublicClient instance for the configured network. */
 // @ts-expect-error viem typings
 export const client = createPublicClient({
   cacheTime: 10_000,
   chain: selectedNetwork(),
-  transport: http(alchemyUrl()),
+  transport: fallBackProvider(),
   batch: {
     multicall: {
       wait: 32,

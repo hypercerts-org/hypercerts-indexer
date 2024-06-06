@@ -1,5 +1,3 @@
-import * as console from "node:console";
-
 // https://github.com/hypercerts-org/hypercerts/blob/7671d06762c929bc2890a31e5dc392f8a30065c6/contracts/test/foundry/protocol/Bitshifting.t.sol
 
 /**

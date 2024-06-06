@@ -1,10 +1,15 @@
-import { assertExists } from "./assertExists";
+import { assertExists } from "./assertExists.js";
 
 export const chainId = Number(assertExists(process.env.CHAIN_ID, "Chain ID"));
 
 export const alchemyApiKey = assertExists(
   process.env.ALCHEMY_API_KEY,
   "Alchemy API key",
+);
+
+export const infuraApiKey = assertExists(
+  process.env.INFURA_API_KEY,
+  "Infura API key",
 );
 
 export const port = Number(assertExists(process.env.PORT, "Port"));

@@ -1,6 +1,6 @@
 import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
-import { Tables } from "@/types/database.types";
-import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs";
+import { Tables } from "@/types/database.types.js";
+import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.

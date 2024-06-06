@@ -1,8 +1,8 @@
-import { parseClaimStoredEvent } from "./claimStoredEvent";
-import { decodeAttestationData } from "@/parsing/attestationData";
-import { parseAttestedEvent } from "@/parsing/attestedEvent";
-import { parseTransferSingle } from "@/parsing/transferSingleEvent";
-import { parseLeafClaimedEvent } from "@/parsing/leafClaimedEvent";
+import { parseClaimStoredEvent } from "./claimStoredEvent.js";
+import { decodeAttestationData } from "@/parsing/attestationData.js";
+import { parseAttestedEvent } from "@/parsing/attestedEvent.js";
+import { parseTransferSingle } from "@/parsing/transferSingleEvent.js";
+import { parseLeafClaimedEvent } from "@/parsing/leafClaimedEvent.js";
 
 export {
   decodeAttestationData,

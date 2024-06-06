@@ -1,5 +1,5 @@
-import { getAttestationsForSchema } from "@/monitoring/eas";
-import { client } from "@/clients/evmClient";
+import { getAttestationsForSchema } from "@/monitoring/eas.js";
+import { client } from "@/clients/evmClient.js";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import sinon from "sinon";
 import { mockFilter, mockLogs } from "../resources/mockAttestations";

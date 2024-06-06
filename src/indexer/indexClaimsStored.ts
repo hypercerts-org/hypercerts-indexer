@@ -1,9 +1,9 @@
-import { parseClaimStoredEvent } from "@/parsing";
-import { IndexerConfig } from "@/types/types";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
-import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { storeClaim } from "@/storage/storeClaim";
+import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
+import { IndexerConfig } from "@/types/types.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { storeClaim } from "@/storage/storeClaim.js";
 
 const defaultConfig = {
   batchSize: 10000n,
@@ -70,6 +70,7 @@ export const indexClaimsStoredEvents = async ({
 
   const claims = results.flatMap((result) => result.claims);
 
+  console.log(claims);
   const contractEventUpdates = results.flatMap((result) => [
     result.contractEventUpdate,
   ]);

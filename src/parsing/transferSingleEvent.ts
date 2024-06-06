@@ -1,6 +1,6 @@
 import { isAddress } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
-import { NewTransfer } from "@/types/types";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { NewTransfer } from "@/types/types.js";
 import { z } from "zod";
 
 const TransferSingleEventSchema = z.object({

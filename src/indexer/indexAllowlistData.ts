@@ -1,8 +1,8 @@
-import { IndexerConfig } from "@/types/types";
-import { fetchAllowListFromUri } from "@/fetching/fetchAllowlistFromUri";
-import { storeAllowListData } from "@/storage/storeAllowListData";
-import { Tables } from "@/types/database.types";
-import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists";
+import { IndexerConfig } from "@/types/types.js";
+import { fetchAllowListFromUri } from "@/fetching/fetchAllowlistFromUri.js";
+import { storeAllowListData } from "@/storage/storeAllowListData.js";
+import { Tables } from "@/types/database.types.js";
+import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last

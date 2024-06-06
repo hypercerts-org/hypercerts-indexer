@@ -1,8 +1,8 @@
-import { client } from "@/clients/evmClient";
-import { parseAbiItem } from "viem";
-import { EventToFetch } from "@/types/types";
-import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock";
-import { getBlocksToFetch } from "@/utils/getBlocksToFetch";
+import { client } from "@/clients/evmClient.js";
+import { EventToFetch } from "@/types/types.js";
+import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock.js";
+import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
+import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 
 interface GetLogsForEventInput {
   fromBlock?: bigint;
@@ -44,11 +44,18 @@ export const getLogsForContractEvents = async ({
   contractEvent,
 }: GetLogsForEventInput) => {
   const { address, startBlock } = getMinterAddressAndStartBlock();
-
   const { fromBlock: from, toBlock: to } = await getBlocksToFetch({
     contractCreationBlock: startBlock,
     fromBlock,
     batchSize,
+  });
+
+  const filter = await client.createContractEventFilter({
+    abi: HypercertMinterAbi,
+    address,
+    eventName: contractEvent.event_name,
+    fromBlock: from,
+    toBlock: to,
   });
 
   try {
@@ -56,15 +63,9 @@ export const getLogsForContractEvents = async ({
       `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${from} to ${to}`,
     );
 
-    const abiItem = parseAbiItem([contractEvent.abi]);
-    const filter = await client.createEventFilter({
-      address,
-      fromBlock: from,
-      toBlock: to,
-      event: abiItem,
-    });
-
     const logs = await client.getFilterLogs({ filter });
+
+    console.log(client);
 
     return { logs, fromBlock: from, toBlock: to };
   } catch (error) {

@@ -1,5 +1,5 @@
 import { isAddress, isHex, parseAbi } from "viem";
-import { client } from "@/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 
 export const ClaimStoredEventSchema = z.object({

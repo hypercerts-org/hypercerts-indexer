@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Database, Tables } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Database } from "@/types/database.types.js";
 import { z } from "zod";
 
 /* 

@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { EventToFetch } from "@/types/types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { EventToFetch } from "@/types/types.js";
 
 interface UpdateLastBlockIndexedContractEvents {
   contract_events: EventToFetch[];

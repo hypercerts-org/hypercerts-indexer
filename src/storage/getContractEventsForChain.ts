@@ -1,6 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import * as console from "console";
-import { chainId } from "@/utils/constants";
+import { supabase } from "@/clients/supabaseClient.js";
+import { chainId } from "@/utils/constants.js";
 
 export type ContractEvents = {
   eventName: string;

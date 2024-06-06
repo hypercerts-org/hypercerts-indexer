@@ -1,4 +1,4 @@
-import { getDeployment } from "@/utils/getDeployment";
+import { getDeployment } from "@/utils/getDeployment.js";
 import { isAddress } from "viem";
 
 /**

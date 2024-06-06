@@ -1,8 +1,15 @@
 {
-  "ignore": ["**/*.test.ts", "**/*.spec.ts", ".git", "node_modules"],
-  "watch": ["src"],
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    ".git",
+    "node_modules",
+    "**/graphql-env.d.ts",
+    "**/__generated__/*"
+  ],
+  "watch": [
+    "./src"
+  ],
   "ext": "ts",
-  "execMap": {
-    "ts": "tsx -r dotenv/config"
-  }
+  "exec": "pnpm supabase:seed && pnpm run build && pnpm run start"
 }

@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Database } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Database } from "@/types/database.types.js";
 
 interface StoreAllowListRecords {
   claim_id?: string;

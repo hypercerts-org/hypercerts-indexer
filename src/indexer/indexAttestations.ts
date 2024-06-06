@@ -1,10 +1,12 @@
-import { getAttestationsForSchema } from "@/monitoring";
-import { decodeAttestationData, parseAttestedEvent } from "@/parsing";
-import { IndexerConfig } from "@/types/types";
-import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
-import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
-import { storeAttestations } from "@/storage/storeAttestations";
-import { fetchAttestationData } from "@/fetching/fetchAttestationData";
+import { getAttestationsForSchema } from "@/monitoring/eas.js";
+import { decodeAttestationData } from "@/parsing/attestationData.js";
+import { parseAttestedEvent } from "@/parsing/attestedEvent.js";
+
+import { IndexerConfig } from "@/types/types.js";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
+import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
+import { storeAttestations } from "@/storage/storeAttestations.js";
+import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
 
 /**
  * Indexes attestation logs for all supported schemas. Attestation logs are fetched from the chain and parsed into attestation data.

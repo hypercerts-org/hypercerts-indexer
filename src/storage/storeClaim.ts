@@ -1,4 +1,4 @@
-import { supabase } from "@/clients/supabaseClient";
+import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
 

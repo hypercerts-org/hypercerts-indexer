@@ -1,7 +1,7 @@
-import { getSupportedSchemas } from "@/storage/getSupportedSchemas";
-import { IndexerConfig } from "@/types/types";
-import { fetchSchemaData } from "@/fetching/fetchSchemaData";
-import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
+import { IndexerConfig } from "@/types/types.js";
+import { fetchSchemaData } from "@/fetching/fetchSchemaData.js";
+import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
 
 /**
  * Indexes supported schemas and stores them in the database.
