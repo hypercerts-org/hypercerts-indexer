@@ -1,7 +1,7 @@
 import { isAddress, isHex } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
-import { LeafClaimed } from "@/types/types";
-import { client } from "@/clients/evmClient";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { LeafClaimed } from "@/types/types.js";
+import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 
 const LeafClaimedSchema = z.object({

@@ -1,5 +1,5 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
-import { getMinterAddressAndStartBlock } from "../../src/utils/getMinterAddressAndStartBlock";
+import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock.js";
 import { getAddress } from "viem";
 import { faker } from "@faker-js/faker";
 

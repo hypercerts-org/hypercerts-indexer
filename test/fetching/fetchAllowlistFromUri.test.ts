@@ -1,10 +1,10 @@
 import {
   fetchAllowListFromUri,
   FetchAllowListFromUriInput,
-} from "../../src/fetching/fetchAllowlistFromUri";
+} from "@/fetching/fetchAllowlistFromUri";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { vi, describe, beforeEach, afterAll, it, expect } from "vitest";
-import { generateAllowList } from "../helpers/factories";
+import { generateAllowList } from "../helpers/factories.js";
 
 const mocks = vi.hoisted(() => {
   return {

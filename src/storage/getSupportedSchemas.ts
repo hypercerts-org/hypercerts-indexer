@@ -1,6 +1,6 @@
-import { supabase } from "@/clients/supabaseClient";
-import { chainId } from "@/utils/constants";
-import { Tables } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { chainId } from "@/utils/constants.js";
+import { Tables } from "@/types/database.types.js";
 
 /**
  * getSupportedSchemas is an async function that fetches supported EAS schemas for a given chain ID from the "supported_schemas" table in the database.

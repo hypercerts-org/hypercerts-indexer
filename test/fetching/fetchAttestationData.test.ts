@@ -7,7 +7,7 @@ import { client } from "@/clients/evmClient";
 import { faker } from "@faker-js/faker";
 import sinon from "sinon";
 import { getAddress } from "viem";
-import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 import { generateEasAttestation } from "../helpers/factories";
 
 describe("fetchAttestationData", () => {

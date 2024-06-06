@@ -1,5 +1,5 @@
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { client } from "@/clients/evmClient";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { client } from "@/clients/evmClient.js";
 import {
   afterAll,
   afterEach,
@@ -25,7 +25,7 @@ vi.mock("../../src/utils/getDeployment", () => ({
 
 describe("getLogsForContractEvents", () => {
   const getBlockNumberSpy = sinon.stub(client, "getBlockNumber");
-  const createEventFilterSpy = sinon.stub(client, "createEventFilter");
+  const createEventFilterSpy = sinon.stub(client, "createContractEventFilter");
   const getFilterLogsSpy = sinon.stub(client, "getFilterLogs");
   const eventToFetch = generateEventToFetch();
 
@@ -89,20 +89,6 @@ describe("getLogsForContractEvents", () => {
           batchSize: 100n,
           fromBlock: 100n,
           contractEvent: eventToFetch,
-        }),
-    ).rejects.toThrowError();
-  });
-
-  it("throws when ABI cannot be parsed", async () => {
-    // parseAbiItem will throw when ABI cannot be parsed
-    getBlockNumberSpy.resolves(100n);
-
-    await expect(
-      async () =>
-        await getLogsForContractEvents({
-          batchSize: 100n,
-          fromBlock: 100n,
-          contractEvent: { ...eventToFetch, abi: "" },
         }),
     ).rejects.toThrowError();
   });

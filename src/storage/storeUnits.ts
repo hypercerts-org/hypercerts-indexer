@@ -1,6 +1,6 @@
-import { supabase } from "@/clients/supabaseClient";
-import { NewUnitTransfer } from "@/types/types";
-import { getClaimTokenId } from "@/utils/tokenIds";
+import { supabase } from "@/clients/supabaseClient.js";
+import { NewUnitTransfer } from "@/types/types.js";
+import { getClaimTokenId } from "@/utils/tokenIds.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.

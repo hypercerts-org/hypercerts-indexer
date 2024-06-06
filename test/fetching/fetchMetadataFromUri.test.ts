@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri";
+import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri.js";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
 import { mockMetadata } from "../resources/mockMetadata";

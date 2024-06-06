@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Database, Tables } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Database } from "@/types/database.types.js";
 
 interface StoreSupportedSchemas {
   supportedSchemas: Database["public"]["Tables"]["supported_schemas"]["Update"][];

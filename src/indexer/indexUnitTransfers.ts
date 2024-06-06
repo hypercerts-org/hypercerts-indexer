@@ -1,10 +1,10 @@
-import { getDeployment } from "@/utils";
-import { IndexerConfig, NewUnitTransfer } from "@/types/types";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain";
-import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents";
-import { getLogsForContractEvents } from "@/monitoring/hypercerts";
-import { parseValueTransfer } from "@/parsing/valueTransferEvent";
-import { storeUnitTransfer } from "@/storage/storeUnits";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { IndexerConfig, NewUnitTransfer } from "@/types/types.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
+import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
+import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { storeUnitTransfer } from "@/storage/storeUnits.js";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last

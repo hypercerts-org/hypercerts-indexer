@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw";
-import { supabaseUrl } from "../src/utils/constants";
+import { supabaseUrl } from "@/utils/constants.js";
 
 export const default_blockNumber = 123456;
 export const default_chainID = 1337;

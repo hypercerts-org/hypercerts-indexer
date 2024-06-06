@@ -1,8 +1,8 @@
-import { client } from "@/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 import { isAddress, parseAbiItem } from "viem";
-import { getDeployment } from "@/utils/getDeployment";
-import { Tables } from "@/types/database.types";
-import { getBlocksToFetch } from "@/utils/getBlocksToFetch";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { Tables } from "@/types/database.types.js";
+import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
 
 /**
  * Fetches the logs of the Attested event from the EAS contract for a specific schema.

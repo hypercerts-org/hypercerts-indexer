@@ -1,5 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Tables } from "@/types/database.types";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Tables } from "@/types/database.types.js";
 
 export const getIncompleteAllowLists = async () => {
   const { data, error } = await supabase

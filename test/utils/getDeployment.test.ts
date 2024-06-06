@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test, vi } from "vitest";
-import { getDeployment } from "../../src/utils";
-import * as constants from "../../src/utils/constants";
+import { getDeployment } from "@/utils/getDeployment.js";
+import * as constants from "@/utils/constants.js";
 
 describe("getDeployment", () => {
   afterAll(() => {

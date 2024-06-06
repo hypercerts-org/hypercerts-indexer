@@ -1,8 +1,8 @@
-import { IndexerConfig } from "@/types/types";
-import { getMissingMetadataUris } from "@/storage/getMissingMetadataUris";
-import { storeMetadata } from "@/storage/storeMetadata";
-import { Tables } from "@/types/database.types";
-import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri";
+import { IndexerConfig } from "@/types/types.js";
+import { getMissingMetadataUris } from "@/storage/getMissingMetadataUris.js";
+import { storeMetadata } from "@/storage/storeMetadata.js";
+import { Tables } from "@/types/database.types.js";
+import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last

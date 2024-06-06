@@ -1,7 +1,7 @@
 import { afterAll, afterEach, describe, it } from "vitest";
-import { client } from "@/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 import sinon from "sinon";
-import { getBlocksToFetch } from "../../src/utils/getBlocksToFetch";
+import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
 
 describe("getBlocksToFetch", () => {
   const readSpy = sinon.stub(client, "getBlockNumber");

@@ -1,4 +1,4 @@
-import { supabase } from "@/clients/supabaseClient";
+import { supabase } from "@/clients/supabaseClient.js";
 
 export const getUnparsedAllowListClaims = async () => {
   const { data: claims, error } = await supabase.rpc(

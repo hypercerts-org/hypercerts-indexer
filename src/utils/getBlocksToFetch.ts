@@ -1,4 +1,4 @@
-import { client } from "@/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 
 interface BlocksToFetchInput {
   contractCreationBlock: bigint;

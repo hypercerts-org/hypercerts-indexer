@@ -1,8 +1,8 @@
 import { decodeAbiParameters, isAddress } from "viem";
-import { Tables } from "@/types/database.types";
-import { EasAttestation } from "@/fetching/fetchAttestationData";
-import { parseSchemaToABI } from "@/utils/parseSchemaToAbi";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
+import { Tables } from "@/types/database.types.js";
+import { EasAttestation } from "@/fetching/fetchAttestationData.js";
+import { parseSchemaToABI } from "@/utils/parseSchemaToAbi.js";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
 import { z } from "zod";
 
 const HypercertAttestationSchema = z.object(

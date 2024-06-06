@@ -1,6 +1,5 @@
-import { supabase } from "@/clients/supabaseClient";
-import { Database, Tables } from "@/types/database.types";
-import * as console from "node:console";
+import { supabase } from "@/clients/supabaseClient.js";
+import { Database } from "@/types/database.types.js";
 
 interface StoreAttestations {
   attestations: Database["public"]["Tables"]["attestations"]["Update"][];

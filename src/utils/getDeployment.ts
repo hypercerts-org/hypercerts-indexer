@@ -1,4 +1,4 @@
-import { chainId } from "@/utils/constants";
+import { chainId } from "@/utils/constants.js";
 import { Deployment, deployments } from "@hypercerts-org/sdk";
 
 /**

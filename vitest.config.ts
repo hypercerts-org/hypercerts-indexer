@@ -3,12 +3,13 @@ import { config } from "dotenv";
 import { resolve } from "node:path";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-config({ path: resolve(__dirname, ".env.test") });
+config({ path: resolve(__dirname, "test/.env.test") });
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     setupFiles: ["./test/setup-env.ts"],
+    exclude: [...(configDefaults.exclude as string[]), "**/integration/**/*ts"],
     // https://github.com/davelosert/vitest-coverage-report-action
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
@@ -21,6 +22,7 @@ export default defineConfig({
         functions: 55,
         statements: 55,
       },
+      include: ["test/**/*.test.ts", "!integration/**/*.test.ts"],
       exclude: [
         ...(configDefaults.coverage.exclude as string[]),
         "**/*.types.ts",

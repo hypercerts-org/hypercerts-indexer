@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
-import { Tables } from "@/types/database.types";
-import { getDeployment } from "@/utils";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp";
+import { Tables } from "@/types/database.types.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 
 export const AttestationSchema = z.object({
