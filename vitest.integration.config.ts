@@ -1,7 +1,7 @@
 import { configDefaults, defineConfig } from "vitest/config";
 import { config } from "dotenv";
-import { resolve } from "node:path";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { resolve } from "node:path";
 
 config({ path: resolve(__dirname, ".env") });
 

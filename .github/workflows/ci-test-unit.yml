@@ -1,9 +1,9 @@
-name: 'Test'
+name: 'Unit tests'
 on:
   pull_request:
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     environment: test
 
@@ -14,8 +14,9 @@ jobs:
       DELAY: ${{ vars.DELAY }}
       SENTRY_ENVIRONMENT: ${{ vars.SENTRY_ENVIRONMENT }}
       SUPABASE_DB_URL: ${{ vars.SUPABASE_DB_URL }}
-      SUPABASE_SERVICE_API_KEY: ${{ vars.SUPABASE_SERVICE_API_KEY }}
+      SUPABASE_SERVICE_API_KEY: ${{ secrets.SUPABASE_SERVICE_API_KEY }}
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
 
     permissions:
       # Required to checkout the code
@@ -37,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: 'Test'
+      - name: 'Run unit tests'
         run: npx vitest --coverage.enabled true
       - name: 'Report Coverage'
         # Set if: always() to also generate the report if tests are failing
