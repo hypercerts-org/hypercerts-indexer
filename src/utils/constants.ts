@@ -7,11 +7,6 @@ export const alchemyApiKey = assertExists(
   "Alchemy API key",
 );
 
-export const ankrApiKey = assertExists(
-  process.env.ANKR_API_KEY,
-  "Ankr API key",
-);
-
 export const infuraApiKey = assertExists(
   process.env.INFURA_API_KEY,
   "Infura API key",
