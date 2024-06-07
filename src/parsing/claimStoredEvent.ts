@@ -33,17 +33,17 @@ export const parseClaimStoredEvent = async (event: unknown) => {
       hash: transactionHash,
     });
 
-    const owner = await client.readContract({
-      address,
-      abi: parseAbi([
-        `function ownerOf(uint256 tokenId) view returns (address owner)`,
-      ]),
-      functionName: "ownerOf",
-      args: [args.claimID],
-    });
+    // const owner = await client.readContract({
+    //   address,
+    //   abi: parseAbi([
+    //     `function ownerOf(uint256 tokenId) view returns (address owner)`,
+    //   ]),
+    //   functionName: "ownerOf",
+    //   args: [args.claimID],
+    // });
 
     return {
-      owner_address: owner,
+      owner_address: "0x0000000000000000000000000000000000000000",
       creator_address: transaction.from,
       token_id: args.claimID,
       uri: args.uri,

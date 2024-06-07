@@ -65,8 +65,6 @@ export const getLogsForContractEvents = async ({
 
     const logs = await client.getFilterLogs({ filter });
 
-    console.log(client);
-
     return { logs, fromBlock: from, toBlock: to };
   } catch (error) {
     console.error(
