@@ -1,6 +1,11 @@
 import { createPublicClient, fallback, http } from "viem";
 import { baseSepolia, optimism, sepolia } from "viem/chains";
-import { alchemyApiKey, chainId, infuraApiKey } from "@/utils/constants.js";
+import {
+  alchemyApiKey,
+  ankrApiKey,
+  chainId,
+  infuraApiKey,
+} from "@/utils/constants.js";
 
 const selectedNetwork = () => {
   switch (chainId) {
@@ -41,8 +46,24 @@ const infuraUrl = () => {
   }
 };
 
+const ankrUrl = () => {
+  switch (chainId) {
+    case 10:
+      return `https://rpc.ankr.com/optimism/${ankrApiKey}`;
+    case 84532:
+      return `https://rpc.ankr.com/base_sepolia/${ankrApiKey}`;
+    case 11155111:
+      return `https://rpc.ankr.com/eth_sepolia/${ankrApiKey}`;
+    default:
+      throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+};
+
 const fallBackProvider = () => {
-  return fallback([http(infuraUrl()), http(alchemyUrl())], {
+  const alchemy = alchemyUrl() ? [http(alchemyUrl())] : [];
+  const ankr = ankrUrl() ? [http(ankrUrl())] : [];
+  const infura = infuraUrl() ? [http(infuraUrl())] : [];
+  return fallback([...infura, ...alchemy, ...ankr], {
     rank: true,
     retryDelay: 1500,
   });
