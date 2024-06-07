@@ -36,7 +36,7 @@ const alchemyUrl = () => {
 const infuraUrl = () => {
   switch (chainId) {
     case 10:
-      return;
+      return `https://optimism-mainnet.infura.io/v3/${infuraApiKey}`;
     case 84532:
       return;
     case 11155111:
