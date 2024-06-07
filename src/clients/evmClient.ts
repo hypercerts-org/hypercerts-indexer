@@ -51,9 +51,9 @@ const ankrUrl = () => {
     case 10:
       return `https://rpc.ankr.com/optimism/${ankrApiKey}`;
     case 84532:
-      return `https://rpc.ankr.com/base_sepolia/${ankrApiKey}`;
+      return;
     case 11155111:
-      return `https://rpc.ankr.com/eth_sepolia/${ankrApiKey}`;
+      return;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
