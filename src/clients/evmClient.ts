@@ -42,7 +42,10 @@ const infuraUrl = () => {
 };
 
 const fallBackProvider = () => {
-  return fallback([http(infuraUrl()), http(alchemyUrl())]);
+  return fallback([http(infuraUrl()), http(alchemyUrl())], {
+    rank: true,
+    retryDelay: 1500,
+  });
 };
 
 /* Returns a PublicClient instance for the configured network. */
