@@ -17,6 +17,11 @@ export const infuraApiKey = assertExists(
   "Infura API key",
 );
 
+export const drpcApiPkey = assertExists(
+  process.env.DRPC_API_KEY,
+  "dRPC API KEY",
+);
+
 export const port = Number(assertExists(process.env.PORT, "Port"));
 
 export const supabaseApiKey = assertExists(

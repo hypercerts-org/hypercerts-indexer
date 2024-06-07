@@ -2,8 +2,8 @@ import { createPublicClient, fallback, http } from "viem";
 import { baseSepolia, optimism, sepolia } from "viem/chains";
 import {
   alchemyApiKey,
-  ankrApiKey,
   chainId,
+  drpcApiPkey,
   infuraApiKey,
 } from "@/utils/constants.js";
 
@@ -36,7 +36,7 @@ const alchemyUrl = () => {
 const infuraUrl = () => {
   switch (chainId) {
     case 10:
-      return `https://optimism-mainnet.infura.io/v3/${infuraApiKey}`;
+      return;
     case 84532:
       return;
     case 11155111:
@@ -46,10 +46,10 @@ const infuraUrl = () => {
   }
 };
 
-const ankrUrl = () => {
+const drpcUrl = () => {
   switch (chainId) {
     case 10:
-      return `https://rpc.ankr.com/optimism/${ankrApiKey}`;
+      return `https://lb.drpc.org/ogrpc?network=optimism&dkey=${drpcApiPkey}`;
     case 84532:
       return;
     case 11155111:
@@ -61,9 +61,9 @@ const ankrUrl = () => {
 
 const fallBackProvider = () => {
   const alchemy = alchemyUrl() ? [http(alchemyUrl())] : [];
-  const ankr = ankrUrl() ? [http(ankrUrl())] : [];
   const infura = infuraUrl() ? [http(infuraUrl())] : [];
-  return fallback([...infura, ...alchemy, ...ankr], {
+  const drpc = drpcUrl() ? [http(drpcUrl())] : [];
+  return fallback([...alchemy, ...drpc, ...infura], {
     rank: true,
     retryDelay: 1500,
   });
