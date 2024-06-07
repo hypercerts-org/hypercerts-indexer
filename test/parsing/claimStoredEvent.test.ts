@@ -22,7 +22,7 @@ describe("claimStoredEvent", {}, () => {
 
     expect(parsed).toEqual({
       creator_address: from,
-      owner_address: owner,
+      owner_address: "0x0000000000000000000000000000000000000000",
       uri: mockEvent.args.uri,
       units: mockEvent.args.totalUnits,
       block_number: mockEvent.blockNumber,

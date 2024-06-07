@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { resolve } from "node:path";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-config({ path: resolve(__dirname, "test/.env.test") });
+config({ path: resolve(__dirname, ".env") });
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
