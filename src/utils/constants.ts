@@ -15,13 +15,13 @@ export const infuraApiKey = assertExists(
 export const port = Number(assertExists(process.env.PORT, "Port"));
 
 export const supabaseApiKey = assertExists(
-  process.env.SUPABASE_SERVICE_API_KEY,
-  "Supabase API key",
+  process.env.SUPABASE_CACHING_SERVICE_API_KEY,
+  "Supabase caching service API key",
 );
 
 export const supabaseUrl = assertExists(
-  process.env.SUPABASE_DB_URL,
-  "Supabase URL",
+  process.env.SUPABASE_CACHING_DB_URL,
+  "Supabase caching DB URL",
 );
 
 export const batchSize = BigInt(
