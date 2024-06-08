@@ -5,7 +5,6 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
-import { ParsedClaimStoredEvent } from "@/parsing/claimStoredEvent";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
