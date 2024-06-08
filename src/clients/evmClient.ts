@@ -64,7 +64,6 @@ const fallBackProvider = () => {
   const infura = infuraUrl() ? [http(infuraUrl())] : [];
   const drpc = drpcUrl() ? [http(drpcUrl())] : [];
   return fallback([...alchemy, ...drpc, ...infura], {
-    rank: true,
     retryDelay: 1500,
   });
 };
