@@ -5,6 +5,7 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
+import { ParsedClaimStoredEvent } from "@/parsing/claimStoredEvent";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -61,15 +62,29 @@ export const indexUnitTransfers = async ({
 
       const { logs, toBlock } = logsFound;
 
-      // Validate and parse logs
-      const parsedEvents = (
-        await Promise.all(logs.map(parseValueTransfer))
-      ).filter((transfer): transfer is NewUnitTransfer => transfer !== null);
+      // Split logs into chunks
+      const logChunks = chunkArray(logs, 10);
 
-      const transfers = parsedEvents.map((transfer) => ({
-        ...transfer,
-        contracts_id: contractEvent.contracts_id,
-      }));
+      // Initialize an empty array to store all claims
+      let allTransfers: NewUnitTransfer[] = [];
+
+      // Process each chunk one by one
+      for (const logChunk of logChunks) {
+        const events = await Promise.all(logChunk.map(parseValueTransfer));
+
+        const transfers = events.map((transfer) => ({
+          ...transfer,
+          contracts_id: contractEvent.contracts_id,
+        }));
+
+        // Add the claims from the current chunk to the allClaims array
+        allTransfers = [...allTransfers, ...transfers];
+      }
+
+      // Validate and parse logs
+      const transfers = allTransfers.filter(
+        (transfer): transfer is NewUnitTransfer => transfer !== null,
+      );
 
       return {
         transfers,
@@ -98,4 +113,12 @@ export const indexUnitTransfers = async ({
       ),
     }),
   );
+};
+
+const chunkArray = (array, size) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
 };

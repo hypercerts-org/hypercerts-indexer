@@ -63,10 +63,27 @@ export const indexTransferSingleEvents = async ({
       const { logs, toBlock } = logsFound;
       console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
 
+      // Split logs into chunks
+      const logChunks = chunkArray(logs, 10);
+
+      // Initialize an empty array to store all claims
+      let allTransfers: NewTransfer[] = [];
+
+      //Process each chunk one by one
+      for (const logChunk of logChunks) {
+        const events = await Promise.all(logChunk.map(parseTransferSingle));
+
+        const transfers = events.map((transfer) => ({
+          ...transfer,
+          contracts_id: contractEvent.contracts_id,
+        }));
+
+        // Add the claims from the current chunk to the allClaims array
+        allTransfers = [...allTransfers, ...transfers];
+      }
+
       // Validate and parse logs
-      const tokensToStore = (
-        await Promise.all(logs.map(parseTransferSingle))
-      ).filter(
+      const tokensToStore = allTransfers.filter(
         (transfer): transfer is NewTransfer =>
           transfer !== null &&
           transfer !== undefined &&
@@ -110,4 +127,12 @@ export const indexTransferSingleEvents = async ({
       ),
     }),
   );
+};
+
+const chunkArray = (array, size) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
 };
