@@ -1,4 +1,7 @@
-import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
+import {
+  parseClaimStoredEvent,
+  ParsedClaimStoredEvent,
+} from "@/parsing/claimStoredEvent.js";
 import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
@@ -50,16 +53,27 @@ export const indexClaimsStoredEvents = async ({
         contractEvent,
       });
 
-      // parse logs to get claimID, contractAddress and cid
-      const events = await Promise.all(logs.map(parseClaimStoredEvent));
+      // Split logs into chunks
+      const logChunks = chunkArray(logs, 10);
 
-      const claims = events.map((claim) => ({
-        ...claim,
-        contracts_id: contractEvent.contracts_id,
-      }));
+      // Initialize an empty array to store all claims
+      let allClaims: ParsedClaimStoredEvent[] = [];
+
+      // Process each chunk one by one
+      for (const logChunk of logChunks) {
+        const events = await Promise.all(logChunk.map(parseClaimStoredEvent));
+
+        const claims = events.map((claim) => ({
+          ...claim,
+          contracts_id: contractEvent.contracts_id,
+        }));
+
+        // Add the claims from the current chunk to the allClaims array
+        allClaims = [...allClaims, ...claims];
+      }
 
       return {
-        claims,
+        claims: allClaims,
         contractEventUpdate: {
           ...contractEvent,
           last_block_indexed: toBlock,
@@ -67,7 +81,6 @@ export const indexClaimsStoredEvents = async ({
       };
     }),
   );
-
   const claims = results.flatMap((result) => result.claims);
 
   const contractEventUpdates = results.flatMap((result) => [
@@ -81,4 +94,12 @@ export const indexClaimsStoredEvents = async ({
       contract_events: contractEventUpdates,
     }),
   );
+};
+
+const chunkArray = (array, size) => {
+  const result = [];
+  for (let i = 0; i < array.length; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
 };
