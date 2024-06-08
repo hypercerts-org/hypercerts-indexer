@@ -17,11 +17,20 @@ export const ClaimStoredEventSchema = z.object({
 
 export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
 
+export type ParsedClaimStoredEvent = {
+  owner_address: string;
+  creator_address: string;
+  token_id: bigint;
+  uri: string;
+  block_number: bigint;
+  units: bigint;
+};
+
 /**
  * Parses a ClaimStoredEvent and retrieves additional information about the transaction.
  *
  * @param {unknown} event - The event to parse.
- * @returns {Promise<Object>} A promise that resolves to an object containing the parsed event data.
+ * @returns {Promise<ParsedClaimStoredEvent>} A promise that resolves to an object containing the parsed event data.
  * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
 export const parseClaimStoredEvent = async (event: unknown) => {
@@ -33,16 +42,7 @@ export const parseClaimStoredEvent = async (event: unknown) => {
       hash: transactionHash,
     });
 
-    // const owner = await client.readContract({
-    //   address,
-    //   abi: parseAbi([
-    //     `function ownerOf(uint256 tokenId) view returns (address owner)`,
-    //   ]),
-    //   functionName: "ownerOf",
-    //   args: [args.claimID],
-    // });
-
-    return {
+    const parsedEvent: ParsedClaimStoredEvent = {
       owner_address: "0x0000000000000000000000000000000000000000",
       creator_address: transaction.from,
       token_id: args.claimID,
@@ -50,6 +50,8 @@ export const parseClaimStoredEvent = async (event: unknown) => {
       block_number: blockNumber,
       units: args.totalUnits,
     };
+
+    return parsedEvent;
   } catch (error) {
     console.error(
       "[ParseClaimStoredEvent] Error parsing claim stored event",
