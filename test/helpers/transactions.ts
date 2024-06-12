@@ -21,3 +21,23 @@ export const submitMintClaimTransaction = async ({
     account,
   });
 };
+
+export const submitSplitTransaction = async ({
+  contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941" as `0x${string}`,
+  account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A" as `0x${string}`,
+  hypercertTokenId = "340282366920938463463374607431768211456",
+  fractions = [parseEther("0.5"), parseEther("0.5")],
+}: {
+  contractAddress: `0x${string}`;
+  account: `0x${string}`;
+  hypercertTokenId: string;
+  fractions: bigint[];
+}) => {
+  return await walletClient.writeContract({
+    address: contractAddress,
+    abi: HypercertMinterAbi,
+    functionName: "splitFraction",
+    args: [account, hypercertTokenId, fractions],
+    account,
+  });
+};

@@ -5,6 +5,7 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
+import * as console from "node:console";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -64,6 +65,8 @@ export const indexUnitTransfers = async ({
       // Split logs into chunks
       const logChunks = chunkArray(logs, 10);
 
+      console.log(logChunks);
+
       // Initialize an empty array to store all claims
       let allTransfers: NewUnitTransfer[] = [];
 
@@ -71,19 +74,24 @@ export const indexUnitTransfers = async ({
       for (const logChunk of logChunks) {
         const events = await Promise.all(logChunk.map(parseValueTransfer));
 
-        const transfers = events.map((transfer) => ({
+        const _transfers = events.map((transfer) => ({
           ...transfer,
           contracts_id: contractEvent.contracts_id,
         }));
 
+        console.log("local transfers: ", _transfers);
+
         // Add the claims from the current chunk to the allClaims array
-        allTransfers = [...allTransfers, ...transfers];
+        allTransfers = [...allTransfers, ..._transfers];
       }
+      console.log("All Transfers: ", allTransfers);
 
       // Validate and parse logs
       const transfers = allTransfers.filter(
         (transfer): transfer is NewUnitTransfer => transfer !== null,
       );
+
+      console.log("tranfers after filter: ", transfers);
 
       return {
         transfers,
@@ -101,6 +109,8 @@ export const indexUnitTransfers = async ({
       (transfer): transfer is NewUnitTransfer =>
         transfer !== null && transfer !== undefined,
     );
+
+  console.log("Transfers to store: ", transfers);
 
   // store the claim and fraction tokens
   return await storeUnitTransfer({

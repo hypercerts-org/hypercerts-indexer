@@ -63,6 +63,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     }),
   );
 
+  console.log("Transfers to store", _transfers);
   await supabase
     .rpc("transfer_units_batch", {
       p_transfers: _transfers,
