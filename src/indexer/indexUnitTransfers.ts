@@ -65,8 +65,6 @@ export const indexUnitTransfers = async ({
       // Split logs into chunks
       const logChunks = chunkArray(logs, 10);
 
-      console.log(logChunks);
-
       // Initialize an empty array to store all claims
       let allTransfers: NewUnitTransfer[] = [];
 
@@ -79,19 +77,14 @@ export const indexUnitTransfers = async ({
           contracts_id: contractEvent.contracts_id,
         }));
 
-        console.log("local transfers: ", _transfers);
-
         // Add the claims from the current chunk to the allClaims array
         allTransfers = [...allTransfers, ..._transfers];
       }
-      console.log("All Transfers: ", allTransfers);
 
       // Validate and parse logs
       const transfers = allTransfers.filter(
         (transfer): transfer is NewUnitTransfer => transfer !== null,
       );
-
-      console.log("tranfers after filter: ", transfers);
 
       return {
         transfers,
@@ -109,8 +102,6 @@ export const indexUnitTransfers = async ({
       (transfer): transfer is NewUnitTransfer =>
         transfer !== null && transfer !== undefined,
     );
-
-  console.log("Transfers to store: ", transfers);
 
   // store the claim and fraction tokens
   return await storeUnitTransfer({
