@@ -29,10 +29,17 @@ export const storeAttestations = async ({
     `[StoreAttestations] Storing ${_attestations.length} attestations`,
   );
 
+  const parsedAttestations = _attestations.map((attestation) => {
+    return {
+      ...attestation,
+      token_id: attestation.token_id.toString(),
+    };
+  });
+
   try {
     await supabase
       .from("attestations")
-      .upsert(_attestations, {
+      .upsert(parsedAttestations, {
         onConflict: "supported_schemas_id, uid",
       })
       .throwOnError();
