@@ -23,6 +23,13 @@ BigInt.prototype.fromJSON = function () {
 };
 
 beforeEach(async () => {
+  await testClient.reset({
+    jsonRpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
+    blockNumber: 4421945n,
+  });
+});
+
+afterEach(async (context) => {
   await supabaseAdmin.rpc("sql", {
     query: "TRUNCATE TABLE public.claims RESTART IDENTITY",
   });
@@ -31,24 +38,19 @@ beforeEach(async () => {
     query: "TRUNCATE TABLE public.fractions RESTART IDENTITY",
   });
 
-  await testClient.reset({
-    jsonRpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
-    blockNumber: 4421945n,
-  });
-});
-
-afterAll(async () => {
-  await testClient.reset({
-    jsonRpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
-    blockNumber: 4421945n,
-  });
-
-  vi.clearAllMocks();
-});
-
-afterEach(async (context) => {
   context.onTestFailed(async () => {
     const logs = await fetchLogs("http://localhost:8545", pool);
     console.log(...logs.slice(-20));
   });
+});
+
+afterAll(async () => {
+  await supabaseAdmin.rpc("sql", {
+    query: "TRUNCATE TABLE public.claims RESTART IDENTITY",
+  });
+
+  await supabaseAdmin.rpc("sql", {
+    query: "TRUNCATE TABLE public.fractions RESTART IDENTITY",
+  });
+  vi.clearAllMocks();
 });
