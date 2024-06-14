@@ -15,7 +15,7 @@
     "supabase:reset": "npx supabase db reset",
     "supabase:seed": "npx supabase db reset && npx tsx seed.ts",
     "update:sentry:sourcemaps": "npx @sentry/wizard@latest -i sourcemaps",
-    "supabase:types": "supabase gen types typescript --local > src/types/database-generated.types.ts"
+    "supabase:types": "npx supabase gen types typescript --local > src/types/database-generated.types.ts"
   },
   "keywords": [],
   "author": "",

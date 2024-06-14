@@ -49,12 +49,11 @@ describe("getBlocksToFetch", () => {
     expect(result).toEqual({ fromBlock: 1337n, toBlock: 1400n });
   });
 
-  it("throws when fromBlock is more recent than toBlock", async ({
+  it("sets blocks to match when fromBlock is greater than toBlock", async ({
     expect,
   }) => {
     readSpy.resolves(1300n);
-    await expect(() => getBlocksToFetch(defaultInput)).rejects.toThrowError(
-      "[getBlocksToFetch] from block more recent than to block. [1337, 1300]",
-    );
+    const result = await getBlocksToFetch(defaultInput);
+    expect(result).toEqual({ fromBlock: 1300n, toBlock: 1300n });
   });
 });
