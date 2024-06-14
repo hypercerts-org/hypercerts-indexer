@@ -35,26 +35,34 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
+  const claimIds: { [key: string]: string } = {};
+
   const _transfers = await Promise.all(
     transfers.map(async (transfer) => {
-      const { data: claim, error: claimError } = await supabase.rpc(
-        "get_or_create_claim",
-        {
-          p_token_id: getClaimTokenId(transfer.to_token_id).toString(),
-          p_contracts_id: transfer.contracts_id,
-        },
-      );
+      const claimTokenId =
+        transfer.from_token_id === 0n
+          ? getClaimTokenId(transfer.to_token_id).toString()
+          : getClaimTokenId(transfer.from_token_id).toString();
+      let claimId = claimIds[claimTokenId];
 
-      if (claimError || !claim) {
-        console.error(
-          `[StoreUnitTransfer] Error while getting or creating claim.`,
-          claimError,
-        );
+      if (!claimId) {
+        const { data: claim } = await supabase
+          .rpc("get_or_create_claim", {
+            p_token_id: claimTokenId,
+            p_contracts_id: transfer.contracts_id,
+          })
+          .throwOnError();
+        claimId = claim?.id;
+        claimIds[claimTokenId] = claim?.id;
+      }
+
+      if (!claimId) {
+        console.error(`[StoreUnitTransfer] Could net get claim_id.`);
         return;
       }
 
       return {
-        claim_id: claim.id,
+        claim_id: claimId,
         from_token_id: transfer.from_token_id.toString(),
         to_token_id: transfer.to_token_id.toString(),
         block_timestamp: transfer.block_timestamp,
@@ -63,6 +71,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     }),
   );
 
+  console.log("Transfers to store", _transfers);
   await supabase
     .rpc("transfer_units_batch", {
       p_transfers: _transfers,

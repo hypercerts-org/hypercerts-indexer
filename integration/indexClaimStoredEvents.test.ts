@@ -1,21 +1,11 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
 import { publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
 import { getAddress, parseEther } from "viem";
-import { Database, Tables } from "../src/types/database.types";
+import { Tables } from "../src/types/database.types";
 import { submitMintClaimTransaction } from "../test/helpers/transactions";
-import { createClient } from "@supabase/supabase-js";
-import { alchemyApiKey, supabaseUrl } from "../src/utils/constants";
+import { ZERO_ADDRESS } from "../src/utils/constants";
 
 vi.mock("../src/clients/evmClient", () => {
   return {
@@ -24,33 +14,10 @@ vi.mock("../src/clients/evmClient", () => {
 });
 
 describe("index claimStored events", async () => {
-  const supabaseAdmin = createClient<Database>(
-    supabaseUrl,
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
-  );
-  const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
   beforeAll(async () => {
     await testClient.impersonateAccount({
       address: "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A",
     });
-  });
-
-  beforeEach(async () => {
-    await supabaseAdmin.rpc("sql", {
-      query: "TRUNCATE TABLE public.claims RESTART IDENTITY",
-    });
-    await testClient.reset({
-      jsonRpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
-      blockNumber: 4421945n,
-    });
-  });
-
-  afterAll(async () => {
-    await supabaseAdmin.rpc("sql", {
-      query: "TRUNCATE TABLE public.claims RESTART IDENTITY",
-    });
-    vi.clearAllMocks();
   });
 
   it("observes and stores mintClaim event", async () => {

@@ -47,9 +47,7 @@ export const getBlocksToFetch = async ({
         : _fromBlock + batchSize;
 
     if (_fromBlock > _toBlock) {
-      throw Error(
-        `[getBlocksToFetch] from block more recent than to block. [${_fromBlock}, ${_toBlock}]`,
-      );
+      return { fromBlock: _toBlock, toBlock: _toBlock };
     }
 
     return { fromBlock: _fromBlock, toBlock: _toBlock };

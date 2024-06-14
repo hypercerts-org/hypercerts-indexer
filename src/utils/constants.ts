@@ -34,3 +34,5 @@ export const batchSize = BigInt(
 );
 
 export const delay = Number(assertExists(process.env.DELAY, "Delay"));
+
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

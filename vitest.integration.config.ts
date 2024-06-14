@@ -8,6 +8,8 @@ config({ path: resolve(__dirname, ".env") });
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
+    fileParallelism: false,
+    testTimeout: 30000,
     include: ["./integration/**/*.test.ts"],
     globalSetup: ["./integration/globalSetup.ts"],
     setupFiles: ["./integration/setup-env.ts"],
@@ -27,7 +29,6 @@ export default defineConfig({
         ...(configDefaults.coverage.exclude as string[]),
         "**/*.types.ts",
         "**/types.ts",
-        "all_leaf_claimed_events.ts",
       ],
     },
   },
