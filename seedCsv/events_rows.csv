@@ -1,0 +1,6 @@
+id,name,abi
+4005ad0a-82c8-5071-9f76-804e753738a7,ClaimStored,"event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)"
+87f19d2c-6490-5bfc-b551-bacabbea7ab3,TransferSingle,"event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)"
+ee6511da-c2f8-569e-ac7e-8c323a022ac3,ValueTransfer,"event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value)"
+1673bb82-e1a3-57a0-9e40-2ba1a6518133,AllowlistCreated,"event AllowlistCreated(uint256 tokenID, bytes32 root)"
+77a23d72-77dc-5dec-a06d-22ea5e1da368,LeafClaimed,"event LeafClaimed(uint256 tokenID, bytes32 leaf)"

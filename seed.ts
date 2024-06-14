@@ -55,7 +55,7 @@ const main = async () => {
   await seed.supported_schemas([
     {
       chain_id: 11155111,
-      uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449\n",
+      uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
       last_block_indexed: 6098991,
       resolver: null,
       schema: null,

@@ -39,7 +39,7 @@ BEGIN
                         INTO from_token
                         FROM fractions
                         WHERE token_id = transfer.from_token_id
-                          AND claims_id = transfer.claim_id;
+                          AND claims_id = transfer.claim_id FOR UPDATE;
 
                         -- Insert from_token in the intermediate_fractions table
                         INSERT INTO intermediate_fractions (claims_id, token_id, units, creation_block_timestamp,
@@ -69,7 +69,7 @@ BEGIN
                         INTO from_token
                         FROM intermediate_fractions
                         WHERE token_id = transfer.from_token_id
-                          AND claims_id = transfer.claim_id;
+                          AND claims_id = transfer.claim_id FOR UPDATE;
                     END IF;
 
                     IF from_token IS NULL
@@ -92,7 +92,7 @@ BEGIN
                         INTO to_token
                         FROM fractions
                         WHERE token_id = transfer.to_token_id
-                          AND claims_id = transfer.claim_id;
+                          AND claims_id = transfer.claim_id FOR UPDATE;
 
                         -- Insert from_token in the intermediate_fractions table
                         INSERT INTO intermediate_fractions (claims_id, token_id, units, creation_block_timestamp,
@@ -121,7 +121,7 @@ BEGIN
                         INTO to_token
                         FROM intermediate_fractions
                         WHERE token_id = transfer.to_token_id
-                          AND claims_id = transfer.claim_id;
+                          AND claims_id = transfer.claim_id FOR UPDATE;
                     END IF;
 
                     IF to_token IS NULL
