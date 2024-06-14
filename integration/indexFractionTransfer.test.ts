@@ -1,22 +1,10 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
 import { publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
 import { parseEther } from "viem";
 import { Tables } from "../src/types/database.types";
-import {
-  submitMintClaimTransaction,
-  submitSplitTransaction,
-} from "../test/helpers/transactions";
+import { submitMintClaimTransaction } from "../test/helpers/transactions";
 import { indexUnitTransfers } from "../src/indexer/indexUnitTransfers";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 

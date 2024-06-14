@@ -9,7 +9,6 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     testTimeout: 30000,
-    fileParallelism: false,
     include: ["./integration/**/*.test.ts"],
     globalSetup: ["./integration/globalSetup.ts"],
     setupFiles: ["./integration/setup-env.ts"],
