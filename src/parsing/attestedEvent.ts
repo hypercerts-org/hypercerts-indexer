@@ -8,8 +8,10 @@ import { messages } from "@/utils/validation";
 export const AttestationSchema = z.object({
   uid: z.string(),
   schema: z.string(),
-  recipient: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
-  attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS })
+  recipient: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
 });
 
 export type Attestation = z.infer<typeof AttestationSchema>;
@@ -17,12 +19,16 @@ export type Attestation = z.infer<typeof AttestationSchema>;
 export const AttestedEventSchema = z.object({
   address: z.string().refine(isAddress),
   args: z.object({
-    recipient: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
-    attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS })
+    recipient: z
+      .string()
+      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+    attester: z
+      .string()
+      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
     uid: z.string(),
-    schema: z.string()
+    schema: z.string(),
   }),
-  blockNumber: z.bigint()
+  blockNumber: z.bigint(),
 });
 
 const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
@@ -30,8 +36,8 @@ const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
     address: z
       .string()
       .refine((address) => address.toLowerCase() == easAddress.toLowerCase(), {
-        message: "[parseAttestedEvent] Address does not match EAS address"
-      })
+        message: "[parseAttestedEvent] Address does not match EAS address",
+      }),
   });
 };
 
@@ -67,7 +73,7 @@ export type ParsedAttestedEvent = Pick<
  * ```
  */
 export const parseAttestedEvent = async (
-  log: unknown
+  log: unknown,
 ): Promise<ParsedAttestedEvent> => {
   const { easAddress } = getDeployment();
   const validator = createAttestedEventSchema({ easAddress });
@@ -77,6 +83,6 @@ export const parseAttestedEvent = async (
     recipient: args.recipient,
     attester: args.attester,
     uid: args.uid,
-    block_timestamp: await getBlockTimestamp(blockNumber)
+    block_timestamp: await getBlockTimestamp(blockNumber),
   };
 };
