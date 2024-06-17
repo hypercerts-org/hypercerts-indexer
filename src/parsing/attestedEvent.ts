@@ -3,7 +3,7 @@ import { Tables } from "@/types/database.types.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
-import { messages } from "@/utils/validation";
+import { messages } from "@/utils/validation.js";
 
 export const AttestationSchema = z.object({
   uid: z.string(),
