@@ -3,12 +3,15 @@ import { Tables } from "@/types/database.types.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
+import { messages } from "@/utils/validation.js";
 
 export const AttestationSchema = z.object({
   uid: z.string(),
   schema: z.string(),
-  recipient: z.string().refine(isAddress),
-  attester: z.string().refine(isAddress),
+  recipient: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
 });
 
 export type Attestation = z.infer<typeof AttestationSchema>;
@@ -16,8 +19,12 @@ export type Attestation = z.infer<typeof AttestationSchema>;
 export const AttestedEventSchema = z.object({
   address: z.string().refine(isAddress),
   args: z.object({
-    recipient: z.string().refine(isAddress),
-    attester: z.string().refine(isAddress),
+    recipient: z
+      .string()
+      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+    attester: z
+      .string()
+      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
     uid: z.string(),
     schema: z.string(),
   }),
