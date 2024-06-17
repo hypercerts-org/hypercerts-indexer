@@ -91,6 +91,6 @@ export const storeMetadata = async ({ metadata }: StoreMetadata) => {
       .upsert(parsedMetadata, { onConflict: "uri", ignoreDuplicates: false })
       .throwOnError();
   } catch (error) {
-    console.error("[StoreMetadata] Error while storing metadata", error);
+    console.error("[StoreMetadata] Error while storing parsed metadata", error);
   }
 };
