@@ -15,7 +15,7 @@ export const fetchFromIPFS = async ({ uri }: { uri: string }) => {
 
     return res.data;
   } catch (error) {
-    console.error(`Failed to get metadata from IPFS for URI ${uri}`, error);
+    console.warn(`Failed to get metadata from IPFS for URI ${uri}`, error);
     return;
   }
 };
@@ -32,7 +32,7 @@ export const fetchFromHTTPS = async ({ uri }: { uri: string }) => {
 
     return res.data;
   } catch (error) {
-    console.error(`Failed to get metadata from URI ${uri} `, error);
+    console.warn(`Failed to get metadata from URI ${uri} `, error);
     return;
   }
 };
@@ -52,7 +52,7 @@ const getFromIPFSGateways = async (
     axios.get(getNftStorageGatewayUri(pointer), { timeout }),
     axios.get(getWeb3UpGatewayUri(pointer), { timeout }),
   ]).catch((err) => {
-    console.error(`Failed to get ${cidOrIpfsUri} from any gateway`, err);
+    console.warn(`Failed to get ${cidOrIpfsUri} from any gateway`, err);
   });
 };
 
@@ -62,7 +62,7 @@ const getPointer = (uri: string) => {
   const cid = split.shift();
 
   if (!cid) {
-    console.error(`No CID found in URI ${uri}`);
+    console.warn(`No CID found in URI ${uri}`);
     return;
   }
 

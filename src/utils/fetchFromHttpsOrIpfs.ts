@@ -2,7 +2,7 @@ import { fetchFromHTTPS, fetchFromIPFS } from "@/utils/fetching.js";
 
 export const fetchFromHttpsOrIpfs = async (uri?: string): Promise<unknown> => {
   if (!uri || uri === "ipfs://null" || uri === "ipfs://") {
-    console.error("[fetchFromHttpsOrIpfs] URI is missing");
+    console.warn("[fetchFromHttpsOrIpfs] URI is missing");
     return;
   }
 
