@@ -29,7 +29,7 @@ const alchemyUrl = () => {
     case 10:
       return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 8453:
-      return `https://base-mainnet.g.alchemy.com/v2/{alchemyApiKey}`;
+      return `https://base-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 42220:
       return;
     case 84532:
