@@ -46,6 +46,8 @@ const infuraUrl = () => {
     case 10:
       return `https://optimism-mainnet.infura.io/v3/${infuraApiKey}`;
     case 8453:
+      return;
+    case 42220:
       return `https://celo-mainnet.infura.io/v3/${infuraApiKey}`;
     case 84532:
       return;
@@ -62,6 +64,8 @@ const drpcUrl = () => {
       return `https://lb.drpc.org/ogrpc?network=optimism&dkey=${drpcApiPkey}`;
     case 8453:
       return `https://lb.drpc.org/ogrpc?network=base&dkey=${drpcApiPkey}`;
+    case 42220:
+      return `https://lb.drpc.org/ogrpc?network=celo&dkey=${drpcApiPkey}`;
     case 84532:
       return;
     case 11155111:
