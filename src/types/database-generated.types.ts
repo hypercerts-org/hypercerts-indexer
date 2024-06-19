@@ -497,6 +497,22 @@ export type Database = {
       }
     }
     Views: {
+      claimable_fractions_with_proofs: {
+        Row: {
+          claimed: boolean | null
+          entry: number | null
+          hypercert_id: string | null
+          id: string | null
+          leaf: string | null
+          proof: Json | null
+          root: string | null
+          token_id: number | null
+          total_units: number | null
+          units: number | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
       hypercert_allow_list_records_with_token_id: {
         Row: {
           claimed: boolean | null
