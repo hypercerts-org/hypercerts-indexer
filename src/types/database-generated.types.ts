@@ -217,18 +217,21 @@ export type Database = {
         Row: {
           chain_id: number
           contract_address: string
+          contract_slug: string
           id: string
           start_block: number | null
         }
         Insert: {
           chain_id: number
           contract_address: string
+          contract_slug: string
           id?: string
           start_block?: number | null
         }
         Update: {
           chain_id?: number
           contract_address?: string
+          contract_slug?: string
           id?: string
           start_block?: number | null
         }
@@ -237,16 +240,19 @@ export type Database = {
       events: {
         Row: {
           abi: string
+          contract_slug: string
           id: string
           name: string
         }
         Insert: {
           abi: string
+          contract_slug: string
           id?: string
           name: string
         }
         Update: {
           abi?: string
+          contract_slug?: string
           id?: string
           name?: string
         }

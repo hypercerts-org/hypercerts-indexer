@@ -7,28 +7,41 @@ import { createSeedClient } from "@snaplet/seed";
 const main = async () => {
   const seed = await createSeedClient({});
 
+  const minterContractSlug = "minter-contract";
+  const marketplaceContractSlug = "marketplace-contract";
+
   // Seed the database with default events
   console.log("🕊️ Seeding events...");
   const { events } = await seed.events([
     {
       name: "ClaimStored",
       abi: "event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)",
+      contract_slug: minterContractSlug,
     },
     {
       name: "TransferSingle",
       abi: "event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)",
+      contract_slug: minterContractSlug,
     },
     {
       name: "ValueTransfer",
       abi: "event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value)",
+      contract_slug: minterContractSlug,
     },
     {
       name: "AllowlistCreated",
       abi: "event AllowlistCreated(uint256 tokenID, bytes32 root)",
+      contract_slug: minterContractSlug,
     },
     {
       name: "LeafClaimed",
       abi: "event LeafClaimed(uint256 tokenID, bytes32 leaf)",
+      contract_slug: minterContractSlug,
+    },
+    {
+      name: "TakerBid",
+      abi: "event TakerBid(tuple nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
+      contract_slug: marketplaceContractSlug,
     },
   ]);
 
@@ -38,16 +51,25 @@ const main = async () => {
       chain_id: 845322,
       contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
       start_block: 6771210,
+      contract_slug: minterContractSlug,
     },
     {
       chain_id: 11155111,
       contract_address: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
       start_block: 4421945,
+      contract_slug: minterContractSlug,
     },
     {
       chain_id: 10,
       contract_address: "0x822f17a9a5eecfd66dbaff7946a8071c265d1d07",
       start_block: 76066993,
+      contract_slug: minterContractSlug,
+    },
+    {
+      chain_id: 11155111,
+      contract_address: "0x9819bbb6980AaA586A8e80dB963a766C6D5711c4",
+      start_block: 6053748,
+      contract_slug: marketplaceContractSlug,
     },
   ]);
 
@@ -65,8 +87,12 @@ const main = async () => {
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");
-  const contractEvents = contracts.flatMap((contract) => {
-    return events.map((event) => {
+  const contractEvents = events.map((event) => {
+    const contractsWithMatchingSlug = contracts.filter(
+      (contract) => contract.contract_slug === event.contract_slug,
+    );
+
+    return contractsWithMatchingSlug.map((contract) => {
       return {
         contract_id: contract.id!,
         event_id: event.id!,
@@ -75,14 +101,16 @@ const main = async () => {
     });
   });
 
-  const { contract_events } = await seed.contract_events(contractEvents, {
-    connect: { contracts, events },
-  });
-
-  console.log(contract_events);
+  const { contract_events } = await seed.contract_events(
+    contractEvents.flat(),
+    {
+      connect: { contracts, events },
+    },
+  );
 
   console.log("🚀 Database seeded successfully!");
 
   process.exit();
 };
+
 main();

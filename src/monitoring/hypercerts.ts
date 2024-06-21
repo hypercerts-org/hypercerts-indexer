@@ -1,7 +1,7 @@
 import { client } from "@/clients/evmClient.js";
 import { EventToFetch } from "@/types/types.js";
-import { getMinterAddressAndStartBlock } from "@/utils/getMinterAddressAndStartBlock.js";
 import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
+import { HypercertExchangeAbi } from "@hypercerts-org/contracts";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 
 interface GetLogsForEventInput {
@@ -43,16 +43,31 @@ export const getLogsForContractEvents = async ({
   batchSize,
   contractEvent,
 }: GetLogsForEventInput) => {
-  const { address, startBlock } = getMinterAddressAndStartBlock();
   const { fromBlock: from, toBlock: to } = await getBlocksToFetch({
-    contractCreationBlock: startBlock,
+    contractCreationBlock: contractEvent.start_block,
     fromBlock,
     batchSize,
   });
 
+  // const from = 6140658n - 1n;
+  // const to = 6140658n + 1n;
+
+  const getAbiByContractSlug = (contractSlug: string) => {
+    switch (contractSlug) {
+      case "minter-contract":
+        return HypercertMinterAbi;
+      case "marketplace-contract":
+        return HypercertExchangeAbi;
+      default:
+        throw new Error(
+          `[getAbiByContractSlug] Unknown contract slug: ${contractSlug}`,
+        );
+    }
+  };
+
   const filter = await client.createContractEventFilter({
-    abi: HypercertMinterAbi,
-    address,
+    abi: getAbiByContractSlug(contractEvent.contract_slug),
+    address: contractEvent.contract_address as `0x${string}`,
     eventName: contractEvent.event_name,
     fromBlock: from,
     toBlock: to,
@@ -68,7 +83,7 @@ export const getLogsForContractEvents = async ({
     return { logs, fromBlock: from, toBlock: to };
   } catch (error) {
     console.error(
-      `[GetLogsForContractEvents] Error while fetching logs for contract event ${contractEvent.event_name} on contract ${address}`,
+      `[GetLogsForContractEvents] Error while fetching logs for contract event ${contractEvent.event_name} on contract ${contractEvent.contract_address}`,
       error,
     );
     throw error;

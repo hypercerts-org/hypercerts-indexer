@@ -10,6 +10,8 @@ export type EventToFetch = {
   event_name: string;
   abi: string;
   last_block_indexed: bigint;
+  contract_slug: string;
+  start_block: bigint;
 };
 
 export type LeafClaimed = {
