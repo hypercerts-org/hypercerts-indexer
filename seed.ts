@@ -2,17 +2,22 @@
  * Use any TypeScript runner to run this script, for example: `npx tsx seed.ts`
  * Learn more about the Seed Client by following our guide: https://docs.snaplet.dev/seed/getting-started
  */
-import { createSeedClient } from "@snaplet/seed";
+import { createClient } from "@supabase/supabase-js";
+import * as dotenv from "dotenv";
 
 const main = async () => {
-  const seed = await createSeedClient({});
+  dotenv.config();
+  const supabase = createClient(
+    process.env.SUPABASE_CACHING_DB_URL!,
+    process.env.SUPABASE_CACHING_SERVICE_API_KEY!,
+  );
 
   const minterContractSlug = "minter-contract";
   const marketplaceContractSlug = "marketplace-contract";
 
   // Seed the database with default events
   console.log("🕊️ Seeding events...");
-  const { events } = await seed.events([
+  await supabase.from("events").insert([
     {
       name: "ClaimStored",
       abi: "event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)",
@@ -46,7 +51,7 @@ const main = async () => {
   ]);
 
   console.log("🕊️ Seeding contracts...");
-  const { contracts } = await seed.contracts([
+  await supabase.from("contracts").insert([
     {
       chain_id: 845322,
       contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
@@ -74,7 +79,7 @@ const main = async () => {
   ]);
 
   console.log("🕊️ Seeding supported schemas...");
-  await seed.supported_schemas([
+  await supabase.from("supported_schemas").insert([
     {
       chain_id: 11155111,
       uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
@@ -87,6 +92,19 @@ const main = async () => {
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");
+  const { data: events } = await supabase.from("events").select("*");
+  const { data: contracts } = await supabase.from("contracts").select("*");
+
+  if (!events) {
+    console.error("No events found in the database");
+    process.exit();
+  }
+
+  if (!contracts) {
+    console.error("No contracts found in the database");
+    process.exit();
+  }
+
   const contractEvents = events.map((event) => {
     const contractsWithMatchingSlug = contracts.filter(
       (contract) => contract.contract_slug === event.contract_slug,
@@ -94,22 +112,21 @@ const main = async () => {
 
     return contractsWithMatchingSlug.map((contract) => {
       return {
-        contract_id: contract.id!,
-        event_id: event.id!,
+        contracts_id: contract.id!,
+        events_id: event.id!,
         last_block_indexed: 0,
       };
     });
   });
 
-  const { contract_events } = await seed.contract_events(
-    contractEvents.flat(),
-    {
-      connect: { contracts, events },
-    },
-  );
-
+  const { error } = await supabase
+    .from("contract_events")
+    .insert(contractEvents.flat());
+  if (error) {
+    console.error("Error seeding contract events", error);
+    process.exit();
+  }
   console.log("🚀 Database seeded successfully!");
-
   process.exit();
 };
 
