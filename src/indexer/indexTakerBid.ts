@@ -9,6 +9,12 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { client } from "@/clients/evmClient.js";
 import { parseEventLogs } from "viem";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
+import { supabaseData } from "@/clients/supabaseClient.js";
+import {
+  HypercertExchangeClient,
+  Maker,
+} from "@hypercerts-org/marketplace-sdk";
+import { ethers } from "ethers";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -136,11 +142,73 @@ export const indexTakerBid = async ({
         hypercert_id: takerBid.hypercertId,
         transactionHash: takerBid.transactionHash,
       })),
-  }).then(() =>
-    updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
-    }),
-  );
+  })
+    .then(async () => {
+      // Check validity of existing orders for tokenIds
+      const allItemIds = results
+        .flatMap((res) =>
+          res?.takerBids?.flatMap((takerBid) => takerBid.args.itemIds),
+        )
+        .filter((x): x is bigint => !!x);
+      const { data: allOrders, error } = await supabaseData
+        .from("marketplace_orders")
+        .select("*")
+        .overlaps("itemIds", allItemIds);
+
+      if (error) {
+        console.error(
+          "[IndexTakerBid] Error while fetching existing orders for tokenIds",
+          error,
+        );
+        return;
+      }
+
+      const hypercertsExchange = new HypercertExchangeClient(
+        chainId,
+        new ethers.JsonRpcProvider(
+          "https://ethereum-sepolia-rpc.publicnode.com",
+        ),
+      );
+
+      const signatures: string[] = [];
+      const orders: Maker[] = [];
+
+      allOrders.forEach((order) => {
+        const {
+          signature,
+          chainId: _,
+          id: __,
+          ...orderWithoutSignature
+        } = order;
+        signatures.push(signature);
+        orders.push(orderWithoutSignature);
+      });
+
+      const validationResults = await hypercertsExchange.verifyMakerOrders(
+        orders,
+        signatures,
+      );
+
+      const ordersToDelete = validationResults
+        .map((result, index) => {
+          const isValid = result.every((code) => code === 0);
+          if (!isValid) {
+            return allOrders[index].id;
+          }
+        })
+        .filter((x): x is string => !!x);
+
+      console.log("[IndexTakerBid] Deleting invalid orders", ordersToDelete);
+      await supabaseData
+        .from("marketplace_orders")
+        .delete()
+        .in("id", ordersToDelete);
+    })
+    .then(() =>
+      updateLastBlockIndexedContractEvents({
+        contract_events: results.flatMap((res) =>
+          res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+        ),
+      }),
+    );
 };
