@@ -17,7 +17,7 @@ import {
 import { ethers } from "ethers";
 
 /*
- * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
+ * This function indexes the logs of the TakerBid event emitted by the HypercertsExchange contract. Based on the last
  * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the claim and fraction tokens in the
  * database.
  *

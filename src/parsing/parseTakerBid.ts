@@ -3,29 +3,36 @@ import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 
 /**
- * Parses an event object to extract the tokenID and root.
+ * Parses an event object to extract the details of a TakerBid event.
  *
- * This function attempts to parse the event object using the AllowListCreatedEventSchema.
- * If the event object is valid, it extracts the tokenID and root from the event's args property,
+ * This function attempts to parse the event object using the TakerBidEventSchema.
+ * If the event object is valid, it extracts the details from the event's args property,
  * and returns them in a new object. If the event object is not valid, it logs an error and returns undefined.
  *
- * @param event - The event object to parse. Its structure should match the AllowListCreatedEventSchema.
+ * @param event - The event object to parse. Its structure should match the TakerBidEventSchema.
  *
- * @returns An object containing the tokenID and root from the event's args property, or undefined if the event object is not valid.
+ * @returns An object containing the details of the TakerBid event from the event's args property, or undefined if the event object is not valid.
  *
  * @example
  * ```typescript
  * const event = {
  *   address: "0x1234",
  *   args: {
- *     tokenID: 5678n,
- *     root: "0x5678",
+ *     bidUser: "0x5678",
+ *     bidRecipient: "0x5678",
+ *     strategyId: 1234n,
+ *     currency: "0x5678",
+ *     collection: "0x5678",
+ *     itemIds: [5678n],
+ *     amounts: [1000n],
+ *     feeRecipients: ["0x5678", "0x5678"],
+ *     feeAmounts: [100n, 200n],
  *   },
  *   blockNumber: 1234n,
  * };
- * const parsedEvent = parseAllowListCreated(event);
- * console.log(parsedEvent); // { token_id: 5678n, root: "0x5678" }
- * */
+ * const parsedEvent = parseTakerBidEvent(event);
+ * console.log(parsedEvent); // { bidUser: "0x5678", bidRecipient: "0x5678", strategyId: 1234n, ... }/
+ **/
 
 const TakerBidEventSchema = z.object({
   address: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
