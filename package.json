@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "@hypercerts-org/contracts": "2.0.0-alpha.0",
-    "@hypercerts-org/marketplace-sdk": "^0.3.5",
+    "@hypercerts-org/marketplace-sdk": "^0.3.6",
     "@hypercerts-org/sdk": "^1.4.3",
     "@openzeppelin/merkle-tree": "^1.0.6",
     "@sentry/integrations": "^7.102.1",
