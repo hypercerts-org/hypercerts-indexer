@@ -1,5 +1,6 @@
 import { isAddress } from "viem";
 import { z } from "zod";
+import { supabase } from "@/clients/supabaseClient.js";
 
 const TakerBidSchema = z.object({
   buyer: z.string().refine(isAddress, { message: "Invalid buyer address" }),
@@ -14,6 +15,7 @@ const TakerBidSchema = z.object({
   itemIds: z.array(z.bigint()),
   hypercert_id: z.string(),
   amounts: z.array(z.bigint()),
+  transactionHash: z.string(),
 });
 
 export type TakerBid = z.infer<typeof TakerBidSchema>;
@@ -58,17 +60,11 @@ export const storeTakerBid = async ({
     const _takerBids = takerBids.map((takerBid) =>
       TakerBidSchema.parse(takerBid),
     );
-    console.log(_takerBids);
-    // console.debug(`[StoreClaim] Storing ${_claims.length} claims`);
-    //
-    // await supabase
-    //   .from("claims")
-    //   .upsert(_claims, {
-    //     onConflict: "contracts_id, token_id",
-    //     ignoreDuplicates: false,
-    //   })
-    //   .throwOnError();
-    // console.log(takerBids);
+    console.debug(`[StoreTakerBid] Storing ${_takerBids.length} taker bids`);
+    await supabase
+      .from("sales")
+      .upsert(_takerBids, { ignoreDuplicates: true })
+      .throwOnError();
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
     throw error;

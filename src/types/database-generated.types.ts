@@ -471,6 +471,45 @@ export type Database = {
           },
         ]
       }
+      sales: {
+        Row: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          created_at: string
+          currency: string
+          hypercert_id: string
+          id: string
+          itemIds: number[]
+          seller: string
+          strategy_id: number
+        }
+        Insert: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          created_at?: string
+          currency: string
+          hypercert_id: string
+          id?: string
+          itemIds: number[]
+          seller: string
+          strategy_id: number
+        }
+        Update: {
+          amounts?: number[]
+          buyer?: string
+          collection?: string
+          created_at?: string
+          currency?: string
+          hypercert_id?: string
+          id?: string
+          itemIds?: number[]
+          seller?: string
+          strategy_id?: number
+        }
+        Relationships: []
+      }
       supported_schemas: {
         Row: {
           chain_id: number

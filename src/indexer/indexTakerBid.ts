@@ -1,5 +1,5 @@
 import { getDeployment } from "@/utils/getDeployment.js";
-import { IndexerConfig, NewAllowList, NewUnitTransfer } from "@/types/types.js";
+import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import * as console from "node:console";
@@ -99,6 +99,7 @@ export const indexTakerBid = async ({
               return {
                 ...parsed,
                 hypercertId,
+                transactionHash: event.transactionHash,
               };
             }),
           )
@@ -107,6 +108,7 @@ export const indexTakerBid = async ({
             allowList,
           ): allowList is TakerBidEvent & {
             hypercertId: string;
+            transactionHash: `0x${string}`;
           } => allowList !== null && allowList !== undefined,
         );
 
@@ -132,6 +134,7 @@ export const indexTakerBid = async ({
         itemIds: takerBid.args.itemIds,
         strategy_id: takerBid.args.strategyId,
         hypercert_id: takerBid.hypercertId,
+        transactionHash: takerBid.transactionHash,
       })),
   }).then(() =>
     updateLastBlockIndexedContractEvents({
