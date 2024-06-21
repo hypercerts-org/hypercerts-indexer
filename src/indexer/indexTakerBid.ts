@@ -6,7 +6,7 @@ import * as console from "node:console";
 import { parseTakerBidEvent, TakerBidEvent } from "@/parsing/parseTakerBid.js";
 import { storeTakerBid } from "@/storage/storeTakerBid.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
-import { client } from "@/clients/evmClient.js";
+import { alchemyUrl, client } from "@/clients/evmClient.js";
 import { parseEventLogs } from "viem";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { supabaseData } from "@/clients/supabaseClient.js";
@@ -165,9 +165,7 @@ export const indexTakerBid = async ({
 
       const hypercertsExchange = new HypercertExchangeClient(
         chainId,
-        new ethers.JsonRpcProvider(
-          "https://ethereum-sepolia-rpc.publicnode.com",
-        ),
+        new ethers.JsonRpcProvider(alchemyUrl()),
       );
 
       const signatures: string[] = [];
