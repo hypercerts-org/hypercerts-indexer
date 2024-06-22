@@ -78,7 +78,7 @@ export const storeTransferSingleFraction = async ({
         const { data: claim, error: claimError } = await supabase.rpc(
           "get_or_create_claim",
           {
-            p_token_id: getClaimTokenId(transfer.token_id).toString(),
+            p_token_id: getHypercertTokenId(transfer.token_id).toString(),
             p_contracts_id: transfer.contracts_id,
           },
         );
@@ -96,7 +96,7 @@ export const storeTransferSingleFraction = async ({
 
       return {
         ...data,
-        hypercert_id: `${chainId}-${getAddress(transfer.contract_address)}-${getClaimTokenId(transfer.token_id)}`,
+        hypercert_id: `${chainId}-${getAddress(transfer.contract_address)}-${getHypercertTokenId(transfer.token_id)}`,
         fraction_id:
           token?.fraction_id ??
           `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
@@ -119,8 +119,6 @@ export const storeTransferSingleFraction = async ({
   );
 
   const sortedUniqueTokens = _(tokens)
-    .orderBy(["last_block_update_timestamp"], ["desc"])
-    .uniqBy("fraction_id")
     .orderBy(["last_update_block_timestamp"], ["desc"])
     .uniqBy("token_id")
     .value();
