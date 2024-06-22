@@ -22,9 +22,10 @@ const TransferSingleEventSchema = z.object({
  * @param event - The event object.
  * */
 export const parseTransferSingle = async (event: unknown) => {
-  const { args, blockNumber } = TransferSingleEventSchema.parse(event);
+  const { args, blockNumber, address } = TransferSingleEventSchema.parse(event);
 
-  const row: Partial<NewTransfer> = {
+  return {
+    contract_address: address,
     token_id: args.id,
     block_timestamp: await getBlockTimestamp(blockNumber),
     block_number: blockNumber,
@@ -32,6 +33,4 @@ export const parseTransferSingle = async (event: unknown) => {
     to_owner_address: args.to,
     from_owner_address: args.from,
   };
-
-  return row;
 };
