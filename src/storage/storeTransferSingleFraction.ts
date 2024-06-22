@@ -4,7 +4,7 @@ import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
-import { Database } from "@/types/database.types.js";
+import { Database, Tables } from "@/types/database.types.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -45,7 +45,7 @@ export const storeTransferSingleFraction = async ({
         .from("fractions")
         .select("*, token_id::text")
         .eq("token_id", transfer.token_id.toString())
-        .maybeSingle<Database["public"]["Tables"]["fractions"]["Row"]>();
+        .maybeSingle();
 
       if (tokenError) {
         console.error(
@@ -55,7 +55,7 @@ export const storeTransferSingleFraction = async ({
         return;
       }
 
-      let data: Partial<Database["public"]["Tables"]["fractions"]["Row"]> = {};
+      let data: Partial<Tables<"fractions">> = {};
       if (token) {
         data = {
           id: token.id,
@@ -96,9 +96,7 @@ export const storeTransferSingleFraction = async ({
 
       return {
         ...data,
-        fraction_id:
-          token?.fraction_id ??
-          `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
+        fraction_id: `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
         token_id: token?.token_id.toString() ?? transfer.token_id.toString(),
         creation_block_timestamp:
           token?.creation_block_timestamp ??
@@ -112,8 +110,6 @@ export const storeTransferSingleFraction = async ({
       };
     }),
   );
-
-  console.log(tokens);
 
   console.debug(
     `[StoreTransferSingleFraction] Storing ${tokens.length} tokens`,

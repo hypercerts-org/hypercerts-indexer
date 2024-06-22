@@ -287,7 +287,10 @@ BEGIN
 END;
 $$;
 
-DROP FUNCTION transfer_units_batch(p_transfers transfer_units_type[]);
+
+DROP FUNCTION transfer_fractions_batch(p_transfers transfer_fractions_type[]);
+
+DROP TYPE transfer_fractions_type;
 
 
 
