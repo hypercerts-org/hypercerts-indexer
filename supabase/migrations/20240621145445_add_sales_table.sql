@@ -1,5 +1,6 @@
 create table "public"."sales"
 (
+    id                          uuid primary key default gen_random_uuid(),
     "creation_block_timestamp" numeric(78, 0) not null,
     "buyer"                    text           not null,
     "seller"                   text           not null,
@@ -22,12 +23,7 @@ alter table "public"."contracts"
 alter table "public"."events"
     add column "contract_slug" text not null default '';
 
-CREATE UNIQUE INDEX sales_pkey ON public.sales USING btree ("transaction_hash");
-
 CREATE UNIQUE INDEX "sales_transactionHash_key" ON public.sales USING btree ("transaction_hash");
-
-alter table "public"."sales"
-    add constraint "sales_pkey" PRIMARY KEY using index "sales_pkey";
 
 alter table "public"."sales"
     add constraint "sales_transactionHash_key" UNIQUE using index "sales_transactionHash_key";

@@ -70,7 +70,10 @@ export const storeTakerBid = async ({
     }));
     await supabase
       .from("sales")
-      .upsert(_takerBidForStorage, { ignoreDuplicates: true })
+      .upsert(_takerBidForStorage, {
+        ignoreDuplicates: true,
+        onConflict: "transaction_hash",
+      })
       .throwOnError();
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
