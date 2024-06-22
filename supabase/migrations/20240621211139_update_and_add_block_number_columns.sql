@@ -4,6 +4,8 @@ drop view if exists "public"."hypercert_allow_list_records_with_token_id";
 
 drop view if exists "public"."hypercert_allowlists_with_claim";
 
+drop view if exists "public"."fractions_view";
+
 alter table "public"."attestations"
     drop column "block_timestamp";
 
@@ -71,6 +73,22 @@ SELECT hal.id AS hypercert_allow_list_id,
        c.creation_block_number
 FROM (hypercert_allow_lists hal
     JOIN claims c ON ((c.id = hal.claims_id)));
+
+create or replace view fractions_view as
+select f.id,
+       f.claims_id,
+       f.token_id,
+       f.fraction_id,
+       c.hypercert_id,
+       f.creation_block_timestamp,
+       f.creation_block_number,
+       f.last_update_block_timestamp,
+       f.last_update_block_number,
+       f.owner_address,
+       f.value,
+       f.units
+from fractions f
+         join public.claims c on f.claims_id = c.id;
 
 alter type transfer_units_type
     add attribute block_number numeric(78, 0);
@@ -269,32 +287,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION transfer_fractions_batch(p_transfers transfer_fractions_type[])
-    RETURNS void
-    LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    transfer transfer_fractions_type;
-BEGIN
-    FOR transfer IN SELECT * FROM unnest(p_transfers)
-        LOOP
-            INSERT INTO fractions (claims_id, token_id, value, owner_address, creation_block_timestamp,
-                                   last_update_block_timestamp, creation_block_number, last_update_block_number)
-            VALUES (transfer.claims_id, transfer.token_id, transfer.value, transfer.to_owner_address,
-                    transfer.block_timestamp, transfer.block_timestamp, transfer.block_number, transfer.block_number)
-            ON CONFLICT (token_id, claims_id)
-                DO UPDATE SET owner_address               = transfer.to_owner_address,
-                              creation_block_number       = COALESCE(fractions.creation_block_number, transfer.block_number),
-                              creation_block_timestamp    = COALESCE(fractions.creation_block_timestamp,
-                                                                     transfer.block_timestamp),
-                              last_update_block_timestamp = COALESCE(transfer.block_timestamp,
-                                                                     fractions.last_update_block_timestamp),
-                              last_update_block_number    = COALESCE(transfer.block_number, fractions.last_update_block_number),
-                              value                       = COALESCE(fractions.value, transfer.value);
-        END LOOP;
-END;
-$$;
+DROP FUNCTION transfer_units_batch(p_transfers transfer_units_type[]);
 
 
 

@@ -6,9 +6,9 @@ CREATE OR REPLACE FUNCTION generate_hypercert_id_fraction()
 $$
 BEGIN
     NEW.fraction_id := (SELECT CONCAT(chain_id::text, '-', contract_address, '-', NEW.token_id::text)
-                         FROM claims
-                                  JOIN contracts ON contracts.id = claims.contracts_id
-                         WHERE claims.id = NEW.claims_id);
+                        FROM claims
+                                 JOIN contracts ON contracts.id = claims.contracts_id
+                        WHERE claims.id = NEW.claims_id);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
@@ -20,7 +20,6 @@ select f.id,
        f.fraction_id,
        c.hypercert_id,
        f.creation_block_timestamp,
-       f.last_block_update_timestamp,
        f.owner_address,
        f.value,
        f.units

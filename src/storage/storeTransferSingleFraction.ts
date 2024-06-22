@@ -43,9 +43,9 @@ export const storeTransferSingleFraction = async ({
     transfers.map(async (transfer) => {
       const { data: token, error: tokenError } = await supabase
         .from("fractions")
-        .select("*")
+        .select("*, token_id::text")
         .eq("token_id", transfer.token_id.toString())
-        .maybeSingle();
+        .maybeSingle<Database["public"]["Tables"]["fractions"]["Row"]>();
 
       if (tokenError) {
         console.error(
@@ -96,23 +96,24 @@ export const storeTransferSingleFraction = async ({
 
       return {
         ...data,
-        hypercert_id: `${chainId}-${getAddress(transfer.contract_address)}-${getHypercertTokenId(transfer.token_id)}`,
         fraction_id:
           token?.fraction_id ??
           `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
-        token_id: token?.token_id ?? transfer.token_id.toString(),
+        token_id: token?.token_id.toString() ?? transfer.token_id.toString(),
         creation_block_timestamp:
           token?.creation_block_timestamp ??
           transfer.block_timestamp.toString(),
         creation_block_number:
           token?.creation_block_number ?? transfer.block_number.toString(),
-        last_block_update_timestamp: transfer.block_timestamp.toString(),
-        last_block_update_number: transfer.block_number.toString(),
-        owner_address: transfer.to_owner_address,
+        last_update_block_timestamp: transfer.block_timestamp.toString(),
+        last_update_block_number: transfer.block_number.toString(),
+        owner_address: getAddress(transfer.to_owner_address),
         value: transfer.value.toString(),
       };
     }),
   );
+
+  console.log(tokens);
 
   console.debug(
     `[StoreTransferSingleFraction] Storing ${tokens.length} tokens`,
@@ -129,6 +130,6 @@ export const storeTransferSingleFraction = async ({
 
   return await supabase
     .from("fractions")
-    .upsert(sortedUniqueTokens, { onConflict: "fraction_id" })
+    .upsert(sortedUniqueTokens, { ignoreDuplicates: false })
     .throwOnError();
 };
