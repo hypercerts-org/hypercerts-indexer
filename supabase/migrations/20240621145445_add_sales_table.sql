@@ -6,10 +6,10 @@ create table "public"."sales"
     "strategy_id"              numeric(78, 0) not null,
     "currency"                 text           not null,
     "collection"               text           not null,
-    "itemIds"                  text[]         not null,
+    "item_ids"                 text[]         not null,
     "hypercert_id"             text           not null,
     "amounts"                  text[]         not null,
-    "transactionHash"          text           not null
+    "transaction_hash"         text           not null
 );
 
 
@@ -22,9 +22,9 @@ alter table "public"."contracts"
 alter table "public"."events"
     add column "contract_slug" text not null default '';
 
-CREATE UNIQUE INDEX sales_pkey ON public.sales USING btree ("transactionHash");
+CREATE UNIQUE INDEX sales_pkey ON public.sales USING btree ("transaction_hash");
 
-CREATE UNIQUE INDEX "sales_transactionHash_key" ON public.sales USING btree ("transactionHash");
+CREATE UNIQUE INDEX "sales_transactionHash_key" ON public.sales USING btree ("transaction_hash");
 
 alter table "public"."sales"
     add constraint "sales_pkey" PRIMARY KEY using index "sales_pkey";

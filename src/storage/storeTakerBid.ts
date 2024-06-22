@@ -12,10 +12,10 @@ const TakerBidSchema = z.object({
   collection: z
     .string()
     .refine(isAddress, { message: "Invalid collection address" }),
-  itemIds: z.array(z.bigint()),
+  item_ids: z.array(z.bigint()),
   hypercert_id: z.string(),
   amounts: z.array(z.bigint()),
-  transactionHash: z.string(),
+  transaction_hash: z.string(),
   creation_block_timestamp: z.bigint(),
 });
 
@@ -65,7 +65,7 @@ export const storeTakerBid = async ({
     const _takerBidForStorage = _takerBids.map((takerBid) => ({
       ...takerBid,
       creation_block_timestamp: takerBid.creation_block_timestamp.toString(),
-      itemIds: takerBid.itemIds.map((id) => id.toString()),
+      item_ids: takerBid.item_ids.map((id) => id.toString()),
       amounts: takerBid.amounts.map((amount) => amount.toString()),
     }));
     await supabase

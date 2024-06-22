@@ -141,10 +141,10 @@ export const indexTakerBid = async ({
         buyer: takerBid.args.bidUser,
         currency: takerBid.args.currency,
         collection: takerBid.args.collection,
-        itemIds: takerBid.args.itemIds,
+        item_ids: takerBid.args.itemIds,
         strategy_id: takerBid.args.strategyId,
         hypercert_id: takerBid.hypercertId,
-        transactionHash: takerBid.transactionHash,
+        transaction_hash: takerBid.transactionHash,
         creation_block_timestamp: takerBid.creation_block_timestamp,
       })),
   })
