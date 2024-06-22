@@ -13,6 +13,7 @@ import { supabaseData } from "@/clients/supabaseClient.js";
 import {
   HypercertExchangeClient,
   Maker,
+  OrderValidatorCode,
 } from "@hypercerts-org/marketplace-sdk";
 import { ethers } from "ethers";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
@@ -194,7 +195,9 @@ export const indexTakerBid = async ({
 
       const ordersToDelete = validationResults
         .map((result, index) => {
-          const isValid = result.every((code) => code === 0);
+          const isValid = !result.some((code) =>
+            FAULTY_ORDER_VALIDATOR_CODES.includes(code),
+          );
           if (!isValid) {
             return allOrders[index].id;
           }
@@ -215,3 +218,8 @@ export const indexTakerBid = async ({
       }),
     );
 };
+
+// TODO: Determine all error codes that result in the order being deleted
+const FAULTY_ORDER_VALIDATOR_CODES = [
+  OrderValidatorCode.TOO_LATE_TO_EXECUTE_ORDER,
+];
