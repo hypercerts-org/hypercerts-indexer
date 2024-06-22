@@ -94,7 +94,8 @@ export const decodeAttestationData = ({
     return {
       attester,
       recipient,
-      block_timestamp: event.block_timestamp,
+      creation_block_timestamp: event.creation_block_timestamp,
+      creation_block_number: event.creation_block_number,
       uid,
       supported_schemas_id: schema.id,
       attestation: JSON.parse(JSON.stringify(attestation)),

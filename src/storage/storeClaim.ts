@@ -2,8 +2,8 @@ import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
 
-const ClaimSchema = z.object({
-  contracts_id: z.string(),
+export const ClaimSchema = z.object({
+  contracts_id: z.string().optional(),
   creator_address: z
     .string()
     .refine(isAddress, { message: "Invalid creator address" }),
@@ -11,7 +11,8 @@ const ClaimSchema = z.object({
     .string()
     .refine(isAddress, { message: "Invalid owner address" }),
   token_id: z.bigint(),
-  block_number: z.bigint(),
+  creation_block_number: z.bigint(),
+  creation_block_timestamp: z.bigint(),
   units: z.bigint(),
   uri: z.string(),
 });
@@ -57,7 +58,8 @@ export const storeClaim = async ({ claims }: StoreClaimInput) => {
     ...ClaimSchema.parse(claim),
     value: 1,
     token_id: claim.token_id.toString(),
-    block_number: claim.block_number.toString(),
+    creation_block_number: claim.creation_block_number.toString(),
+    creation_block_timestamp: claim.creation_block_timestamp.toString(),
     units: claim.units.toString(),
   }));
 

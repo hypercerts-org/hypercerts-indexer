@@ -3,9 +3,9 @@ import { parseTransferSingle } from "@/parsing";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
-import { client } from "../../src/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 
-import { alchemyUrl } from "../resources/alchemyUrl";
+import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
 
 describe("transferSingleEvent", {}, () => {
@@ -56,9 +56,10 @@ describe("transferSingleEvent", {}, () => {
 
     const parsed = await parseTransferSingle(event);
 
-    expect(parsed).toEqual({
-      block_number: blockNumber,
-      block_timestamp: timestamp,
+    expect(parsed).toMatchObject({
+      contract_address: contractAddress,
+      last_update_block_number: blockNumber,
+      last_update_block_timestamp: timestamp,
       from_owner_address: fromAddress,
       to_owner_address: toAddress,
       token_id: claimID,

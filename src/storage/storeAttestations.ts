@@ -2,7 +2,10 @@ import { supabase } from "@/clients/supabaseClient.js";
 import { Database } from "@/types/database.types.js";
 
 interface StoreAttestations {
-  attestations: Database["public"]["Tables"]["attestations"]["Update"][];
+  attestations: (
+    | Database["public"]["Tables"]["attestations"]["Update"]
+    | undefined
+  )[];
 }
 
 /*
@@ -16,9 +19,12 @@ interface StoreAttestations {
 export const storeAttestations = async ({
   attestations,
 }: StoreAttestations) => {
-  const _attestations = (attestations = attestations.filter(
-    (attestation) => attestation !== null && attestation !== undefined,
-  ));
+  const _attestations = attestations.filter(
+    (
+      attestation,
+    ): attestation is Database["public"]["Tables"]["attestations"]["Update"] =>
+      attestation !== null && attestation !== undefined,
+  );
 
   if (!_attestations || _attestations.length === 0) {
     console.debug("[StoreAttestations] No attestation data provided");
@@ -33,6 +39,8 @@ export const storeAttestations = async ({
     return {
       ...attestation,
       token_id: attestation.token_id.toString(),
+      creation_block_number: attestation.creation_block_number.toString(),
+      creation_block_timestamp: attestation.creation_block_timestamp.toString(),
     };
   });
 

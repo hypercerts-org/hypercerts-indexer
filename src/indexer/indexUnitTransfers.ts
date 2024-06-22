@@ -115,7 +115,8 @@ export const indexUnitTransfers = async ({
   );
 };
 
-const chunkArray = (array, size) => {
+// @ts-ignore
+const chunkArray = (array, size: number) => {
   const result = [];
   for (let i = 0; i < array.length; i += size) {
     result.push(array.slice(i, i + size));
