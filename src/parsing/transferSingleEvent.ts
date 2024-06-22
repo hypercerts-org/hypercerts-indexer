@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
-import { NewTransfer } from "@/types/types.js";
 import { z } from "zod";
+import { isHypercertToken } from "@/utils/tokenIds.js";
 
 const TransferSingleEventSchema = z.object({
   address: z.string().refine(isAddress),
@@ -24,13 +24,18 @@ const TransferSingleEventSchema = z.object({
 export const parseTransferSingle = async (event: unknown) => {
   const { args, blockNumber, address } = TransferSingleEventSchema.parse(event);
 
+  const type: "claim" | "fraction" = isHypercertToken(args.id)
+    ? "claim"
+    : "fraction";
+
   return {
     contract_address: address,
     token_id: args.id,
-    block_timestamp: await getBlockTimestamp(blockNumber),
     block_number: blockNumber,
+    block_timestamp: await getBlockTimestamp(blockNumber),
     value: args.value,
     to_owner_address: args.to,
     from_owner_address: args.from,
+    type,
   };
 };

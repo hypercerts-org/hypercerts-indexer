@@ -1,6 +1,8 @@
-import { isAddress, isHex, parseAbi } from "viem";
+import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { ClaimSchema } from "@/storage/storeClaim.js";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {
@@ -17,20 +19,11 @@ export const ClaimStoredEventSchema = z.object({
 
 export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
 
-export type ParsedClaimStoredEvent = {
-  owner_address: string;
-  creator_address: string;
-  token_id: bigint;
-  uri: string;
-  block_number: bigint;
-  units: bigint;
-};
-
 /**
  * Parses a ClaimStoredEvent and retrieves additional information about the transaction.
  *
  * @param {unknown} event - The event to parse.
- * @returns {Promise<ParsedClaimStoredEvent>} A promise that resolves to an object containing the parsed event data.
+ * @returns {Promise<Claim>} A promise that resolves to an object containing the parsed event data.
  * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
 export const parseClaimStoredEvent = async (event: unknown) => {
@@ -42,16 +35,15 @@ export const parseClaimStoredEvent = async (event: unknown) => {
       hash: transactionHash,
     });
 
-    const parsedEvent: ParsedClaimStoredEvent = {
+    return ClaimSchema.parse({
       owner_address: "0x0000000000000000000000000000000000000000",
       creator_address: transaction.from,
       token_id: args.claimID,
       uri: args.uri,
-      block_number: blockNumber,
+      creation_block_number: blockNumber,
+      creation_block_timestamp: await getBlockTimestamp(blockNumber),
       units: args.totalUnits,
-    };
-
-    return parsedEvent;
+    });
   } catch (error) {
     console.error(
       "[ParseClaimStoredEvent] Error parsing claim stored event",

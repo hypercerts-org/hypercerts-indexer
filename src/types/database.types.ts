@@ -92,17 +92,20 @@ export type Database = MergeDeep<
           Row: {
             chain_id: bigint | number | string;
             token_id: bigint | number | string;
-            block_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
           };
           Insert: {
             chain_id: bigint | number | string;
             token_id: bigint | number | string;
-            block_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
           };
           Update: {
             chain_id: bigint | number | string;
             token_id: bigint | number | string;
-            block_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
           };
         };
         claims: {

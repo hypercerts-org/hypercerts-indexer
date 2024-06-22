@@ -2,8 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
-import { parseValueTransfer } from "../../src/parsing/valueTransferEvent";
-import { client } from "../../src/clients/evmClient";
+import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { client } from "@/clients/evmClient.js";
 import { alchemyUrl } from "../resources/alchemyUrl";
 import { getAddress } from "viem";
 
@@ -51,7 +51,7 @@ describe("valueTransferEvent", () => {
 
     expect(parsed.from_token_id).toEqual(fromTokenID);
     expect(parsed.to_token_id).toEqual(toTokenID);
-    expect(parsed.block_timestamp).toEqual(timestamp);
+    expect(parsed.last_update_block_timestamp).toEqual(timestamp);
     expect(parsed.units).toEqual(value);
   });
 

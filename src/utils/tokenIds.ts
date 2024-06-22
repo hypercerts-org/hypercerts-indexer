@@ -42,7 +42,7 @@ const isBaseType = (id: bigint) => {
  * @param {BigInt} tokenId - The token ID to check. It can be undefined.
  * @returns {boolean} - Returns true if the token ID represents a claim token, false otherwise.
  */
-export const isClaimToken = (tokenId?: bigint) => {
+export const isHypercertToken = (tokenId?: bigint) => {
   if (!tokenId) {
     return false;
   }
@@ -58,6 +58,6 @@ export const isClaimToken = (tokenId?: bigint) => {
  * @param {BigInt} tokenId - The token ID to get the claim token ID from.
  * @returns {BigInt} - Returns the claim token ID.
  */
-export const getClaimTokenId = (tokenId: bigint) => {
+export const getHypercertTokenId = (tokenId: bigint) => {
   return tokenId & TYPE_MASK;
 };

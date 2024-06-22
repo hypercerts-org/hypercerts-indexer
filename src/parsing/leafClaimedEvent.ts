@@ -31,7 +31,7 @@ export const parseLeafClaimedEvent = async (event: unknown) => {
   const claim: Partial<LeafClaimed> = {
     creator_address: transaction.from,
     token_id: args.tokenID,
-    block_timestamp: await getBlockTimestamp(blockNumber),
+    creation_block_timestamp: await getBlockTimestamp(blockNumber),
     contract_address: address,
     leaf: args.leaf,
   };

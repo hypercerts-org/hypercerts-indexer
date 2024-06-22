@@ -57,6 +57,6 @@ describe("parseAttestedEvent", () => {
     expect(result.recipient).toEqual(recipient);
     expect(result.attester).toEqual(attester);
     expect(result.uid).toEqual("abcdef");
-    expect(result.block_timestamp).toEqual(1234567890n);
+    expect(result.creation_block_timestamp).toEqual(1234567890n);
   });
 });

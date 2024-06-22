@@ -43,7 +43,11 @@ const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
 
 export type ParsedAttestedEvent = Pick<
   Tables<"attestations">,
-  "attester" | "recipient" | "uid" | "block_timestamp"
+  | "attester"
+  | "recipient"
+  | "uid"
+  | "creation_block_timestamp"
+  | "creation_block_number"
 >;
 
 /**
@@ -83,6 +87,7 @@ export const parseAttestedEvent = async (
     recipient: args.recipient,
     attester: args.attester,
     uid: args.uid,
-    block_timestamp: await getBlockTimestamp(blockNumber),
+    creation_block_number: blockNumber,
+    creation_block_timestamp: await getBlockTimestamp(blockNumber),
   };
 };

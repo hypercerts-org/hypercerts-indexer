@@ -1,6 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { NewTransfer } from "@/types/types.js";
-import { getClaimTokenId } from "@/utils/tokenIds.js";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
@@ -121,6 +121,8 @@ export const storeTransferSingleFraction = async ({
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_block_update_timestamp"], ["desc"])
     .uniqBy("fraction_id")
+    .orderBy(["last_update_block_timestamp"], ["desc"])
+    .uniqBy("token_id")
     .value();
 
   console.debug(

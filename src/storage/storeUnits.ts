@@ -1,6 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { NewUnitTransfer } from "@/types/types.js";
-import { getClaimTokenId } from "@/utils/tokenIds.js";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -41,8 +41,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     transfers.map(async (transfer) => {
       const claimTokenId =
         transfer.from_token_id === 0n
-          ? getClaimTokenId(transfer.to_token_id).toString()
-          : getClaimTokenId(transfer.from_token_id).toString();
+          ? getHypercertTokenId(transfer.to_token_id).toString()
+          : getHypercertTokenId(transfer.from_token_id).toString();
       let claimId = claimIds[claimTokenId];
 
       if (!claimId) {
@@ -65,13 +65,14 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         claim_id: claimId,
         from_token_id: transfer.from_token_id.toString(),
         to_token_id: transfer.to_token_id.toString(),
-        block_timestamp: transfer.block_timestamp,
+        last_update_block_timestamp:
+          transfer.last_update_block_timestamp.toString(),
+        last_update_block_number: transfer.last_update_block_number.toString(),
         units_transferred: transfer.units,
       };
     }),
   );
 
-  console.log("Transfers to store", _transfers);
   await supabase
     .rpc("transfer_units_batch", {
       p_transfers: _transfers,
