@@ -15,6 +15,7 @@ import {
   Maker,
 } from "@hypercerts-org/marketplace-sdk";
 import { ethers } from "ethers";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 
 /*
  * This function indexes the logs of the TakerBid event emitted by the HypercertsExchange contract. Based on the last
@@ -102,10 +103,12 @@ export const indexTakerBid = async ({
               const parsed = await parseTakerBidEvent(event);
               // @ts-expect-error args is missing in the type
               const hypercertId = `${chainId}-${parsed?.args?.collection}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+              const timestamp = await getBlockTimestamp(event.blockNumber);
               return {
                 ...parsed,
                 hypercertId,
                 transactionHash: event.transactionHash,
+                creation_block_timestamp: timestamp,
               };
             }),
           )
@@ -115,6 +118,7 @@ export const indexTakerBid = async ({
           ): allowList is TakerBidEvent & {
             hypercertId: string;
             transactionHash: `0x${string}`;
+            creation_block_timestamp: bigint;
           } => allowList !== null && allowList !== undefined,
         );
 
@@ -141,6 +145,7 @@ export const indexTakerBid = async ({
         strategy_id: takerBid.args.strategyId,
         hypercert_id: takerBid.hypercertId,
         transactionHash: takerBid.transactionHash,
+        creation_block_timestamp: takerBid.creation_block_timestamp,
       })),
   })
     .then(async () => {

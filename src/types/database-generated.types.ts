@@ -224,7 +224,7 @@ export type Database = {
         Insert: {
           chain_id: number
           contract_address: string
-          contract_slug: string
+          contract_slug?: string
           id?: string
           start_block?: number | null
         }
@@ -246,7 +246,7 @@ export type Database = {
         }
         Insert: {
           abi: string
-          contract_slug: string
+          contract_slug?: string
           id?: string
           name: string
         }
@@ -473,40 +473,40 @@ export type Database = {
       }
       sales: {
         Row: {
-          amounts: number[]
+          amounts: string[]
           buyer: string
           collection: string
-          created_at: string
+          creation_block_timestamp: number
           currency: string
           hypercert_id: string
-          id: string
-          itemIds: number[]
+          itemIds: string[]
           seller: string
           strategy_id: number
+          transactionHash: string
         }
         Insert: {
-          amounts: number[]
+          amounts: string[]
           buyer: string
           collection: string
-          created_at?: string
+          creation_block_timestamp: number
           currency: string
           hypercert_id: string
-          id?: string
-          itemIds: number[]
+          itemIds: string[]
           seller: string
           strategy_id: number
+          transactionHash: string
         }
         Update: {
-          amounts?: number[]
+          amounts?: string[]
           buyer?: string
           collection?: string
-          created_at?: string
+          creation_block_timestamp?: number
           currency?: string
           hypercert_id?: string
-          id?: string
-          itemIds?: number[]
+          itemIds?: string[]
           seller?: string
           strategy_id?: number
+          transactionHash?: string
         }
         Relationships: []
       }

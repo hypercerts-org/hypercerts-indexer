@@ -16,6 +16,7 @@ const TakerBidSchema = z.object({
   hypercert_id: z.string(),
   amounts: z.array(z.bigint()),
   transactionHash: z.string(),
+  creation_block_timestamp: z.bigint(),
 });
 
 export type TakerBid = z.infer<typeof TakerBidSchema>;
@@ -61,9 +62,15 @@ export const storeTakerBid = async ({
       TakerBidSchema.parse(takerBid),
     );
     console.debug(`[StoreTakerBid] Storing ${_takerBids.length} taker bids`);
+    const _takerBidForStorage = _takerBids.map((takerBid) => ({
+      ...takerBid,
+      creation_block_timestamp: takerBid.creation_block_timestamp.toString(),
+      itemIds: takerBid.itemIds.map((id) => id.toString()),
+      amounts: takerBid.amounts.map((amount) => amount.toString()),
+    }));
     await supabase
       .from("sales")
-      .upsert(_takerBids, { ignoreDuplicates: true })
+      .upsert(_takerBidForStorage, { ignoreDuplicates: true })
       .throwOnError();
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);

@@ -69,7 +69,6 @@ export type TakerBidEvent = z.infer<typeof TakerBidEventSchema>;
 
 export const parseTakerBidEvent = async (event: unknown) => {
   try {
-    console.log(event);
     return TakerBidEventSchema.parse(event);
   } catch (e) {
     console.error("[parseTakerBidEvent] Error parsing event", e);

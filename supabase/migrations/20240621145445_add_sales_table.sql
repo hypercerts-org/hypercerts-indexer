@@ -1,15 +1,15 @@
 create table "public"."sales"
 (
-    "created_at"      timestamp with time zone not null default now(),
-    "buyer"           text                     not null,
-    "seller"          text                     not null,
-    "strategy_id"     numeric                  not null,
-    "currency"        text                     not null,
-    "collection"      text                     not null,
-    "itemIds"         numeric[]                not null,
-    "hypercert_id"    text                     not null,
-    "amounts"         numeric[]                not null,
-    "transactionHash" text                     not null
+    "creation_block_timestamp" numeric(78, 0) not null,
+    "buyer"                    text           not null,
+    "seller"                   text           not null,
+    "strategy_id"              numeric(78, 0) not null,
+    "currency"                 text           not null,
+    "collection"               text           not null,
+    "itemIds"                  text[]         not null,
+    "hypercert_id"             text           not null,
+    "amounts"                  text[]         not null,
+    "transactionHash"          text           not null
 );
 
 
