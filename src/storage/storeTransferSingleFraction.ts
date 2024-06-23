@@ -126,6 +126,9 @@ export const storeTransferSingleFraction = async ({
 
   return await supabase
     .from("fractions")
-    .upsert(sortedUniqueTokens, { ignoreDuplicates: false })
+    .upsert(sortedUniqueTokens, {
+      ignoreDuplicates: false,
+      defaultToNull: false,
+    })
     .throwOnError();
 };
