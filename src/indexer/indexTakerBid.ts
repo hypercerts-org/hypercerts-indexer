@@ -148,6 +148,7 @@ export const indexTakerBid = async ({
         strategy_id: takerBid.args.strategyId,
         hypercert_id: takerBid.hypercertId,
         transaction_hash: takerBid.transactionHash,
+        creation_block_number: takerBid.creation_block_number,
         creation_block_timestamp: takerBid.creation_block_timestamp,
       })),
   })

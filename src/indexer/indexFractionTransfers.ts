@@ -6,7 +6,6 @@ import { getContractEventsForChain } from "@/storage/getContractEventsForChain.j
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { isHypercertToken } from "@/utils/tokenIds.js";
-import { GetFilterLogsReturnType } from "viem";
 import _ from "lodash";
 
 /*

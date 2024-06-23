@@ -9,7 +9,11 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
     setupFiles: ["./test/setup-env.ts"],
-    exclude: [...(configDefaults.exclude as string[]), "**/integration/**/*ts"],
+    exclude: [
+      ...(configDefaults.exclude as string[]),
+      "**/integration/**/*ts",
+      "lib",
+    ],
     // https://github.com/davelosert/vitest-coverage-report-action
     coverage: {
       // you can include other reporters, but 'json-summary' is required, json is recommended
@@ -28,6 +32,7 @@ export default defineConfig({
         "**/*.types.ts",
         "**/types.ts",
         "all_leaf_claimed_events.ts",
+        "lib/*",
       ],
     },
   },

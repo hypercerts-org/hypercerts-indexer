@@ -79,7 +79,7 @@ export const storeTakerBid = async ({
       })
       .throwOnError();
   } catch (error) {
-    console.error("[StoreClaim] Error storing claims", error);
+    console.error("[StoreTakerBid] Error storing taker bid", error);
     throw error;
   }
 };
