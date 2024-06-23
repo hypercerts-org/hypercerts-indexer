@@ -24,30 +24,6 @@ export type LeafClaimed = {
   leaf: string;
 };
 
-export type NewTransfer = {
-  contracts_id: string;
-  contract_address: string;
-  token_id: bigint;
-  block_timestamp: bigint;
-  block_number: bigint;
-  value: bigint;
-  from_owner_address: string;
-  to_owner_address: string;
-  type: "claim" | "fraction";
-};
-
-export type NewUnitTransfer = {
-  contracts_id: string;
-  contract_address: string;
-  from_token_id: bigint;
-  to_token_id: bigint;
-  creation_block_timestamp: bigint;
-  creation_block_number: bigint;
-  last_update_block_timestamp: bigint;
-  last_update_block_number: bigint;
-  units: bigint;
-};
-
 export type NewAllowList = {
   contracts_id: string;
   token_id: bigint | string;

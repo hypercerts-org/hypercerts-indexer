@@ -1,7 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { NewUnitTransfer } from "@/types/types.js";
-import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import { Tables } from "@/types/database.types";
+import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -21,7 +20,7 @@ import { Tables } from "@/types/database.types";
  */
 
 interface StoreUnitTransfer {
-  transfers?: NewUnitTransfer[];
+  transfers?: ParsedValueTransfer[];
 }
 
 export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
@@ -41,6 +40,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
 
   await Promise.all(
     transfers.map(async (transfer) => {
+      console.log("TRANSFER: ", transfer);
       let fromToken = tokens.find(
         (token) => token.token_id === transfer.from_token_id.toString(),
       );
@@ -48,10 +48,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         (token) => token.token_id === transfer.to_token_id.toString(),
       );
 
-      const claimTokenId =
-        transfer.from_token_id === 0n
-          ? getHypercertTokenId(transfer.to_token_id).toString()
-          : getHypercertTokenId(transfer.from_token_id).toString();
+      const claimTokenId = transfer.claim_id.toString();
       let claimId = claimIds[claimTokenId];
 
       if (!claimId) {
@@ -84,7 +81,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
           fromToken = {
             claims_id: claimId,
             token_id: transfer.from_token_id.toString(),
-            units: 0,
+            units: 0n,
             last_update_block_timestamp:
               transfer.last_update_block_timestamp.toString(),
             last_update_block_number:
