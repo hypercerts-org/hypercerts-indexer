@@ -26,6 +26,8 @@ export const parseValueTransfer = async (event: unknown) => {
     contract_address: address,
     from_token_id: args.fromTokenID,
     to_token_id: args.toTokenID,
+    creation_block_number: blockNumber,
+    creation_block_timestamp: await getBlockTimestamp(blockNumber),
     last_update_block_number: blockNumber,
     last_update_block_timestamp: await getBlockTimestamp(blockNumber),
     units: args.value,

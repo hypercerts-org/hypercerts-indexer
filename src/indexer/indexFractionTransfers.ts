@@ -7,6 +7,7 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { isHypercertToken } from "@/utils/tokenIds.js";
 import { GetFilterLogsReturnType } from "viem";
+import _ from "lodash";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -65,7 +66,7 @@ export const indexTransferSingleEvents = async ({
       console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
 
       // Split logs into chunks
-      const logChunks = chunkArray(logs, 10);
+      const logChunks = _.chunk(logs, 10);
 
       // Initialize an empty array to store all claims
       let allTransfers: NewTransfer[] = [];
@@ -128,21 +129,4 @@ export const indexTransferSingleEvents = async ({
       ),
     }),
   );
-};
-
-const chunkArray = (
-  array: GetFilterLogsReturnType<
-    undefined,
-    undefined,
-    undefined,
-    bigint,
-    bigint
-  >,
-  size: number,
-) => {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
 };

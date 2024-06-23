@@ -223,7 +223,7 @@ BEGIN
                                                                      row.creation_block_timestamp),
                               last_update_block_timestamp = COALESCE(row.creation_block_timestamp,
                                                                      fractions.last_update_block_timestamp),
-                              last_update_block_number    = COALESCE(row.last_update_block_numberA, fractions.last_update_block_number),
+                              last_update_block_number    = COALESCE(row.last_update_block_number, fractions.last_update_block_number),
                               value                       = COALESCE(fractions.value, row.value);
         END LOOP;
 
