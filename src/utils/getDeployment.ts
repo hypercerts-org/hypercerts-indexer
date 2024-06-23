@@ -23,6 +23,7 @@ export const getDeployment = (): Partial<Deployment> & {
   chainId: number;
 } => {
   switch (chainId) {
+    // PRD
     case 10:
       return {
         ...deployments["10"],
@@ -31,6 +32,23 @@ export const getDeployment = (): Partial<Deployment> & {
         schemaRegistryAddress: "0x4200000000000000000000000000000000000020",
         chainId,
       };
+    case 8453:
+      return {
+        ...deployments["8453"],
+        startBlock: 6771210n,
+        easAddress: "0x4200000000000000000000000000000000000021",
+        schemaRegistryAddress: "0x4200000000000000000000000000000000000020",
+        chainId,
+      };
+    case 42220:
+      return {
+        ...deployments["42220"],
+        startBlock: 22079540n,
+        easAddress: "",
+        schemaRegistryAddress: "",
+        chainId,
+      };
+    // Testnets
     case 11155111:
       return {
         ...deployments["11155111"],
