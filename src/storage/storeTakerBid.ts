@@ -68,6 +68,7 @@ export const storeTakerBid = async ({
       item_ids: takerBid.item_ids.map((id) => id.toString()),
       amounts: takerBid.amounts.map((amount) => amount.toString()),
     }));
+
     await supabase
       .from("sales")
       .upsert(_takerBidForStorage, {

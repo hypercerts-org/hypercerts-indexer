@@ -1,16 +1,16 @@
 create table "public"."sales"
 (
-    id                          uuid primary key default gen_random_uuid(),
-    "creation_block_timestamp" numeric(78, 0) not null,
-    "buyer"                    text           not null,
-    "seller"                   text           not null,
-    "strategy_id"              numeric(78, 0) not null,
-    "currency"                 text           not null,
-    "collection"               text           not null,
-    "item_ids"                 text[]         not null,
-    "hypercert_id"             text           not null,
-    "amounts"                  text[]         not null,
-    "transaction_hash"         text           not null
+    id                         uuid primary key default gen_random_uuid(),
+    "creation_block_timestamp" numeric(78, 0)   not null,
+    "buyer"                    text             not null,
+    "seller"                   text             not null,
+    "strategy_id"              numeric(78, 0)   not null,
+    "currency"                 text             not null,
+    "collection"               text             not null,
+    "item_ids"                 numeric(78, 0)[] not null,
+    "hypercert_id"             text             not null,
+    "amounts"                  numeric(78, 0)[] not null,
+    "transaction_hash"         text             not null
 );
 
 

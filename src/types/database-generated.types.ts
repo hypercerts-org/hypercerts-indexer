@@ -473,40 +473,43 @@ export type Database = {
       }
       sales: {
         Row: {
-          amounts: string[]
+          amounts: number[]
           buyer: string
           collection: string
           creation_block_timestamp: number
           currency: string
           hypercert_id: string
-          itemIds: string[]
+          id: string
+          item_ids: number[]
           seller: string
           strategy_id: number
-          transactionHash: string
+          transaction_hash: string
         }
         Insert: {
-          amounts: string[]
+          amounts: number[]
           buyer: string
           collection: string
           creation_block_timestamp: number
           currency: string
           hypercert_id: string
-          itemIds: string[]
+          id?: string
+          item_ids: number[]
           seller: string
           strategy_id: number
-          transactionHash: string
+          transaction_hash: string
         }
         Update: {
-          amounts?: string[]
+          amounts?: number[]
           buyer?: string
           collection?: string
           creation_block_timestamp?: number
           currency?: string
           hypercert_id?: string
-          itemIds?: string[]
+          id?: string
+          item_ids?: number[]
           seller?: string
           strategy_id?: number
-          transactionHash?: string
+          transaction_hash?: string
         }
         Relationships: []
       }
