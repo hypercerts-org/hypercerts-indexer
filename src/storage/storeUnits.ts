@@ -166,7 +166,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
 
   const filteredTokens = tokens.filter((token) => token.token_id !== "0");
 
-  // TODO units toString()
   const parsedTokens = filteredTokens.map((token) => {
     return {
       ...token,
