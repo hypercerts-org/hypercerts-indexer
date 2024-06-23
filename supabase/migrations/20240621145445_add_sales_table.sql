@@ -17,12 +17,6 @@ create table "public"."sales"
 alter table "public"."sales"
     enable row level security;
 
-alter table "public"."contracts"
-    add column "contract_slug" text not null default '';
-
-alter table "public"."events"
-    add column "contract_slug" text not null default '';
-
 CREATE UNIQUE INDEX "sales_transactionHash_key" ON public.sales USING btree ("transaction_hash");
 
 alter table "public"."sales"
