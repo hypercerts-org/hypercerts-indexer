@@ -48,22 +48,6 @@ describe("getLogsForContractEvents", () => {
     sinon.restore();
   });
 
-  it("throws when minter address is not available", async () => {
-    // getMinterAddress will throw when getDeployment returns null
-    mocks.getDeployment.mockReturnValue({ addresses: null, startBlock: 0n });
-
-    await expect(
-      async () =>
-        await getLogsForContractEvents({
-          batchSize: 100n,
-          fromBlock: 100n,
-          contractEvent: eventToFetch,
-        }),
-    ).rejects.toThrowError(
-      "[getMinterAddressAndStartBlock] HypercertMinterUUPS is not available",
-    );
-  });
-
   it("throws when block number is not available", async () => {
     // getBlocksToFetch will throw when client cannot get block number
     getBlockNumberSpy.throws();

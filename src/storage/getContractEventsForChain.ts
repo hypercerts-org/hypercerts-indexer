@@ -12,7 +12,7 @@ export const getContractEventsForChain = async ({
     const { data } = await supabase
       .from("contract_events")
       .select(
-        "contract:contracts!inner(id,contract_address,start_block),event:events!inner(id,name,abi),last_block_indexed",
+        "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
       )
       .eq("contracts.chain_id", chainId)
       .eq("events.name", eventName)
@@ -47,6 +47,13 @@ export const getContractEventsForChain = async ({
           ? // @ts-expect-error incorrect typing as array
             BigInt(contractEvent.contract.start_block)
           : 0n,
+      // @ts-expect-error incorrect typing as array
+      contract_slug: contractEvent.contract.contract_slug,
+      // @ts-expect-error incorrect typing as array
+      start_block: contractEvent.contract.start_block
+        ? // @ts-expect-error incorrect typing as array
+          BigInt(contractEvent.contract.start_block)
+        : 0n,
     }));
   } catch (error) {
     console.error(

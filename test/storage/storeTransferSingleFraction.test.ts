@@ -8,10 +8,10 @@ import { getAddress } from "viem";
 
 describe("storeTransferSingleFraction", () => {
   const transfer = {
-    last_update_block_number: faker.number.bigInt(),
+    block_number: faker.number.bigInt(),
     contract_address: faker.finance.ethereumAddress(),
     value: faker.number.bigInt(),
-    last_update_block_timestamp: faker.number.bigInt(),
+    block_timestamp: faker.number.bigInt(),
     from_owner_address: getAddress(faker.finance.ethereumAddress()),
     to_owner_address: getAddress(faker.finance.ethereumAddress()),
     token_id: 420n,

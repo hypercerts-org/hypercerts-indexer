@@ -4,38 +4,6 @@ drop view if exists "public"."hypercert_allow_list_records_with_token_id";
 
 drop view if exists "public"."hypercert_allowlists_with_claim";
 
-drop view if exists "public"."fractions_view";
-
-alter table "public"."attestations"
-    drop column "block_timestamp";
-
-alter table "public"."attestations"
-    add column "creation_block_number" numeric;
-
-alter table "public"."attestations"
-    add column "creation_block_timestamp" numeric(78, 0) not null;
-
-alter table "public"."claims"
-    drop column "block_number";
-
-alter table "public"."claims"
-    add column "creation_block_number" numeric(78, 0);
-
-alter table "public"."claims"
-    add column "creation_block_timestamp" numeric;
-
-alter table "public"."fractions"
-    drop column "last_block_update_timestamp";
-
-alter table "public"."fractions"
-    add column "creation_block_number" numeric;
-
-alter table "public"."fractions"
-    add column "last_update_block_number" numeric(78, 0);
-
-alter table "public"."fractions"
-    add column "last_update_block_timestamp" numeric;
-
 create or replace view "public"."claimable_fractions_with_proofs" as
 SELECT halr.id,
        claims.token_id,
@@ -52,18 +20,6 @@ FROM (((claims
     JOIN hypercert_allow_lists hal ON ((claims.id = hal.claims_id)))
     JOIN hypercert_allow_list_records halr ON ((hal.id = halr.hypercert_allow_lists_id)))
     JOIN allow_list_data ald ON ((ald.id = hal.allow_list_data_id)));
-
-
-create or replace view "public"."hypercert_allow_list_records_with_token_id" as
-SELECT halr.id,
-       claims.token_id,
-       halr.leaf,
-       halr.entry,
-       halr.user_address,
-       halr.claimed
-FROM ((claims
-    JOIN hypercert_allow_lists hal ON ((claims.id = hal.claims_id)))
-    JOIN hypercert_allow_list_records halr ON ((hal.id = halr.hypercert_allow_lists_id)));
 
 
 create or replace view "public"."hypercert_allowlists_with_claim" as
@@ -278,8 +234,13 @@ BEGIN
                     row.last_update_block_timestamp, row.creation_block_number, row.last_update_block_number)
             ON CONFLICT (token_id, claims_id)
                 DO UPDATE SET units                       = row.units,
-                              last_update_block_timestamp = row.last_update_block_timestamp,
-                              last_update_block_number    = row.last_update_block_number;
+                              creation_block_number       = COALESCE(fractions.creation_block_number, row.creation_block_number),
+                              creation_block_timestamp    = COALESCE(fractions.creation_block_timestamp,
+                                                                     row.creation_block_timestamp),
+                              last_update_block_timestamp = COALESCE(row.creation_block_timestamp,
+                                                                     fractions.last_update_block_timestamp),
+                              last_update_block_number    = COALESCE(row.last_update_block_number, fractions.last_update_block_number),
+                              value                       = COALESCE(fractions.value, row.value);
         END LOOP;
 
     -- Drop the intermediate table

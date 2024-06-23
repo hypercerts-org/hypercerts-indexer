@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll } from "vitest";
+import { afterAll, afterEach, beforeAll, vi } from "vitest";
 import { setupServer } from "msw/node";
 import { handlers } from "./handlers";
 
@@ -23,5 +23,6 @@ beforeAll(() => server.listen());
 afterEach(() => server.resetHandlers());
 
 afterAll(() => {
-  server.close(), vi.restoreAllMocks();
+  server.close();
+  vi.restoreAllMocks();
 });

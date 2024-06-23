@@ -42,6 +42,8 @@ export const parseClaimStoredEvent = async (event: unknown) => {
       uri: args.uri,
       creation_block_number: blockNumber,
       creation_block_timestamp: await getBlockTimestamp(blockNumber),
+      last_update_block_number: blockNumber,
+      last_update_block_timestamp: await getBlockTimestamp(blockNumber),
       units: args.totalUnits,
     });
   } catch (error) {

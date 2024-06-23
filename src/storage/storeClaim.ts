@@ -13,6 +13,8 @@ export const ClaimSchema = z.object({
   token_id: z.bigint(),
   creation_block_number: z.bigint(),
   creation_block_timestamp: z.bigint(),
+  last_update_block_number: z.bigint(),
+  last_update_block_timestamp: z.bigint(),
   units: z.bigint(),
   uri: z.string(),
 });
@@ -60,6 +62,8 @@ export const storeClaim = async ({ claims }: StoreClaimInput) => {
     token_id: claim.token_id.toString(),
     creation_block_number: claim.creation_block_number.toString(),
     creation_block_timestamp: claim.creation_block_timestamp.toString(),
+    last_update_block_number: claim.last_update_block_number.toString(),
+    last_update_block_timestamp: claim.last_update_block_timestamp.toString(),
     units: claim.units.toString(),
   }));
 

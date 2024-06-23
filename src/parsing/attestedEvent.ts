@@ -48,6 +48,8 @@ export type ParsedAttestedEvent = Pick<
   | "uid"
   | "creation_block_timestamp"
   | "creation_block_number"
+  | "last_block_update_number"
+  | "last_block_update_timestamp"
 >;
 
 /**
@@ -89,5 +91,7 @@ export const parseAttestedEvent = async (
     uid: args.uid,
     creation_block_number: blockNumber,
     creation_block_timestamp: await getBlockTimestamp(blockNumber),
+    last_block_update_number: blockNumber,
+    last_block_update_timestamp: await getBlockTimestamp(blockNumber),
   };
 };

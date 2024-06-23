@@ -34,54 +34,768 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      allow_list_data: {
+        Row: {
+          data: Json | null
+          id: string
+          parsed: boolean | null
+          root: string | null
+          uri: string | null
+        }
+        Insert: {
+          data?: Json | null
+          id?: string
+          parsed?: boolean | null
+          root?: string | null
+          uri?: string | null
+        }
+        Update: {
+          data?: Json | null
+          id?: string
+          parsed?: boolean | null
+          root?: string | null
+          uri?: string | null
+        }
+        Relationships: []
+      }
+      attestations: {
+        Row: {
+          attestation: Json
+          attester: string
+          chain_id: number | null
+          claims_id: string | null
+          contract_address: string | null
+          creation_block_number: number
+          creation_block_timestamp: number
+          data: Json
+          id: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          recipient: string
+          supported_schemas_id: string
+          token_id: number | null
+          uid: string
+        }
+        Insert: {
+          attestation: Json
+          attester: string
+          chain_id?: number | null
+          claims_id?: string | null
+          contract_address?: string | null
+          creation_block_number: number
+          creation_block_timestamp: number
+          data: Json
+          id?: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          recipient: string
+          supported_schemas_id: string
+          token_id?: number | null
+          uid: string
+        }
+        Update: {
+          attestation?: Json
+          attester?: string
+          chain_id?: number | null
+          claims_id?: string | null
+          contract_address?: string | null
+          creation_block_number?: number
+          creation_block_timestamp?: number
+          data?: Json
+          id?: string
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
+          recipient?: string
+          supported_schemas_id?: string
+          token_id?: number | null
+          uid?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attestations_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attestations_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "attestations_supported_schemas_id_fkey"
+            columns: ["supported_schemas_id"]
+            isOneToOne: false
+            referencedRelation: "supported_schemas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      claims: {
+        Row: {
+          contracts_id: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          creator_address: string | null
+          hypercert_id: string | null
+          id: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          owner_address: string | null
+          token_id: number
+          units: number | null
+          uri: string | null
+          value: number | null
+          claim_attestation_count: number | null
+        }
+        Insert: {
+          contracts_id: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          creator_address?: string | null
+          hypercert_id?: string | null
+          id?: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          owner_address?: string | null
+          token_id: number
+          units?: number | null
+          uri?: string | null
+          value?: number | null
+        }
+        Update: {
+          contracts_id?: string
+          creation_block_number?: number
+          creation_block_timestamp?: number
+          creator_address?: string | null
+          hypercert_id?: string | null
+          id?: string
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
+          owner_address?: string | null
+          token_id?: number
+          units?: number | null
+          uri?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_contracts_id_fkey"
+            columns: ["contracts_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_uri_fkey"
+            columns: ["uri"]
+            isOneToOne: false
+            referencedRelation: "metadata"
+            referencedColumns: ["uri"]
+          },
+        ]
+      }
+      contract_events: {
+        Row: {
+          contracts_id: string
+          events_id: string
+          last_block_indexed: number | null
+        }
+        Insert: {
+          contracts_id: string
+          events_id: string
+          last_block_indexed?: number | null
+        }
+        Update: {
+          contracts_id?: string
+          events_id?: string
+          last_block_indexed?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_events_contracts_id_fkey"
+            columns: ["contracts_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_events_events_id_fkey"
+            columns: ["events_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contracts: {
+        Row: {
+          chain_id: number
+          contract_address: string
+          contract_slug: string
+          id: string
+          start_block: number | null
+        }
+        Insert: {
+          chain_id: number
+          contract_address: string
+          contract_slug: string
+          id?: string
+          start_block?: number | null
+        }
+        Update: {
+          chain_id?: number
+          contract_address?: string
+          contract_slug?: string
+          id?: string
+          start_block?: number | null
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          abi: string
+          contract_slug: string
+          id: string
+          name: string
+        }
+        Insert: {
+          abi: string
+          contract_slug: string
+          id?: string
+          name: string
+        }
+        Update: {
+          abi?: string
+          contract_slug?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      fractions: {
+        Row: {
+          claims_id: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          fraction_id: string | null
+          id: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          owner_address: string | null
+          token_id: number
+          units: number | null
+          value: number | null
+        }
+        Insert: {
+          claims_id: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          fraction_id?: string | null
+          id?: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
+          owner_address?: string | null
+          token_id: number
+          units?: number | null
+          value?: number | null
+        }
+        Update: {
+          claims_id?: string
+          creation_block_number?: number
+          creation_block_timestamp?: number
+          fraction_id?: string | null
+          id?: string
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
+          owner_address?: string | null
+          token_id?: number
+          units?: number | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
+        ]
+      }
+      hypercert_allow_list_records: {
+        Row: {
+          claimed: boolean
+          entry: number
+          hypercert_allow_lists_id: string
+          id: string
+          leaf: string
+          proof: Json
+          units: number
+          user_address: string
+        }
+        Insert: {
+          claimed?: boolean
+          entry: number
+          hypercert_allow_lists_id: string
+          id?: string
+          leaf?: string
+          proof?: Json
+          units: number
+          user_address: string
+        }
+        Update: {
+          claimed?: boolean
+          entry?: number
+          hypercert_allow_lists_id?: string
+          id?: string
+          leaf?: string
+          proof?: Json
+          units?: number
+          user_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allow_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["hypercert_allow_list_id"]
+          },
+        ]
+      }
+      hypercert_allow_lists: {
+        Row: {
+          allow_list_data_id: string | null
+          claims_id: string
+          id: string
+          parsed: boolean | null
+          root: string | null
+        }
+        Insert: {
+          allow_list_data_id?: string | null
+          claims_id: string
+          id?: string
+          parsed?: boolean | null
+          root?: string | null
+        }
+        Update: {
+          allow_list_data_id?: string | null
+          claims_id?: string
+          id?: string
+          parsed?: boolean | null
+          root?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hypercert_allow_lists_allow_list_data_id_fkey"
+            columns: ["allow_list_data_id"]
+            isOneToOne: false
+            referencedRelation: "allow_list_data"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: true
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: true
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
+        ]
+      }
+      metadata: {
+        Row: {
+          allow_list_uri: string | null
+          contributors: string[] | null
+          description: string | null
+          external_url: string | null
+          id: string
+          image: string | null
+          impact_scope: string[] | null
+          impact_timeframe_from: number | null
+          impact_timeframe_to: number | null
+          name: string | null
+          parsed: boolean | null
+          properties: Json | null
+          rights: string[] | null
+          uri: string | null
+          work_scope: string[] | null
+          work_timeframe_from: number | null
+          work_timeframe_to: number | null
+        }
+        Insert: {
+          allow_list_uri?: string | null
+          contributors?: string[] | null
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          image?: string | null
+          impact_scope?: string[] | null
+          impact_timeframe_from?: number | null
+          impact_timeframe_to?: number | null
+          name?: string | null
+          parsed?: boolean | null
+          properties?: Json | null
+          rights?: string[] | null
+          uri?: string | null
+          work_scope?: string[] | null
+          work_timeframe_from?: number | null
+          work_timeframe_to?: number | null
+        }
+        Update: {
+          allow_list_uri?: string | null
+          contributors?: string[] | null
+          description?: string | null
+          external_url?: string | null
+          id?: string
+          image?: string | null
+          impact_scope?: string[] | null
+          impact_timeframe_from?: number | null
+          impact_timeframe_to?: number | null
+          name?: string | null
+          parsed?: boolean | null
+          properties?: Json | null
+          rights?: string[] | null
+          uri?: string | null
+          work_scope?: string[] | null
+          work_timeframe_from?: number | null
+          work_timeframe_to?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metadata_allow_list_uri_fkey"
+            columns: ["allow_list_uri"]
+            isOneToOne: false
+            referencedRelation: "allow_list_data"
+            referencedColumns: ["uri"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          currency: string
+          hypercert_id: string
+          id: string
+          item_ids: number[]
+          seller: string
+          strategy_id: number
+          transaction_hash: string
+        }
+        Insert: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          creation_block_number: number
+          creation_block_timestamp: number
+          currency: string
+          hypercert_id: string
+          id?: string
+          item_ids: number[]
+          seller: string
+          strategy_id: number
+          transaction_hash: string
+        }
+        Update: {
+          amounts?: number[]
+          buyer?: string
+          collection?: string
+          creation_block_number?: number
+          creation_block_timestamp?: number
+          currency?: string
+          hypercert_id?: string
+          id?: string
+          item_ids?: number[]
+          seller?: string
+          strategy_id?: number
+          transaction_hash?: string
+        }
+        Relationships: []
+      }
+      supported_schemas: {
+        Row: {
+          chain_id: number
+          id: string
+          last_block_indexed: number | null
+          resolver: string | null
+          revocable: boolean | null
+          schema: string | null
+          uid: string
+        }
+        Insert: {
+          chain_id: number
+          id?: string
+          last_block_indexed?: number | null
+          resolver?: string | null
+          revocable?: boolean | null
+          schema?: string | null
+          uid: string
+        }
+        Update: {
+          chain_id?: number
+          id?: string
+          last_block_indexed?: number | null
+          resolver?: string | null
+          revocable?: boolean | null
+          schema?: string | null
+          uid?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      claimable_fractions_with_proofs: {
+        Row: {
+          claimed: boolean | null
+          entry: number | null
+          hypercert_id: string | null
+          id: string | null
+          leaf: string | null
+          proof: Json | null
+          root: string | null
+          token_id: number | null
+          total_units: number | null
+          units: number | null
+          user_address: string | null
+        }
+        Relationships: []
+      }
+      fractions_view: {
+        Row: {
+          claims_id: string | null
+          creation_block_number: number | null
+          creation_block_timestamp: number | null
+          fraction_id: string | null
+          hypercert_id: string | null
+          id: string | null
+          last_update_block_number: number | null
+          last_update_block_timestamp: number | null
+          owner_address: string | null
+          token_id: number | null
+          units: number | null
+          value: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["claim_id"]
+          },
+        ]
+      }
+      hypercert_allowlists_with_claim: {
+        Row: {
+          claim_id: string | null
+          creation_block_number: number | null
+          hypercert_allow_list_id: string | null
+          hypercert_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      claim_attestation_count: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
+      }
+      get_missing_metadata_uris: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          missing_uri: string
+        }[]
+      }
+      get_or_create_claim:
+        | {
+            Args: {
+              p_chain_id: number
+              p_contract_address: string
+              p_token_id: number
+              p_creation_block_number: number
+              p_creation_block_timestamp: number
+              p_last_update_block_number: number
+              p_last_update_block_timestamp: number
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_contracts_id: string
+              p_token_id: number
+            }
+            Returns: {
+              contracts_id: string
+              creation_block_number: number
+              creation_block_timestamp: number
+              creator_address: string | null
+              hypercert_id: string | null
+              id: string
+              last_update_block_number: number
+              last_update_block_timestamp: number
+              owner_address: string | null
+              token_id: number
+              units: number | null
+              uri: string | null
+              value: number | null
+            }
+          }
+      get_unparsed_hypercert_allow_lists: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          claim_id: string
+          al_data_id: string
+          data: Json
+        }[]
+      }
+      store_allow_list_records: {
+        Args: {
+          _claims_id: string
+          _allow_list_data_id: string
+          _records: Json[]
+        }
+        Returns: undefined
+      }
+      store_fraction: {
+        Args: {
+          _fractions: Database["public"]["CompositeTypes"]["fraction_type"][]
+        }
+        Returns: {
+          fraction_id: string
+        }[]
+      }
+      store_hypercert_allow_list_roots: {
+        Args: {
+          p_hc_allow_list_roots: Database["public"]["CompositeTypes"]["hc_allow_list_root_type"][]
+        }
+        Returns: undefined
+      }
+      transfer_fractions_batch: {
+        Args: {
+          p_transfers: Database["public"]["CompositeTypes"]["transfer_fractions_type"][]
+        }
+        Returns: undefined
+      }
+      transfer_units_batch: {
+        Args: {
+          p_transfers: Database["public"]["CompositeTypes"]["transfer_units_type"][]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      fraction_type: {
+        claims_id: string | null
+        token_id: number | null
+        creation_block_timestamp: number | null
+        last_block_update_timestamp: number | null
+        owner_address: string | null
+        value: number | null
+      }
+      hc_allow_list_root_type: {
+        contract_id: string | null
+        token_id: number | null
+        root: string | null
+      }
+      transfer_fractions_type: {
+        claims_id: string | null
+        token_id: number | null
+        from_owner_address: string | null
+        to_owner_address: string | null
+        block_timestamp: number | null
+        value: number | null
+        block_number: number | null
+      }
+      transfer_units_type: {
+        claim_id: string | null
+        from_token_id: number | null
+        to_token_id: number | null
+        block_timestamp: number | null
+        units_transferred: number | null
+        block_number: number | null
+      }
     }
   }
   storage: {
     Tables: {
       buckets: {
         Row: {
+          allowed_mime_types: string[] | null
+          avif_autodetection: boolean | null
           created_at: string | null
+          file_size_limit: number | null
           id: string
           name: string
           owner: string | null
+          owner_id: string | null
+          public: boolean | null
           updated_at: string | null
         }
         Insert: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
           created_at?: string | null
+          file_size_limit?: number | null
           id: string
           name: string
           owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
           updated_at?: string | null
         }
         Update: {
+          allowed_mime_types?: string[] | null
+          avif_autodetection?: boolean | null
           created_at?: string | null
+          file_size_limit?: number | null
           id?: string
           name?: string
           owner?: string | null
+          owner_id?: string | null
+          public?: boolean | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "buckets_owner_fkey"
-            columns: ["owner"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       migrations: {
         Row: {
@@ -113,7 +827,10 @@ export type Database = {
           metadata: Json | null
           name: string | null
           owner: string | null
+          owner_id: string | null
+          path_tokens: string[] | null
           updated_at: string | null
+          version: string | null
         }
         Insert: {
           bucket_id?: string | null
@@ -123,7 +840,10 @@ export type Database = {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
           updated_at?: string | null
+          version?: string | null
         }
         Update: {
           bucket_id?: string | null
@@ -133,7 +853,10 @@ export type Database = {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
+          owner_id?: string | null
+          path_tokens?: string[] | null
           updated_at?: string | null
+          version?: string | null
         }
         Relationships: [
           {
@@ -143,11 +866,99 @@ export type Database = {
             referencedRelation: "buckets"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      s3_multipart_uploads: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          id: string
+          in_progress_size: number
+          key: string
+          owner_id: string | null
+          upload_signature: string
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          id: string
+          in_progress_size?: number
+          key: string
+          owner_id?: string | null
+          upload_signature: string
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          id?: string
+          in_progress_size?: number
+          key?: string
+          owner_id?: string | null
+          upload_signature?: string
+          version?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "objects_owner_fkey"
-            columns: ["owner"]
+            foreignKeyName: "s3_multipart_uploads_bucket_id_fkey"
+            columns: ["bucket_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      s3_multipart_uploads_parts: {
+        Row: {
+          bucket_id: string
+          created_at: string
+          etag: string
+          id: string
+          key: string
+          owner_id: string | null
+          part_number: number
+          size: number
+          upload_id: string
+          version: string
+        }
+        Insert: {
+          bucket_id: string
+          created_at?: string
+          etag: string
+          id?: string
+          key: string
+          owner_id?: string | null
+          part_number: number
+          size?: number
+          upload_id: string
+          version: string
+        }
+        Update: {
+          bucket_id?: string
+          created_at?: string
+          etag?: string
+          id?: string
+          key?: string
+          owner_id?: string | null
+          part_number?: number
+          size?: number
+          upload_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_bucket_id_fkey"
+            columns: ["bucket_id"]
+            isOneToOne: false
+            referencedRelation: "buckets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "s3_multipart_uploads_parts_upload_id_fkey"
+            columns: ["upload_id"]
+            isOneToOne: false
+            referencedRelation: "s3_multipart_uploads"
             referencedColumns: ["id"]
           },
         ]
@@ -157,6 +968,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_insert_object: {
+        Args: {
+          bucketid: string
+          name: string
+          owner: string
+          metadata: Json
+        }
+        Returns: undefined
+      }
       extension: {
         Args: {
           name: string
@@ -175,6 +995,44 @@ export type Database = {
         }
         Returns: string[]
       }
+      get_size_by_bucket: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          size: number
+          bucket_id: string
+        }[]
+      }
+      list_multipart_uploads_with_delimiter: {
+        Args: {
+          bucket_id: string
+          prefix_param: string
+          delimiter_param: string
+          max_keys?: number
+          next_key_token?: string
+          next_upload_token?: string
+        }
+        Returns: {
+          key: string
+          id: string
+          created_at: string
+        }[]
+      }
+      list_objects_with_delimiter: {
+        Args: {
+          bucket_id: string
+          prefix_param: string
+          delimiter_param: string
+          max_keys?: number
+          start_after?: string
+          next_token?: string
+        }
+        Returns: {
+          name: string
+          id: string
+          metadata: Json
+          updated_at: string
+        }[]
+      }
       search: {
         Args: {
           prefix: string
@@ -182,6 +1040,9 @@ export type Database = {
           limits?: number
           levels?: number
           offsets?: number
+          search?: string
+          sortcolumn?: string
+          sortorder?: string
         }
         Returns: {
           name: string
