@@ -217,18 +217,21 @@ export type Database = {
         Row: {
           chain_id: number
           contract_address: string
+          contract_slug: string
           id: string
           start_block: number | null
         }
         Insert: {
           chain_id: number
           contract_address: string
+          contract_slug?: string
           id?: string
           start_block?: number | null
         }
         Update: {
           chain_id?: number
           contract_address?: string
+          contract_slug?: string
           id?: string
           start_block?: number | null
         }
@@ -237,16 +240,19 @@ export type Database = {
       events: {
         Row: {
           abi: string
+          contract_slug: string
           id: string
           name: string
         }
         Insert: {
           abi: string
+          contract_slug?: string
           id?: string
           name: string
         }
         Update: {
           abi?: string
+          contract_slug?: string
           id?: string
           name?: string
         }
@@ -464,6 +470,48 @@ export type Database = {
             referencedColumns: ["uri"]
           },
         ]
+      }
+      sales: {
+        Row: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          creation_block_timestamp: number
+          currency: string
+          hypercert_id: string
+          id: string
+          item_ids: number[]
+          seller: string
+          strategy_id: number
+          transaction_hash: string
+        }
+        Insert: {
+          amounts: number[]
+          buyer: string
+          collection: string
+          creation_block_timestamp: number
+          currency: string
+          hypercert_id: string
+          id?: string
+          item_ids: number[]
+          seller: string
+          strategy_id: number
+          transaction_hash: string
+        }
+        Update: {
+          amounts?: number[]
+          buyer?: string
+          collection?: string
+          creation_block_timestamp?: number
+          currency?: string
+          hypercert_id?: string
+          id?: string
+          item_ids?: number[]
+          seller?: string
+          strategy_id?: number
+          transaction_hash?: string
+        }
+        Relationships: []
       }
       supported_schemas: {
         Row: {
