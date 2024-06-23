@@ -155,7 +155,7 @@ export const indexTakerBid = async ({
         .flatMap((res) =>
           res?.takerBids?.flatMap((takerBid) => takerBid.args.itemIds),
         )
-        .filter((x): x is bigint => !!x);
+        .filter((x) => x !== undefined);
       const { data: allOrders, error } = await supabaseData
         .from("marketplace_orders")
         .select("*")
