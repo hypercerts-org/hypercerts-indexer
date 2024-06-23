@@ -33,10 +33,6 @@ BEGIN
       AND cl.token_id = p_token_id;
 
     IF _claim_id IS NULL THEN
-        INSERT INTO contracts (chain_id, contract_address)
-        VALUES (p_chain_id, p_contract_address)
-        ON CONFLICT (chain_id, contract_address) DO NOTHING;
-
         INSERT INTO claims (contracts_id, token_id, creation_block_number, creation_block_timestamp, last_update_block_number, last_update_block_timestamp)
         SELECT c.id, p_token_id, p_creation_block_number, p_creation_block_timestamp, p_last_update_block_number, p_last_update_block_timestamp
         FROM contracts c
