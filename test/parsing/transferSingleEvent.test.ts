@@ -58,8 +58,8 @@ describe("transferSingleEvent", {}, () => {
 
     expect(parsed).toMatchObject({
       contract_address: contractAddress,
-      last_update_block_number: blockNumber,
-      last_update_block_timestamp: timestamp,
+      block_number: blockNumber,
+      block_timestamp: timestamp,
       from_owner_address: fromAddress,
       to_owner_address: toAddress,
       token_id: claimID,

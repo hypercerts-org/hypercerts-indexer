@@ -39,6 +39,8 @@ export type NewUnitTransfer = {
   contract_address: string;
   from_token_id: bigint;
   to_token_id: bigint;
+  creation_block_timestamp: bigint;
+  creation_block_number: bigint;
   last_update_block_timestamp: bigint;
   last_update_block_number: bigint;
   units: bigint;

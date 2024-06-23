@@ -65,6 +65,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         claim_id: claimId,
         from_token_id: transfer.from_token_id.toString(),
         to_token_id: transfer.to_token_id.toString(),
+        creation_block_timestamp: transfer.creation_block_timestamp.toString(),
+        creation_block_number: transfer.creation_block_number.toString(),
         last_update_block_timestamp:
           transfer.last_update_block_timestamp.toString(),
         last_update_block_number: transfer.last_update_block_number.toString(),

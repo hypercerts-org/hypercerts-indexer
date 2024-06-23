@@ -65,10 +65,12 @@ export type Database = {
           chain_id: number | null
           claims_id: string | null
           contract_address: string | null
-          creation_block_number: number | null
+          creation_block_number: number
           creation_block_timestamp: number
           data: Json
           id: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
           recipient: string
           supported_schemas_id: string
           token_id: number | null
@@ -80,10 +82,12 @@ export type Database = {
           chain_id?: number | null
           claims_id?: string | null
           contract_address?: string | null
-          creation_block_number?: number | null
+          creation_block_number: number
           creation_block_timestamp: number
           data: Json
           id?: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
           recipient: string
           supported_schemas_id: string
           token_id?: number | null
@@ -95,10 +99,12 @@ export type Database = {
           chain_id?: number | null
           claims_id?: string | null
           contract_address?: string | null
-          creation_block_number?: number | null
+          creation_block_number?: number
           creation_block_timestamp?: number
           data?: Json
           id?: string
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
           recipient?: string
           supported_schemas_id?: string
           token_id?: number | null
@@ -131,11 +137,13 @@ export type Database = {
       claims: {
         Row: {
           contracts_id: string
-          creation_block_number: number | null
-          creation_block_timestamp: number | null
+          creation_block_number: number
+          creation_block_timestamp: number
           creator_address: string | null
           hypercert_id: string | null
           id: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
           owner_address: string | null
           token_id: number
           units: number | null
@@ -145,11 +153,13 @@ export type Database = {
         }
         Insert: {
           contracts_id: string
-          creation_block_number?: number | null
-          creation_block_timestamp?: number | null
+          creation_block_number: number
+          creation_block_timestamp: number
           creator_address?: string | null
           hypercert_id?: string | null
           id?: string
+          last_update_block_number: number
+          last_update_block_timestamp: number
           owner_address?: string | null
           token_id: number
           units?: number | null
@@ -158,11 +168,13 @@ export type Database = {
         }
         Update: {
           contracts_id?: string
-          creation_block_number?: number | null
-          creation_block_timestamp?: number | null
+          creation_block_number?: number
+          creation_block_timestamp?: number
           creator_address?: string | null
           hypercert_id?: string | null
           id?: string
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
           owner_address?: string | null
           token_id?: number
           units?: number | null
@@ -261,12 +273,12 @@ export type Database = {
       fractions: {
         Row: {
           claims_id: string
-          creation_block_number: number | null
-          creation_block_timestamp: number | null
+          creation_block_number: number
+          creation_block_timestamp: number
           hypercert_id: string | null
           id: string
-          last_update_block_number: number | null
-          last_update_block_timestamp: number | null
+          last_update_block_number: number
+          last_update_block_timestamp: number
           owner_address: string | null
           token_id: number
           units: number | null
@@ -274,12 +286,12 @@ export type Database = {
         }
         Insert: {
           claims_id: string
-          creation_block_number?: number | null
-          creation_block_timestamp?: number | null
+          creation_block_number: number
+          creation_block_timestamp: number
           hypercert_id?: string | null
           id?: string
-          last_update_block_number?: number | null
-          last_update_block_timestamp?: number | null
+          last_update_block_number: number
+          last_update_block_timestamp: number
           owner_address?: string | null
           token_id: number
           units?: number | null
@@ -287,12 +299,12 @@ export type Database = {
         }
         Update: {
           claims_id?: string
-          creation_block_number?: number | null
-          creation_block_timestamp?: number | null
+          creation_block_number?: number
+          creation_block_timestamp?: number
           hypercert_id?: string | null
           id?: string
-          last_update_block_number?: number | null
-          last_update_block_timestamp?: number | null
+          last_update_block_number?: number
+          last_update_block_timestamp?: number
           owner_address?: string | null
           token_id?: number
           units?: number | null
@@ -525,17 +537,6 @@ export type Database = {
         }
         Relationships: []
       }
-      hypercert_allow_list_records_with_token_id: {
-        Row: {
-          claimed: boolean | null
-          entry: number | null
-          id: string | null
-          leaf: string | null
-          token_id: number | null
-          user_address: string | null
-        }
-        Relationships: []
-      }
       hypercert_allowlists_with_claim: {
         Row: {
           claim_id: string | null
@@ -565,6 +566,10 @@ export type Database = {
               p_chain_id: number
               p_contract_address: string
               p_token_id: number
+              p_creation_block_number: number
+              p_creation_block_timestamp: number
+              p_last_update_block_number: number
+              p_last_update_block_timestamp: number
             }
             Returns: string
           }
@@ -575,11 +580,13 @@ export type Database = {
             }
             Returns: {
               contracts_id: string
-              creation_block_number: number | null
-              creation_block_timestamp: number | null
+              creation_block_number: number
+              creation_block_timestamp: number
               creator_address: string | null
               hypercert_id: string | null
               id: string
+              last_update_block_number: number
+              last_update_block_timestamp: number
               owner_address: string | null
               token_id: number
               units: number | null
@@ -654,6 +661,7 @@ export type Database = {
         to_owner_address: string | null
         block_timestamp: number | null
         value: number | null
+        block_number: number | null
       }
       transfer_units_type: {
         claim_id: string | null
@@ -661,6 +669,7 @@ export type Database = {
         to_token_id: number | null
         block_timestamp: number | null
         units_transferred: number | null
+        block_number: number | null
       }
     }
   }

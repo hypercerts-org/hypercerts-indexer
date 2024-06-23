@@ -94,18 +94,24 @@ export type Database = MergeDeep<
             token_id: bigint | number | string;
             creation_block_timestamp: bigint | number | string;
             creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
           Insert: {
             chain_id: bigint | number | string;
             token_id: bigint | number | string;
             creation_block_timestamp: bigint | number | string;
             creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
           Update: {
             chain_id: bigint | number | string;
             token_id: bigint | number | string;
             creation_block_timestamp: bigint | number | string;
             creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
         };
         claims: {
@@ -119,20 +125,19 @@ export type Database = MergeDeep<
             value: bigint | number | string | null | undefined;
             units: bigint | number | string | null | undefined;
             token_id: bigint | number | string;
-            creation_block_timestamp:
-              | bigint
-              | number
-              | string
-              | null
-              | undefined;
-            last_block_update_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
           Update: {
             value: bigint | number | string | null | undefined;
             units: bigint | number | string | null | undefined;
             token_id: bigint | number | string;
-            creation_block_timestamp: bigint | number | string | null;
-            last_block_update_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
         };
         fractions: {
@@ -141,41 +146,51 @@ export type Database = MergeDeep<
             units: bigint | number | string | null | undefined;
             token_id: bigint | number | string;
             creation_block_timestamp: bigint | number | string;
-            last_block_update_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
           Insert: {
             value: bigint | number | string | null | undefined;
             units: bigint | number | string | null | undefined;
             token_id: bigint | number | string;
-            creation_block_timestamp:
-              | bigint
-              | number
-              | string
-              | null
-              | undefined;
-            last_block_update_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
           Update: {
             value: bigint | number | string | null | undefined;
             units: bigint | number | string | null | undefined;
             token_id: bigint | number | string;
-            creation_block_timestamp: bigint | number | string | null;
-            last_block_update_timestamp: bigint | number | string;
+            creation_block_timestamp: bigint | number | string;
+            creation_block_number: bigint | number | string;
+            last_update_block_number: bigint | number | string;
+            last_update_block_timestamp: bigint | number | string;
           };
         };
       };
       hypercerts: {
         Row: {
           claim_id: bigint | number | string | null;
-          block_timestamp: bigint | number | string | null;
+          creation_block_timestamp: bigint | number | string;
+          creation_block_number: bigint | number | string;
+          last_update_block_number: bigint | number | string;
+          last_update_block_timestamp: bigint | number | string;
         };
         Insert: {
           claim_id: bigint | number | string | null;
-          block_timestamp: bigint | number | string | null;
+          creation_block_timestamp: bigint | number | string;
+          creation_block_number: bigint | number | string;
+          last_update_block_number: bigint | number | string;
+          last_update_block_timestamp: bigint | number | string;
         };
         Update: {
           claim_id: bigint | number | string | null;
-          block_timestamp: bigint | number | string | null;
+          creation_block_timestamp: bigint | number | string;
+          creation_block_number: bigint | number | string;
+          last_update_block_number: bigint | number | string;
+          last_update_block_timestamp: bigint | number | string;
         };
       };
       hypercert_allow_list_records: {

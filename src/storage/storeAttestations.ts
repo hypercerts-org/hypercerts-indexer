@@ -41,6 +41,9 @@ export const storeAttestations = async ({
       token_id: attestation.token_id.toString(),
       creation_block_number: attestation.creation_block_number.toString(),
       creation_block_timestamp: attestation.creation_block_timestamp.toString(),
+      last_update_block_number: attestation.last_update_block_number.toString(),
+      last_update_block_timestamp:
+        attestation.last_update_block_timestamp.toString(),
     };
   });
 
