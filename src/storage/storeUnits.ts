@@ -1,6 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { NewUnitTransfer } from "@/types/types.js";
-import { getClaimTokenId } from "@/utils/tokenIds.js";
+import { Tables } from "@/types/database.types";
+import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -20,7 +20,7 @@ import { getClaimTokenId } from "@/utils/tokenIds.js";
  */
 
 interface StoreUnitTransfer {
-  transfers?: NewUnitTransfer[];
+  transfers?: ParsedValueTransfer[];
 }
 
 export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
@@ -35,14 +35,20 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
+  const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
-  const _transfers = await Promise.all(
+  await Promise.all(
     transfers.map(async (transfer) => {
-      const claimTokenId =
-        transfer.from_token_id === 0n
-          ? getClaimTokenId(transfer.to_token_id).toString()
-          : getClaimTokenId(transfer.from_token_id).toString();
+      console.log("TRANSFER: ", transfer);
+      let fromToken = tokens.find(
+        (token) => token.token_id === transfer.from_token_id.toString(),
+      );
+      let toToken = tokens.find(
+        (token) => token.token_id === transfer.to_token_id.toString(),
+      );
+
+      const claimTokenId = transfer.claim_id.toString();
       let claimId = claimIds[claimTokenId];
 
       if (!claimId) {
@@ -61,20 +67,119 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         return;
       }
 
-      return {
-        claim_id: claimId,
-        from_token_id: transfer.from_token_id.toString(),
-        to_token_id: transfer.to_token_id.toString(),
-        block_timestamp: transfer.block_timestamp,
-        units_transferred: transfer.units,
+      if (!fromToken) {
+        const { data: fromTokenData } = await supabase
+          .from("fractions")
+          .select("*, token_id::text")
+          .eq("token_id", transfer.from_token_id.toString())
+          .maybeSingle()
+          .throwOnError();
+
+        if (fromTokenData) {
+          fromToken = fromTokenData;
+        } else {
+          fromToken = {
+            claims_id: claimId,
+            token_id: transfer.from_token_id.toString(),
+            units: 0n,
+            last_update_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            last_update_block_number:
+              transfer.last_update_block_number.toString(),
+            creation_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            creation_block_number: transfer.last_update_block_number.toString(),
+            value: 1n,
+          };
+        }
+      }
+
+      if (!toToken) {
+        const { data: toTokenData } = await supabase
+          .from("fractions")
+          .select("*, token_id::text")
+          .eq("token_id", transfer.to_token_id.toString())
+          .maybeSingle()
+          .throwOnError();
+
+        if (toTokenData) {
+          toToken = toTokenData;
+        } else {
+          toToken = {
+            claims_id: claimId,
+            token_id: transfer.to_token_id.toString(),
+            units: 0n,
+            last_update_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            last_update_block_number:
+              transfer.last_update_block_number.toString(),
+            creation_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            creation_block_number: transfer.last_update_block_number.toString(),
+            value: 1n,
+          };
+        }
+      }
+
+      // Update to token with updated units and timestamps
+      if (!fromToken || !toToken) {
+        throw Error(
+          `[StoreUnitTransfer] Something went wrong fetching or building token.`,
+        );
+      }
+
+      if (transfer.from_token_id !== 0n) {
+        const fromUnits = fromToken?.units || 0n;
+        fromToken.units = BigInt(fromUnits) - transfer.units;
+        fromToken.last_update_block_timestamp =
+          transfer.last_update_block_timestamp.toString();
+        fromToken.last_update_block_number =
+          transfer.last_update_block_number.toString();
+      }
+
+      if (transfer.to_token_id !== 0n) {
+        const toUnits = toToken?.units || 0n;
+        toToken.units = BigInt(toUnits) + transfer.units;
+
+        toToken.last_update_block_timestamp =
+          transfer.last_update_block_timestamp.toString();
+        toToken.last_update_block_number =
+          transfer.last_update_block_number.toString();
+      }
+
+      const replaceToken = (array, token) => {
+        const index = array.findIndex((t) => t.token_id === token.token_id);
+        if (index !== -1) {
+          array[index] = token;
+        } else {
+          array.push(token);
+        }
       };
+
+      replaceToken(tokens, fromToken);
+      replaceToken(tokens, toToken);
     }),
   );
 
-  console.log("Transfers to store", _transfers);
+  const filteredTokens = tokens.filter((token) => token.token_id !== "0");
+
+  const parsedTokens = filteredTokens.map((token) => {
+    return {
+      ...token,
+      token_id: token.token_id.toString(),
+      units: token?.units?.toString() ?? "0",
+      creation_block_number: token.creation_block_number.toString(),
+      creation_block_timestamp: token.creation_block_timestamp.toString(),
+      last_update_block_number: token.last_update_block_number.toString(),
+      last_update_block_timestamp: token.last_update_block_timestamp.toString(),
+    };
+  });
+
   await supabase
-    .rpc("transfer_units_batch", {
-      p_transfers: _transfers,
+    .from("fractions")
+    .upsert(parsedTokens, {
+      ignoreDuplicates: false,
+      defaultToNull: false,
     })
     .throwOnError();
 };

@@ -1,9 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseClaimStoredEvent } from "../../src/parsing";
+import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
 import { faker } from "@faker-js/faker";
-import { client } from "../../src/clients/evmClient";
+import { client } from "@/clients/evmClient.js";
 import { getAddress, GetTransactionReturnType } from "viem";
 import { generateClaimStoredEvent } from "../helpers/factories";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+
+vi.mock("../../src/utils/getBlockTimestamp.js");
 
 describe("claimStoredEvent", {}, () => {
   it("parses a claim stored event", {}, async () => {
@@ -18,14 +21,19 @@ describe("claimStoredEvent", {}, () => {
 
     vi.spyOn(client, "readContract").mockResolvedValue(owner);
 
+    vi.mocked(getBlockTimestamp).mockResolvedValue(42n);
+
     const parsed = await parseClaimStoredEvent(mockEvent);
 
     expect(parsed).toEqual({
+      creation_block_number: mockEvent.blockNumber,
+      creation_block_timestamp: 42n,
+      last_update_block_number: mockEvent.blockNumber,
+      last_update_block_timestamp: 42n,
       creator_address: from,
       owner_address: "0x0000000000000000000000000000000000000000",
       uri: mockEvent.args.uri,
       units: mockEvent.args.totalUnits,
-      block_number: mockEvent.blockNumber,
       token_id: mockEvent.args.claimID,
     });
   });

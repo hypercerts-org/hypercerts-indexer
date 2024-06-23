@@ -15,6 +15,7 @@ import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas.js";
 import { runIndexing } from "@/indexer/runIndexing.js";
 import { indexAllowlistSingleClaimMinted } from "@/indexer/indexAllowlistSingleClaimMinted.js";
+import { indexTakerBid } from "@/indexer/indexTakerBid.js";
 
 import * as Sentry from "@sentry/node";
 
@@ -51,6 +52,7 @@ app.listen(port, async () => {
     indexAllowlistRecords,
     indexAttestations,
     indexAllowlistSingleClaimMinted,
+    indexTakerBid,
   ];
 
   await runIndexing(indexingMethods, delay);

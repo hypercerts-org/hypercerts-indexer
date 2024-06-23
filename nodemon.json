@@ -5,7 +5,8 @@
     ".git",
     "node_modules",
     "**/graphql-env.d.ts",
-    "**/__generated__/*"
+    "**/__generated__/*",
+    "**/types/database-generated.types.ts"
   ],
   "watch": [
     "./src"

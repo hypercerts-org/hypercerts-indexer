@@ -29,6 +29,7 @@ export default defineConfig({
         ...(configDefaults.coverage.exclude as string[]),
         "**/*.types.ts",
         "**/types.ts",
+        "lib/*",
       ],
     },
   },

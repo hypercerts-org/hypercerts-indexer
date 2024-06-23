@@ -16,7 +16,10 @@ export const generateClaim = (overrides?: Partial<Claim>): Claim => {
     creator_address: getAddress(faker.finance.ethereumAddress()),
     owner_address: getAddress(faker.finance.ethereumAddress()),
     token_id: faker.number.bigInt(),
-    block_number: faker.number.bigInt(),
+    creation_block_number: faker.number.bigInt(),
+    creation_block_timestamp: faker.number.bigInt(),
+    last_update_block_timestamp: faker.number.bigInt(),
+    last_update_block_number: faker.number.bigInt(),
     units: faker.number.bigInt(),
     uri: faker.internet.url(),
     ...overrides,
@@ -72,7 +75,8 @@ export const generateParsedAttestedEvent = (
     attester: getAddress(faker.finance.ethereumAddress()),
     recipient: getAddress(faker.finance.ethereumAddress()),
     uid: faker.string.hexadecimal({ length: 66 }) as Hex,
-    block_timestamp: faker.number.bigInt(),
+    creation_block_number: faker.number.bigInt(),
+    creation_block_timestamp: faker.number.bigInt(),
     ...overrides,
   };
 };
@@ -112,6 +116,8 @@ export const generateEventToFetch = (overrides?: Partial<EventToFetch>) => {
     event_name: faker.hacker.noun(),
     abi: faker.random.words(),
     last_block_indexed: faker.number.bigInt(),
+    contract_slug: "minter-contract",
+    start_block: faker.number.bigInt(),
     ...overrides,
   };
 };

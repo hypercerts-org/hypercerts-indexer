@@ -29,6 +29,15 @@ export const supabaseUrl = assertExists(
   "Supabase caching DB URL",
 );
 
+export const supabaseDataUrl = assertExists(
+  process.env.SUPABASE_DATA_DB_URL,
+  "Supabase data DB URL",
+);
+export const supabaseDataServiceApiKey = assertExists(
+  process.env.SUPABASE_DATA_SERVICE_API_KEY,
+  "Supabase data service API key",
+);
+
 export const batchSize = BigInt(
   assertExists(process.env.BATCH_SIZE, "Batch size"),
 );

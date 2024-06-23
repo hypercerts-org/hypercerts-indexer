@@ -52,7 +52,7 @@ describe("leafClaimedEvent", {}, () => {
     expect(parsed).toEqual({
       contract_address: address,
       creator_address: from,
-      block_timestamp: timestamp,
+      creation_block_timestamp: timestamp,
       token_id: tokenID,
       leaf,
     });
