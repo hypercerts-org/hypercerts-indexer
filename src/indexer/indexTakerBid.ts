@@ -193,22 +193,26 @@ export const indexTakerBid = async ({
         signatures,
       );
 
-      const ordersToDelete = validationResults
+      const ordersToUpdate = validationResults
         .map((result, index) => {
           const isValid = !result.some((code) =>
             FAULTY_ORDER_VALIDATOR_CODES.includes(code),
           );
-          if (!isValid) {
-            return allOrders[index].id;
-          }
-        })
-        .filter((x): x is string => !!x);
 
-      console.log("[IndexTakerBid] Deleting invalid orders", ordersToDelete);
-      await supabaseData
-        .from("marketplace_orders")
-        .delete()
-        .in("id", ordersToDelete);
+          if (!isValid) {
+            const order = allOrders[index];
+            return {
+              ...order,
+              invalidated: true,
+              validator_codes: result,
+            };
+          }
+          return null;
+        })
+        .filter((x) => x !== null);
+
+      console.log("[IndexTakerBid] Deleting invalid orders", ordersToUpdate);
+      await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
     })
     .then(() =>
       updateLastBlockIndexedContractEvents({

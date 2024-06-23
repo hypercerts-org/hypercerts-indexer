@@ -16,7 +16,7 @@
     "supabase:seed": "npx supabase db reset && npx tsx seed.ts",
     "update:sentry:sourcemaps": "npx @sentry/wizard@latest -i sourcemaps",
     "supabase:types": "npx supabase gen types typescript --local > src/types/database-generated.types.ts",
-    "supabase:types:data": "npx supabase gen types typescript --project-id zgvoyckkistexkfdmjqc > ./src/types/supabase-data-generated.types.ts"
+    "supabase:types:data": "npx supabase gen types typescript --local --workdir ./lib/hypercerts-api > ./src/types/supabase-data-generated.types.ts"
   },
   "keywords": [],
   "author": "",
@@ -58,7 +58,7 @@
     "supertest": "^6.3.4",
     "ts-mockito": "^2.6.1",
     "tsx": "^4.7.1",
-    "typescript": "^5.3.3",
+    "typescript": "^5.5.2",
     "typescript-eslint": "^7.0.2",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.3.1",
