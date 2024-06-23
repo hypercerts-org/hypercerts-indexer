@@ -707,12 +707,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      transfer_fractions_batch: {
-        Args: {
-          p_transfers: Database["public"]["CompositeTypes"]["transfer_fractions_type"][]
-        }
-        Returns: undefined
-      }
       transfer_units_batch: {
         Args: {
           p_transfers: Database["public"]["CompositeTypes"]["transfer_units_type"][]
@@ -736,15 +730,6 @@ export type Database = {
         contract_id: string | null
         token_id: number | null
         root: string | null
-      }
-      transfer_fractions_type: {
-        claims_id: string | null
-        token_id: number | null
-        from_owner_address: string | null
-        to_owner_address: string | null
-        block_timestamp: number | null
-        value: number | null
-        block_number: number | null
       }
       transfer_units_type: {
         claim_id: string | null

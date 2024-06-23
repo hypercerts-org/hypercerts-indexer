@@ -13,7 +13,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-create view fractions_view as
+create or replace view fractions_view as
 select f.id,
        f.claims_id,
        f.token_id,
@@ -21,8 +21,8 @@ select f.id,
        c.hypercert_id,
        f.creation_block_timestamp,
        f.creation_block_number,
-       f.last_update_block_number,
        f.last_update_block_timestamp,
+       f.last_update_block_number,
        f.owner_address,
        f.value,
        f.units

@@ -30,21 +30,7 @@ SELECT hal.id AS hypercert_allow_list_id,
 FROM (hypercert_allow_lists hal
     JOIN claims c ON ((c.id = hal.claims_id)));
 
-create or replace view fractions_view as
-select f.id,
-       f.claims_id,
-       f.token_id,
-       f.fraction_id,
-       c.hypercert_id,
-       f.creation_block_timestamp,
-       f.creation_block_number,
-       f.last_update_block_timestamp,
-       f.last_update_block_number,
-       f.owner_address,
-       f.value,
-       f.units
-from fractions f
-         join public.claims c on f.claims_id = c.id;
+
 
 alter type transfer_units_type
     add attribute block_number numeric(78, 0);
@@ -239,7 +225,8 @@ BEGIN
                                                                      row.creation_block_timestamp),
                               last_update_block_timestamp = COALESCE(row.creation_block_timestamp,
                                                                      fractions.last_update_block_timestamp),
-                              last_update_block_number    = COALESCE(row.last_update_block_number, fractions.last_update_block_number),
+                              last_update_block_number    = COALESCE(row.last_update_block_number,
+                                                                     fractions.last_update_block_number),
                               value                       = COALESCE(fractions.value, row.value);
         END LOOP;
 
