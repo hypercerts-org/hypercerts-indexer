@@ -35,7 +35,7 @@ export const getDeployment = (): Partial<Deployment> & {
     case 8453:
       return {
         ...deployments["8453"],
-        startBlock: 76066993n,
+        startBlock: 6771210n,
         easAddress: "0x4200000000000000000000000000000000000021",
         schemaRegistryAddress: "0x4200000000000000000000000000000000000020",
         chainId,
