@@ -17,6 +17,7 @@ const TakerBidSchema = z.object({
   amounts: z.array(z.bigint()),
   transaction_hash: z.string(),
   creation_block_timestamp: z.bigint(),
+  creation_block_number: z.bigint(),
 });
 
 export type TakerBid = z.infer<typeof TakerBidSchema>;
@@ -65,6 +66,7 @@ export const storeTakerBid = async ({
     const _takerBidForStorage = _takerBids.map((takerBid) => ({
       ...takerBid,
       creation_block_timestamp: takerBid.creation_block_timestamp.toString(),
+      creation_block_number: takerBid.creation_block_number.toString(),
       item_ids: takerBid.item_ids.map((id) => id.toString()),
       amounts: takerBid.amounts.map((amount) => amount.toString()),
     }));

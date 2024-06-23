@@ -31,11 +31,14 @@ create table claims
     contracts_id                uuid           not null references contracts (id),
     token_id                    numeric(78, 0) not null,
     hypercert_id                text,
-    block_number                numeric(78, 0),
     owner_address               text,
     value                       numeric(78, 0),
     units                       numeric(78, 0),
     uri                         text,
+    creation_block_number       numeric(78, 0) not null,
+    creation_block_timestamp    numeric(78, 0) not null,
+    last_update_block_number    numeric(78, 0) not null,
+    last_update_block_timestamp numeric(78, 0) not null,
     UNIQUE (contracts_id, token_id)
 );
 
@@ -45,11 +48,13 @@ create table fractions
     claims_id                   uuid           not null references claims (id),
     token_id                    numeric(78, 0) not null,
     hypercert_id                text,
-    creation_block_timestamp    numeric(78, 0),
-    last_block_update_timestamp numeric(78, 0),
     owner_address               text,
     value                       numeric(78, 0),
     units                       numeric(78, 0),
+    creation_block_number       numeric(78, 0) not null,
+    creation_block_timestamp    numeric(78, 0) not null,
+    last_update_block_number    numeric(78, 0) not null,
+    last_update_block_timestamp numeric(78, 0) not null,
     UNIQUE (claims_id, token_id)
 );
 
@@ -90,18 +95,21 @@ create table supported_schemas
 
 create table attestations
 (
-    id                   uuid primary key default gen_random_uuid(),
-    supported_schemas_id uuid           not null references supported_schemas (id),
-    attestation_uid      text           not null,
-    chain_id             numeric(78, 0),
-    contract_address     text,
-    token_id             numeric(78, 0),
-    claims_id            uuid,
-    recipient_address    text           not null,
-    attester_address     text           not null,
-    attestation          jsonb          not null,
-    decoded_attestation  jsonb          not null,
-    block_timestamp      numeric(78, 0) not null,
+    id                          uuid primary key default gen_random_uuid(),
+    supported_schemas_id        uuid           not null references supported_schemas (id),
+    attestation_uid             text           not null,
+    chain_id                    numeric(78, 0),
+    contract_address            text,
+    token_id                    numeric(78, 0),
+    claims_id                   uuid,
+    recipient_address           text           not null,
+    attester_address            text           not null,
+    attestation                 jsonb          not null,
+    decoded_attestation         jsonb          not null,
+    creation_block_number       numeric(78, 0) not null,
+    creation_block_timestamp    numeric(78, 0) not null,
+    last_update_block_number    numeric(78, 0) not null,
+    last_update_block_timestamp numeric(78, 0) not null,
     UNIQUE (supported_schemas_id, attestation_uid)
 );
 

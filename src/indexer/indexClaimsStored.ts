@@ -1,12 +1,10 @@
-import {
-  parseClaimStoredEvent,
-  ParsedClaimStoredEvent,
-} from "@/parsing/claimStoredEvent.js";
+import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
 import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
-import { storeClaim } from "@/storage/storeClaim.js";
+import { Claim, storeClaim } from "@/storage/storeClaim.js";
+import _ from "lodash";
 
 const defaultConfig = {
   batchSize: 10000n,
@@ -54,10 +52,10 @@ export const indexClaimsStoredEvents = async ({
       });
 
       // Split logs into chunks
-      const logChunks = chunkArray(logs, 10);
+      const logChunks = _.chunk(logs, 10);
 
       // Initialize an empty array to store all claims
-      let allClaims: ParsedClaimStoredEvent[] = [];
+      let allClaims: Claim[] = [];
 
       // Process each chunk one by one
       for (const logChunk of logChunks) {
@@ -94,12 +92,4 @@ export const indexClaimsStoredEvents = async ({
       contract_events: contractEventUpdates,
     }),
   );
-};
-
-const chunkArray = (array, size) => {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
 };

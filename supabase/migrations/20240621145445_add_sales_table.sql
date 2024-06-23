@@ -1,6 +1,7 @@
 create table "public"."sales"
 (
     id                         uuid primary key default gen_random_uuid(),
+    "creation_block_number"    numeric(78, 0)   not null,
     "creation_block_timestamp" numeric(78, 0)   not null,
     "buyer"                    text             not null,
     "seller"                   text             not null,

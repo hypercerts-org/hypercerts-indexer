@@ -1,6 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { NewTransfer } from "@/types/types.js";
-import { getClaimTokenId } from "@/utils/tokenIds.js";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 
 /* 
@@ -41,7 +41,7 @@ export const storeTransferSingleFraction = async ({
       const { data: claim, error: claimError } = await supabase.rpc(
         "get_or_create_claim",
         {
-          p_token_id: getClaimTokenId(transfer.token_id).toString(),
+          p_token_id: getHypercertTokenId(transfer.token_id).toString(),
           p_contracts_id: transfer.contracts_id,
         },
       );
@@ -57,8 +57,8 @@ export const storeTransferSingleFraction = async ({
       return {
         claims_id: claim.id,
         token_id: transfer.token_id.toString(),
-        creation_block_timestamp: transfer.block_timestamp.toString(),
         block_timestamp: transfer.block_timestamp.toString(),
+        block_number: transfer.block_number.toString(),
         from_owner_address: transfer.from_owner_address,
         to_owner_address: transfer.to_owner_address,
         value: transfer.value.toString(),
@@ -71,7 +71,7 @@ export const storeTransferSingleFraction = async ({
   );
 
   const sortedUniqueTokens = _(tokens)
-    .orderBy(["last_block_update_timestamp"], ["desc"])
+    .orderBy(["last_update_block_timestamp"], ["desc"])
     .uniqBy("token_id")
     .value();
 

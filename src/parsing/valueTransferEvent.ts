@@ -1,6 +1,5 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
-import { NewUnitTransfer } from "@/types/types.js";
 import { z } from "zod";
 
 const ValueTransferEventSchema = z.object({
@@ -21,14 +20,16 @@ const ValueTransferEventSchema = z.object({
  * @param event - The event object.
  * */
 export const parseValueTransfer = async (event: unknown) => {
-  const { args, blockNumber } = ValueTransferEventSchema.parse(event);
+  const { args, blockNumber, address } = ValueTransferEventSchema.parse(event);
 
-  const row: Partial<NewUnitTransfer> = {
+  return {
+    contract_address: address,
     from_token_id: args.fromTokenID,
     to_token_id: args.toTokenID,
-    block_timestamp: await getBlockTimestamp(blockNumber),
+    creation_block_number: blockNumber,
+    creation_block_timestamp: await getBlockTimestamp(blockNumber),
+    last_update_block_number: blockNumber,
+    last_update_block_timestamp: await getBlockTimestamp(blockNumber),
     units: args.value,
   };
-
-  return row;
 };

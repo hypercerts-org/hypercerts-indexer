@@ -69,7 +69,7 @@ export const indexAttestations = async ({
       const parsedEvents = await Promise.all(logs.map(parseAttestedEvent));
 
       const attestations = await Promise.all(
-        parsedEvents.map(async (event) =>
+        parsedEvents.flatMap(async (event) =>
           fetchAttestationData({ attestedEvent: event }).then(
             ({ attestation, event }) =>
               decodeAttestationData({

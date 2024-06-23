@@ -5,7 +5,7 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
-import * as console from "node:console";
+import _ from "lodash";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -63,7 +63,7 @@ export const indexUnitTransfers = async ({
       const { logs, toBlock } = logsFound;
 
       // Split logs into chunks
-      const logChunks = chunkArray(logs, 10);
+      const logChunks = _.chunk(logs, 10);
 
       // Initialize an empty array to store all claims
       let allTransfers: NewUnitTransfer[] = [];
@@ -113,12 +113,4 @@ export const indexUnitTransfers = async ({
       ),
     }),
   );
-};
-
-const chunkArray = (array, size) => {
-  const result = [];
-  for (let i = 0; i < array.length; i += size) {
-    result.push(array.slice(i, i + size));
-  }
-  return result;
 };

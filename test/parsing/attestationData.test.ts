@@ -1,11 +1,11 @@
 import { expect, it, beforeEach, describe } from "vitest";
-import { decodeAttestationData } from "../../src/parsing/attestationData";
+import { decodeAttestationData } from "@/parsing/attestationData";
 import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
 import { Tables } from "@/types/database.types";
-import { EasAttestation } from "../../src/fetching/fetchAttestationData";
+import { EasAttestation } from "@/fetching/fetchAttestationData";
 import { faker } from "@faker-js/faker";
 import { Address, getAddress } from "viem";
-import { chainId } from "../../src/utils/constants";
+import { chainId } from "@/utils/constants";
 import {
   generateEasAttestation,
   generateParsedAttestedEvent,
@@ -64,7 +64,8 @@ describe("decodeAttestationData", () => {
     expect(result).toMatchObject({
       attester,
       recipient,
-      block_timestamp: event.block_timestamp,
+      creation_block_timestamp: event.creation_block_timestamp,
+      creation_block_number: event.creation_block_number,
       uid: attestation.uid,
       supported_schemas_id: schema.id,
       attestation: JSON.parse(JSON.stringify(attestation)),

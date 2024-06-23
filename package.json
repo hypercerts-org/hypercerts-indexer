@@ -12,8 +12,8 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "test:integration": "pnpm supabase:seed && vitest run --config ./vitest.integration.config.ts",
-    "supabase:reset": "npx supabase db reset",
-    "supabase:seed": "npx supabase db reset && npx tsx seed.ts",
+    "supabase:reset": "npx supabase db reset && pnpm supabase:types",
+    "supabase:seed": "pnpm supabase:reset && npx tsx seed.ts",
     "update:sentry:sourcemaps": "npx @sentry/wizard@latest -i sourcemaps",
     "supabase:types": "npx supabase gen types typescript --local > src/types/database-generated.types.ts",
     "supabase:types:data": "npx supabase gen types typescript --local --workdir ./lib/hypercerts-api > ./src/types/supabase-data-generated.types.ts"

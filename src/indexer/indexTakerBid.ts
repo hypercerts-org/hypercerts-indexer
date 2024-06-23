@@ -109,18 +109,20 @@ export const indexTakerBid = async ({
                 ...parsed,
                 hypercertId,
                 transactionHash: event.transactionHash,
+                creation_block_number: event.blockNumber,
                 creation_block_timestamp: timestamp,
               };
             }),
           )
         ).filter(
           (
-            allowList,
-          ): allowList is TakerBidEvent & {
+            takerBid,
+          ): takerBid is TakerBidEvent & {
             hypercertId: string;
             transactionHash: `0x${string}`;
             creation_block_timestamp: bigint;
-          } => allowList !== null && allowList !== undefined,
+            creation_block_number: bigint;
+          } => takerBid !== null && takerBid !== undefined,
         );
 
         return {

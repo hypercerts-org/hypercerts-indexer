@@ -15,7 +15,10 @@ CREATE TRIGGER check_uri_before_insert
     FOR EACH ROW
 EXECUTE FUNCTION check_uri_and_insert_into_metadata();
 
-CREATE OR REPLACE FUNCTION get_or_create_claim(p_chain_id numeric, p_contract_address text, p_token_id numeric)
+CREATE OR REPLACE FUNCTION get_or_create_claim(p_chain_id numeric, p_contract_address text, p_token_id numeric,
+                                               p_creation_block_number numeric, p_creation_block_timestamp numeric,
+                                               p_last_update_block_number numeric,
+                                               p_last_update_block_timestamp numeric)
     RETURNS uuid AS
 $$
 DECLARE
@@ -34,8 +37,8 @@ BEGIN
         VALUES (p_chain_id, p_contract_address)
         ON CONFLICT (chain_id, contract_address) DO NOTHING;
 
-        INSERT INTO claims (contracts_id, token_id)
-        SELECT c.id, p_token_id
+        INSERT INTO claims (contracts_id, token_id, creation_block_number, creation_block_timestamp, last_update_block_number, last_update_block_timestamp)
+        SELECT c.id, p_token_id, p_creation_block_number, p_creation_block_timestamp, p_last_update_block_number, p_last_update_block_timestamp
         FROM contracts c
         WHERE c.chain_id = p_chain_id
           AND c.contract_address = p_contract_address
@@ -51,7 +54,8 @@ CREATE OR REPLACE FUNCTION set_claim_id_on_insert()
     RETURNS TRIGGER AS
 $$
 BEGIN
-    NEW.claims_id := get_or_create_claim(NEW.chain_id, NEW.contract_address, NEW.token_id);
+    NEW.claims_id := get_or_create_claim(NEW.chain_id, NEW.contract_address, NEW.token_id, NEW.creation_block_number,
+                                         NEW.creation_block_timestamp, NEW.last_update_block_number, NEW.last_update_block_timestamp);
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

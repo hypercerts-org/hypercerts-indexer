@@ -51,7 +51,8 @@ describe("storeTransferSingleFraction", () => {
     );
     const transferOld = {
       ...transfer,
-      block_timestamp: transfer.block_timestamp - 1n,
+      last_update_block_number: transfer.last_update_block_number - 1n,
+      last_update_block_timestamp: transfer.last_update_block_timestamp - 10n,
       value: transfer.value - 1n,
     };
 

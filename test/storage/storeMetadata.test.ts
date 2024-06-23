@@ -48,24 +48,28 @@ describe("storeMetadata", () => {
     };
 
     // Spy on storemetadata to check if it throws
-    await expect(
-      storeMetadata({
+    await expect(async () => {
+      await storeMetadata({
         metadata: [metadata],
-      }),
-    ).resolves.toBeUndefined();
+      });
+    }).rejects.toThrowError(
+      "work_timeframe_from must be less than work_timeframe_to",
+    );
   });
 
-  it("should pass if impact timeframe is in wrong chronological order", async () => {
+  it("should fail if impact timeframe is in wrong chronological order", async () => {
     const metadata = {
       ...mockMetadata,
       impact_timeframe_to: mockMetadata.impact_timeframe_from - 1,
     };
 
     // Spy on storemetadata to check if it throws
-    await expect(
-      storeMetadata({
+    await expect(async () => {
+      await storeMetadata({
         metadata: [metadata],
-      }),
-    ).resolves.toBeUndefined();
+      });
+    }).rejects.toThrowError(
+      "impact_timeframe_from must be less than impact_timeframe_to",
+    );
   });
 });
