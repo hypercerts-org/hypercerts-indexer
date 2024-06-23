@@ -1,9 +1,12 @@
 import { getDeployment } from "@/utils/getDeployment.js";
-import { IndexerConfig, NewUnitTransfer } from "@/types/types.js";
+import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
-import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
+import {
+  ParsedValueTransfer,
+  parseValueTransfer,
+} from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
 import _ from "lodash";
 
@@ -66,24 +69,24 @@ export const indexUnitTransfers = async ({
       const logChunks = _.chunk(logs, 10);
 
       // Initialize an empty array to store all claims
-      let allTransfers: NewUnitTransfer[] = [];
+      let allTransfers: ParsedValueTransfer[] = [];
 
       // Process each chunk one by one
       for (const logChunk of logChunks) {
-        const events = await Promise.all(logChunk.map(parseValueTransfer));
-
-        const _transfers = events.map((transfer) => ({
-          ...transfer,
-          contracts_id: contractEvent.contracts_id,
-        }));
+        const events = await Promise.all(
+          logChunk.map(async (log) => ({
+            ...(await parseValueTransfer(log)),
+            contracts_id: contractEvent.contracts_id,
+          })),
+        );
 
         // Add the claims from the current chunk to the allClaims array
-        allTransfers = [...allTransfers, ..._transfers];
+        allTransfers = [...allTransfers, ...events];
       }
 
       // Validate and parse logs
       const transfers = allTransfers.filter(
-        (transfer): transfer is NewUnitTransfer => transfer !== null,
+        (transfer) => transfer !== null && transfer !== undefined,
       );
 
       return {
@@ -98,15 +101,10 @@ export const indexUnitTransfers = async ({
 
   const transfers = results
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
-    .filter(
-      (transfer): transfer is NewUnitTransfer =>
-        transfer !== null && transfer !== undefined,
-    );
+    .filter((transfer) => transfer !== null && transfer !== undefined);
 
   // store the claim and fraction tokens
-  return await storeUnitTransfer({
-    transfers,
-  }).then(() =>
+  return await storeUnitTransfer({ transfers }).then(() =>
     updateLastBlockIndexedContractEvents({
       contract_events: results.flatMap((res) =>
         res?.contractEventUpdate ? [res.contractEventUpdate] : [],

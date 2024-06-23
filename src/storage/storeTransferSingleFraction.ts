@@ -1,10 +1,10 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { NewTransfer } from "@/types/types.js";
 import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
-import { Database, Tables } from "@/types/database.types.js";
+import { Tables } from "@/types/database.types.js";
+import { ParsedTransferSingle } from "@/parsing/transferSingleEvent";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -24,7 +24,7 @@ import { Database, Tables } from "@/types/database.types.js";
  */
 
 interface StoreTransferSingle {
-  transfers?: NewTransfer[];
+  transfers?: ParsedTransferSingle[];
 }
 
 export const storeTransferSingleFraction = async ({

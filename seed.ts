@@ -53,6 +53,18 @@ const main = async () => {
   console.log("🕊️ Seeding contracts...");
   await supabase.from("contracts").insert([
     {
+      chain_id: 42220,
+      contract_address: "0x620257e9301a813bE7CC5B75AAe8DDA3F6A926D2",
+      start_block: 22079540,
+      contract_slug: minterContractSlug,
+    },
+    {
+      chain_id: 8453,
+      contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
+      start_block: 6771210,
+      contract_slug: minterContractSlug,
+    },
+    {
       chain_id: 845322,
       contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
       start_block: 6771210,
