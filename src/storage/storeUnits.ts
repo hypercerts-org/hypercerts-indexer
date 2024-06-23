@@ -180,6 +180,9 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
 
   await supabase
     .from("fractions")
-    .upsert(parsedTokens, { ignoreDuplicates: false })
+    .upsert(parsedTokens, {
+      ignoreDuplicates: false,
+      defaultToNull: false,
+    })
     .throwOnError();
 };
