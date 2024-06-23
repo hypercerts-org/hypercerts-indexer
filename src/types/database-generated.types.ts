@@ -707,12 +707,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      transfer_units_batch: {
-        Args: {
-          p_transfers: Database["public"]["CompositeTypes"]["transfer_units_type"][]
-        }
-        Returns: undefined
-      }
     }
     Enums: {
       [_ in never]: never
@@ -730,14 +724,6 @@ export type Database = {
         contract_id: string | null
         token_id: number | null
         root: string | null
-      }
-      transfer_units_type: {
-        claim_id: string | null
-        from_token_id: number | null
-        to_token_id: number | null
-        block_timestamp: number | null
-        units_transferred: number | null
-        block_number: number | null
       }
     }
   }
