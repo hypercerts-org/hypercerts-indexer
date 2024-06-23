@@ -116,6 +116,8 @@ export const generateEventToFetch = (overrides?: Partial<EventToFetch>) => {
     event_name: faker.hacker.noun(),
     abi: faker.random.words(),
     last_block_indexed: faker.number.bigInt(),
+    contract_slug: "minter-contract",
+    start_block: faker.number.bigInt(),
     ...overrides,
   };
 };

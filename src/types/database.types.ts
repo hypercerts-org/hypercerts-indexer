@@ -204,6 +204,20 @@ export type Database = MergeDeep<
           units: bigint | number | string | null;
         };
       };
+      sales: {
+        Row: {
+          amounts: bigint[] | number[] | string[];
+          item_ids: bigint[] | number[] | string[];
+        };
+        Insert: {
+          amounts: bigint[] | number[] | string[];
+          item_ids: bigint[] | number[] | string[];
+        };
+        Update: {
+          amounts: bigint[] | number[] | string[];
+          item_ids: bigint[] | number[] | string[];
+        };
+      };
     };
   }
 >;

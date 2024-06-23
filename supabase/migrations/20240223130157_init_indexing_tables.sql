@@ -3,6 +3,7 @@ create table contracts
     id               uuid primary key default gen_random_uuid(),
     chain_id         numeric(78, 0) not null,
     contract_address text           not null,
+    contract_slug    text           not null,
     start_block      numeric(78, 0),
     UNIQUE (chain_id, contract_address)
 );
@@ -12,6 +13,7 @@ create table events
     id   uuid primary key default gen_random_uuid(),
     name text not null,
     abi  text not null,
+    contract_slug text not null,
     UNIQUE (abi)
 );
 

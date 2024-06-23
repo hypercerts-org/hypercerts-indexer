@@ -24,7 +24,7 @@ const selectedNetwork = () => {
   }
 };
 
-const alchemyUrl = () => {
+export const alchemyUrl = () => {
   switch (chainId) {
     case 10:
       return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
