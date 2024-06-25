@@ -8,7 +8,7 @@ import { delay, port } from "./utils/constants.js";
 import { indexAttestations } from "@/indexer/indexAttestations.js";
 import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored.js";
 import { indexTransferSingleEvents } from "@/indexer/indexFractionTransfers.js";
-import { indexValueTransfer } from "@/indexer/indexValueTransfer";
+import { indexValueTransfer } from "@/indexer/indexValueTransfer.js";
 import { indexMetadata } from "@/indexer/indexMetadata.js";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
 import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
