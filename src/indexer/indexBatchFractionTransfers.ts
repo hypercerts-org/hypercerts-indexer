@@ -1,7 +1,4 @@
-import {
-  ParsedTransferSingle,
-  parseTransferSingle,
-} from "@/parsing/transferSingleEvent.js";
+import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { IndexerConfig } from "@/types/types.js";
 import { storeFractionTransfer } from "@/storage/storeFractionTransfer.js";
@@ -10,6 +7,7 @@ import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockI
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { isHypercertToken } from "@/utils/tokenIds.js";
 import _ from "lodash";
+import { parseTransferBatch } from "@/parsing/transferBatchEvent.js";
 
 /*
  * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
@@ -26,10 +24,10 @@ import _ from "lodash";
 
 const defaultConfig = {
   batchSize: 10000n,
-  eventName: "TransferSingle",
+  eventName: "TransferBatch",
 };
 
-export const indexTransferSingleEvents = async ({
+export const indexTransferBatchEvents = async ({
   batchSize = defaultConfig.batchSize,
   eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
@@ -40,7 +38,7 @@ export const indexTransferSingleEvents = async ({
 
   if (!contractsWithEvents || contractsWithEvents.length === 0) {
     console.debug(
-      `[IndexTokenTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
+      `[IndexBatchTokenTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
     );
     return;
   }
@@ -58,14 +56,14 @@ export const indexTransferSingleEvents = async ({
 
       if (!logsFound) {
         console.debug(
-          "[IndexTokenTransfers] No logs found for contract event",
+          "[IndexBatchTokenTransfers] No logs found for contract event",
           contractEvent,
         );
         return;
       }
 
       const { logs, toBlock } = logsFound;
-      console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
+      console.debug(`[IndexBatchTokenTransfers] Found ${logs.length} logs`);
 
       // Split logs into chunks
       const logChunks = _.chunk(logs, 10);
@@ -76,11 +74,15 @@ export const indexTransferSingleEvents = async ({
       //Process each chunk one by one
       for (const logChunk of logChunks) {
         const events = await Promise.all(
-          logChunk.map(async (log) => ({
-            ...(await parseTransferSingle(log)),
-            contracts_id: contractEvent.contracts_id,
-          })),
-        );
+          logChunk.flatMap(async (log) => await parseTransferBatch(log)),
+        )
+          .then((res) => res.flat())
+          .then((res) =>
+            res.map((event) => ({
+              ...event,
+              contracts_id: contractEvent.contracts_id,
+            })),
+          );
 
         // Add the claims from the current chunk to the allClaims array
         allTransfers = [...allTransfers, ...events];
@@ -92,7 +94,7 @@ export const indexTransferSingleEvents = async ({
       );
 
       console.debug(
-        `[IndexTokenTransfers] Found ${tokensToStore.length} transfers`,
+        `[IndexBatchTokenTransfers] Found ${tokensToStore.length} transfers`,
       );
 
       return {

@@ -8,7 +8,7 @@ import {
   submitBurnTransaction,
   submitMintClaimTransaction,
 } from "../test/helpers/transactions";
-import { indexUnitTransfers } from "../src/indexer/indexUnitTransfers";
+import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 
 vi.mock("../src/clients/evmClient", () => {
@@ -51,7 +51,7 @@ describe("index unitsTransferred events mint and burn", async () => {
       eventName: "TransferSingle",
     });
 
-    await indexUnitTransfers({
+    await indexValueTransfer({
       batchSize: 1000n,
       eventName: "ValueTransfer",
     });
@@ -89,7 +89,7 @@ describe("index unitsTransferred events mint and burn", async () => {
       eventName: "TransferSingle",
     });
 
-    await indexUnitTransfers({
+    await indexValueTransfer({
       batchSize: 1000n,
       eventName: "ValueTransfer",
     });

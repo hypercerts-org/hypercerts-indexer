@@ -16,7 +16,7 @@ const TransferSingleEventSchema = z.object({
   blockNumber: z.bigint(),
 });
 
-const ParsedTransferSingle = z.object({
+export const ParsedTransferSingle = z.object({
   contract_address: z
     .string()
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),

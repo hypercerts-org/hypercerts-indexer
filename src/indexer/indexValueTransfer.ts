@@ -1,14 +1,13 @@
-import {
-  ParsedTransferSingle,
-  parseTransferSingle,
-} from "@/parsing/transferSingleEvent.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { IndexerConfig } from "@/types/types.js";
-import { storeFractionTransfer } from "@/storage/storeFractionTransfer.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
-import { isHypercertToken } from "@/utils/tokenIds.js";
+import {
+  ParsedValueTransfer,
+  parseValueTransfer,
+} from "@/parsing/valueTransferEvent.js";
+import { storeUnitTransfer } from "@/storage/storeUnits.js";
 import _ from "lodash";
 
 /*
@@ -26,10 +25,10 @@ import _ from "lodash";
 
 const defaultConfig = {
   batchSize: 10000n,
-  eventName: "TransferSingle",
+  eventName: "ValueTransfer",
 };
 
-export const indexTransferSingleEvents = async ({
+export const indexValueTransfer = async ({
   batchSize = defaultConfig.batchSize,
   eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
@@ -40,7 +39,7 @@ export const indexTransferSingleEvents = async ({
 
   if (!contractsWithEvents || contractsWithEvents.length === 0) {
     console.debug(
-      `[IndexTokenTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
+      `[IndexValueTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
     );
     return;
   }
@@ -58,26 +57,25 @@ export const indexTransferSingleEvents = async ({
 
       if (!logsFound) {
         console.debug(
-          "[IndexTokenTransfers] No logs found for contract event",
+          " [IndexValueTransfers] No logs found for contract event",
           contractEvent,
         );
         return;
       }
 
       const { logs, toBlock } = logsFound;
-      console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
 
       // Split logs into chunks
       const logChunks = _.chunk(logs, 10);
 
       // Initialize an empty array to store all claims
-      let allTransfers: ParsedTransferSingle[] = [];
+      let allTransfers: ParsedValueTransfer[] = [];
 
-      //Process each chunk one by one
+      // Process each chunk one by one
       for (const logChunk of logChunks) {
         const events = await Promise.all(
           logChunk.map(async (log) => ({
-            ...(await parseTransferSingle(log)),
+            ...(await parseValueTransfer(log)),
             contracts_id: contractEvent.contracts_id,
           })),
         );
@@ -87,16 +85,12 @@ export const indexTransferSingleEvents = async ({
       }
 
       // Validate and parse logs
-      const tokensToStore = allTransfers.filter(
-        (transfer) => !isHypercertToken(transfer.token_id),
-      );
-
-      console.debug(
-        `[IndexTokenTransfers] Found ${tokensToStore.length} transfers`,
+      const transfers = allTransfers.filter(
+        (transfer) => transfer !== null && transfer !== undefined,
       );
 
       return {
-        transfers: tokensToStore,
+        transfers,
         contractEventUpdate: {
           ...contractEvent,
           last_block_indexed: toBlock,
@@ -109,10 +103,8 @@ export const indexTransferSingleEvents = async ({
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
 
-  // store the fraction tokens
-  return await storeFractionTransfer({
-    transfers,
-  }).then(() =>
+  // store the claim and fraction tokens
+  return await storeUnitTransfer({ transfers }).then(() =>
     updateLastBlockIndexedContractEvents({
       contract_events: results.flatMap((res) =>
         res?.contractEventUpdate ? [res.contractEventUpdate] : [],

@@ -3,32 +3,29 @@ import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
-import {
-  ParsedValueTransfer,
-  parseValueTransfer,
-} from "@/parsing/valueTransferEvent.js";
+import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeUnitTransfer } from "@/storage/storeUnits.js";
 import _ from "lodash";
+import { parseBatchValueTransfer } from "@/parsing/batchValueTransferEvent.js";
 
 /*
- * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the claim and fraction tokens in the
- * database.
+ * This function indexes the logs of the BatchTransferValue event emitted by the HypercertMinter contract. Based on the last
+ * block indexed, it fetches the logs in batches, parses them, create a flat list of transfers and stores those.
  *
  * @param [batchSize] - The number of logs to fetch and parse in each batch.
  *
  * @example
  * ```js
- * await indexTransferSingleEvents({ batchSize: 1000n });
+ * await indexBatchValueTransfer({ batchSize: 1000n });
  * ```
  */
 
 const defaultConfig = {
   batchSize: 10000n,
-  eventName: "ValueTransfer",
+  eventName: "BatchValueTransfer",
 };
 
-export const indexUnitTransfers = async ({
+export const indexBatchValueTransfer = async ({
   batchSize = defaultConfig.batchSize,
   eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
@@ -39,7 +36,7 @@ export const indexUnitTransfers = async ({
 
   if (!contractsWithEvents || contractsWithEvents.length === 0) {
     console.debug(
-      `[IndexUnitTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
+      `[IndexBatchValueTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
     );
     return;
   }
@@ -57,7 +54,7 @@ export const indexUnitTransfers = async ({
 
       if (!logsFound) {
         console.debug(
-          " [IndexUnitTransfers] No logs found for contract event",
+          " [IndexBatchValueTransfers] No logs found for contract event",
           contractEvent,
         );
         return;
@@ -74,11 +71,15 @@ export const indexUnitTransfers = async ({
       // Process each chunk one by one
       for (const logChunk of logChunks) {
         const events = await Promise.all(
-          logChunk.map(async (log) => ({
-            ...(await parseValueTransfer(log)),
-            contracts_id: contractEvent.contracts_id,
-          })),
-        );
+          logChunk.map(async (log) => await parseBatchValueTransfer(log)),
+        )
+          .then((transfers) => transfers.flat())
+          .then((results) =>
+            results.map((result) => ({
+              ...result,
+              contracts_id: contractEvent.contracts_id,
+            })),
+          );
 
         // Add the claims from the current chunk to the allClaims array
         allTransfers = [...allTransfers, ...events];

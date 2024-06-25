@@ -12,23 +12,23 @@ export const updateAllowlistRecordClaimed = async ({
   try {
     // Get an allowlist record for corresponding tokenId and leaf that has not been claimed
     const record = await supabase
-      .from("hypercert_allow_list_records_with_token_id")
+      .from("claimable_fractions_with_proofs")
       .select("*")
       .eq("leaf", leaf)
       .eq("user_address", userAddress)
       .eq("claimed", false)
-      .eq("token_id", tokenId)
+      .eq("token_id", tokenId.toString())
       .maybeSingle()
       .throwOnError();
 
     if (!record.data) {
       const alreadyClaimedRecord = await supabase
-        .from("hypercert_allow_list_records_with_token_id")
+        .from("claimable_fractions_with_proofs")
         .select("*")
         .eq("leaf", leaf)
         .eq("user_address", userAddress)
         .eq("claimed", true)
-        .eq("token_id", tokenId)
+        .eq("token_id", tokenId.toString())
         .maybeSingle()
         .throwOnError();
 
