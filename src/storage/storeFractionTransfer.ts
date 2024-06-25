@@ -64,11 +64,11 @@ export const storeFractionTransfer = async ({
       }
 
       if (!data?.claims_id) {
-        const { data: claim, error: claimError } = await supabase.rpc(
+        const { data: claim_id, error: claimError } = await supabase.rpc(
           "get_or_create_claim",
           {
             p_chain_id: chainId,
-            p_contract_address: transfer.contract_address,
+            p_contract_address: getAddress(transfer.contract_address),
             p_token_id: getHypercertTokenId(transfer.token_id).toString(),
             p_creation_block_number:
               token?.creation_block_timestamp ??
@@ -80,15 +80,16 @@ export const storeFractionTransfer = async ({
           },
         );
 
-        if (claimError || !claim) {
+        if (claimError || !claim_id) {
           console.error(
             `[StoreTransferFraction] Error while getting or creating claim.`,
             claimError,
+            claim_id,
           );
           return;
         }
 
-        data.claims_id = claim.id;
+        data.claims_id = claim_id;
       }
 
       return {
