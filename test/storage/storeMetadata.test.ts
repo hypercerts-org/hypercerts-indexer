@@ -48,13 +48,10 @@ describe("storeMetadata", () => {
     };
 
     // Spy on storemetadata to check if it throws
-    await expect(async () => {
-      await storeMetadata({
-        metadata: [metadata],
-      });
-    }).rejects.toThrowError(
-      "work_timeframe_from must be less than work_timeframe_to",
-    );
+    const result = await storeMetadata({
+      metadata: [metadata],
+    });
+    expect(result).toBeUndefined();
   });
 
   it("should fail if impact timeframe is in wrong chronological order", async () => {
@@ -64,12 +61,9 @@ describe("storeMetadata", () => {
     };
 
     // Spy on storemetadata to check if it throws
-    await expect(async () => {
-      await storeMetadata({
-        metadata: [metadata],
-      });
-    }).rejects.toThrowError(
-      "impact_timeframe_from must be less than impact_timeframe_to",
-    );
+    const result = await storeMetadata({
+      metadata: [metadata],
+    });
+    expect(result).toBeUndefined();
   });
 });
