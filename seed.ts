@@ -97,7 +97,7 @@ const main = async () => {
     {
       chain_id: 11155111,
       contract_address: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
-      start_block: 5237421,
+      start_block: 4421945,
       contract_slug: minterContractSlug,
     },
     {
