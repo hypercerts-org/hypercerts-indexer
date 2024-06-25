@@ -27,7 +27,7 @@ interface StoreTransferSingle {
   transfers?: ParsedTransferSingle[];
 }
 
-export const storeTransferSingleFraction = async ({
+export const storeFractionTransfer = async ({
   transfers,
 }: StoreTransferSingle) => {
   if (!transfers || transfers.length === 0) {
@@ -36,7 +36,7 @@ export const storeTransferSingleFraction = async ({
   }
 
   console.debug(
-    `[StoreTransferSingleFraction] Storing ${transfers.length} transfers`,
+    `[StoreTransferFraction] Storing ${transfers.length} transfers`,
   );
 
   const tokens = await Promise.all(
@@ -49,7 +49,7 @@ export const storeTransferSingleFraction = async ({
 
       if (tokenError) {
         console.error(
-          `[StoreTransferSingleFraction] Error while getting token.`,
+          `[StoreTransferFraction] Error while getting token.`,
           tokenError,
         );
         return;
@@ -67,14 +67,22 @@ export const storeTransferSingleFraction = async ({
         const { data: claim, error: claimError } = await supabase.rpc(
           "get_or_create_claim",
           {
+            p_chain_id: chainId,
+            p_contract_address: transfer.contract_address,
             p_token_id: getHypercertTokenId(transfer.token_id).toString(),
-            p_contracts_id: transfer.contracts_id,
+            p_creation_block_number:
+              token?.creation_block_timestamp ??
+              transfer.block_timestamp.toString(),
+            p_creation_block_timestamp:
+              token?.creation_block_number ?? transfer.block_number.toString(),
+            p_last_update_block_number: transfer.block_number.toString(),
+            p_last_update_block_timestamp: transfer.block_timestamp.toString(),
           },
         );
 
         if (claimError || !claim) {
           console.error(
-            `[StoreTransferSingleFraction] Error while getting or creating claim.`,
+            `[StoreTransferFraction] Error while getting or creating claim.`,
             claimError,
           );
           return;
@@ -100,9 +108,7 @@ export const storeTransferSingleFraction = async ({
     }),
   );
 
-  console.debug(
-    `[StoreTransferSingleFraction] Storing ${tokens.length} tokens`,
-  );
+  console.debug(`[StoreTransferFraction] Storing ${tokens.length} tokens`);
 
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_update_block_timestamp"], ["desc"])
@@ -110,7 +116,7 @@ export const storeTransferSingleFraction = async ({
     .value();
 
   console.debug(
-    `[StoreTransferSingleFraction] Found ${sortedUniqueTokens.length} unique tokens`,
+    `[StoreTransferFraction] Found ${sortedUniqueTokens.length} unique tokens`,
   );
 
   return await supabase

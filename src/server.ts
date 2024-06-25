@@ -18,6 +18,7 @@ import { indexAllowlistSingleClaimMinted } from "@/indexer/indexAllowlistSingleC
 import { indexTakerBid } from "@/indexer/indexTakerBid.js";
 
 import * as Sentry from "@sentry/node";
+import { indexTransferBatchEvents } from "@/indexer/indexBatchFractionTransfers.js";
 
 // @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
@@ -47,6 +48,7 @@ app.listen(port, async () => {
     indexClaimsStoredEvents,
     indexUnitTransfers,
     indexTransferSingleEvents,
+    indexTransferBatchEvents,
     indexMetadata,
     indexAllowListData,
     indexAllowlistRecords,
