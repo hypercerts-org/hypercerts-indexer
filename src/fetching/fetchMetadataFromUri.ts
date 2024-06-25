@@ -43,7 +43,7 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
   if (!res.success) {
     console.warn(
       `[FetchMetadataFromUri] Invalid metadata for URI ${uri}`,
-      res.error,
+      res.error.message,
     );
     return;
   }

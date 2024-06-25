@@ -18,11 +18,13 @@ export const mockMetadata = {
     impact_scope: {
       name: "Impact Scope",
       value: ["all"],
+      excludes: [],
       display_value: "All",
     },
     work_scope: {
       name: "Work Scope",
       value: ["art design", "metadata standards"],
+      excludes: [],
       display_value: "Art Design & Metadata Standards",
     },
     work_timeframe: {
@@ -43,6 +45,7 @@ export const mockMetadata = {
     rights: {
       name: "Rights",
       value: ["public display", "-transfers"],
+      excludes: [],
       display_value: "Public display",
     },
   },
