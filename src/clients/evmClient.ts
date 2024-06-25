@@ -75,12 +75,18 @@ const drpcUrl = () => {
   }
 };
 
+const rpc_timeout = 20_000;
+
 const fallBackProvider = () => {
-  const alchemy = alchemyUrl() ? [http(alchemyUrl())] : [];
-  const infura = infuraUrl() ? [http(infuraUrl())] : [];
-  const drpc = drpcUrl() ? [http(drpcUrl())] : [];
+  const alchemy = alchemyUrl()
+    ? [http(alchemyUrl(), { timeout: rpc_timeout })]
+    : [];
+  const infura = infuraUrl()
+    ? [http(infuraUrl(), { timeout: rpc_timeout })]
+    : [];
+  const drpc = drpcUrl() ? [http(drpcUrl(), { timeout: rpc_timeout })] : [];
   return fallback([...alchemy, ...drpc, ...infura], {
-    retryDelay: 1500,
+    retryCount: 5,
   });
 };
 

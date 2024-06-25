@@ -54,7 +54,7 @@ const main = async () => {
   await supabase.from("contracts").insert([
     {
       chain_id: 42220,
-      contract_address: "0x620257e9301a813bE7CC5B75AAe8DDA3F6A926D2",
+      contract_address: "0x16bA53B74c234C870c61EFC04cD418B8f2865959",
       start_block: 22079540,
       contract_slug: minterContractSlug,
     },
