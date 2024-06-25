@@ -7,6 +7,20 @@ import * as dotenv from "dotenv";
 
 const main = async () => {
   dotenv.config();
+
+  const isLocalDb =
+    process.env.SUPABASE_CACHING_DB_URL?.includes("localhost") ||
+    process.env.SUPABASE_CACHING_DB_URL?.includes("127.0.0.1");
+  const overrideLocalDbProtectionFlag =
+    process.env.OVERRIDE_LOCAL_DB_PROTECTION === "true";
+
+  if (!isLocalDb && !overrideLocalDbProtectionFlag) {
+    console.error(
+      "This script is only intended to be run on a local development environment",
+    );
+    process.exit();
+  }
+
   const supabase = createClient(
     process.env.SUPABASE_CACHING_DB_URL!,
     process.env.SUPABASE_CACHING_SERVICE_API_KEY!,
@@ -29,8 +43,18 @@ const main = async () => {
       contract_slug: minterContractSlug,
     },
     {
+      name: "TransferBatch",
+      abi: "event TransferBatch (index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
+      contract_slug: minterContractSlug,
+    },
+    {
       name: "ValueTransfer",
       abi: "event ValueTransfer(uint256 claimID, uint256 fromTokenID, uint256 toTokenID, uint256 value)",
+      contract_slug: minterContractSlug,
+    },
+    {
+      name: "BatchValueTransfer",
+      abi: "event BatchValueTransfer (uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
       contract_slug: minterContractSlug,
     },
     {
@@ -133,7 +157,7 @@ const main = async () => {
 
   const { error } = await supabase
     .from("contract_events")
-    .insert(contractEvents.flat());
+    .upsert(contractEvents.flat());
   if (error) {
     console.error("Error seeding contract events", error);
     process.exit();

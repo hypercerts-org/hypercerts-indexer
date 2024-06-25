@@ -30,14 +30,14 @@ export type Database = MergeDeep<
         };
       };
       Functions: {
-        get_or_create_claim: {
-          Args: {
-            p_token_id: bigint | string;
-          };
-          Returns: {
-            token_id: bigint | string;
-          };
-        };
+        // get_or_create_claim: {
+        //   Args: {
+        //     p_token_id: bigint | string;
+        //   };
+        //   Returns: {
+        //     token_id: bigint | string;
+        //   };
+        // };
         store_claim: {
           Args: {
             p_token_id: bigint | string;

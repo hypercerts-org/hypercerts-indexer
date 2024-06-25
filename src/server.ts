@@ -8,7 +8,7 @@ import { delay, port } from "./utils/constants.js";
 import { indexAttestations } from "@/indexer/indexAttestations.js";
 import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored.js";
 import { indexTransferSingleEvents } from "@/indexer/indexFractionTransfers.js";
-import { indexUnitTransfers } from "@/indexer/indexUnitTransfers.js";
+import { indexValueTransfer } from "@/indexer/indexValueTransfer";
 import { indexMetadata } from "@/indexer/indexMetadata.js";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
 import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
@@ -18,6 +18,8 @@ import { indexAllowlistSingleClaimMinted } from "@/indexer/indexAllowlistSingleC
 import { indexTakerBid } from "@/indexer/indexTakerBid.js";
 
 import * as Sentry from "@sentry/node";
+import { indexTransferBatchEvents } from "@/indexer/indexBatchFractionTransfers.js";
+import { indexBatchValueTransfer } from "@/indexer/indexBatchValueTransfer.js";
 
 // @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
@@ -45,8 +47,10 @@ app.listen(port, async () => {
   const indexingMethods = [
     indexSupportedSchemas,
     indexClaimsStoredEvents,
-    indexUnitTransfers,
+    indexValueTransfer,
+    indexBatchValueTransfer,
     indexTransferSingleEvents,
+    indexTransferBatchEvents,
     indexMetadata,
     indexAllowListData,
     indexAllowlistRecords,
