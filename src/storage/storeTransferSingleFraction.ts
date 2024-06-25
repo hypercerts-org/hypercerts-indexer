@@ -63,8 +63,6 @@ export const storeTransferSingleFraction = async ({
         };
       }
 
-      console.log(token);
-
       if (
         token &&
         token?.owner_address &&
