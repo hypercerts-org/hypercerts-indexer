@@ -64,13 +64,14 @@ export const storeTransferSingleFraction = async ({
       }
 
       if (
+        token &&
         token?.owner_address &&
         token.owner_address.toLowerCase() !==
           transfer.from_owner_address.toLowerCase()
       ) {
         console.error(
-          `[StoreTransferSingleFraction] Error while getting token; owner address mismatch. [${(token.owner_address.toLowerCase(), transfer.from_owner_address.toLowerCase())}]`,
-          tokenError,
+          `[StoreTransferSingleFraction] Error while getting token; owner address mismatch.`,
+          `[${(token.owner_address.toLowerCase(), transfer.from_owner_address.toLowerCase())}]`,
         );
         return;
       }
