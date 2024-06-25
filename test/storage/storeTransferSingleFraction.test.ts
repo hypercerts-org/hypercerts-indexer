@@ -9,7 +9,7 @@ import { getAddress } from "viem";
 describe("storeTransferSingleFraction", () => {
   const transfer = {
     block_number: faker.number.bigInt(),
-    contract_address: faker.finance.ethereumAddress(),
+    contract_address: faker.finance.ethereumAddress().toString(),
     value: faker.number.bigInt(),
     block_timestamp: faker.number.bigInt(),
     from_owner_address: getAddress(faker.finance.ethereumAddress()),
