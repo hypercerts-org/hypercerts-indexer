@@ -78,13 +78,13 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     if (!fromToken) {
       const { data: fromTokenData } = await supabase
         .from("fractions")
-        .select("*, token_id::text")
+        .select("*, token_id::text, units::text")
         .eq("token_id", transfer.from_token_id.toString())
         .maybeSingle()
         .throwOnError();
 
       if (fromTokenData) {
-        fromToken = fromTokenData;
+        fromToken = { ...fromTokenData, units: BigInt(fromTokenData.units) };
       } else {
         fromToken = {
           claims_id: claimId,
@@ -105,13 +105,13 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     if (!toToken) {
       const { data: toTokenData } = await supabase
         .from("fractions")
-        .select("*, token_id::text")
+        .select("*, token_id::text, units::text")
         .eq("token_id", transfer.to_token_id.toString())
         .maybeSingle()
         .throwOnError();
 
       if (toTokenData) {
-        toToken = toTokenData;
+        toToken = { toTokenData, units: BigInt(toTokenData.units) };
       } else {
         toToken = {
           claims_id: claimId,
