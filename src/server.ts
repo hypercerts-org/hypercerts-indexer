@@ -19,7 +19,7 @@ import { indexTakerBid } from "@/indexer/indexTakerBid.js";
 
 import * as Sentry from "@sentry/node";
 import { indexTransferBatchEvents } from "@/indexer/indexBatchFractionTransfers.js";
-import { indexBatchValueTransfer } from "@/indexer/indexBatchValueTransfer.js";
+// import { indexBatchValueTransfer } from "@/indexer/indexBatchValueTransfer.js";
 
 // @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
@@ -48,7 +48,7 @@ app.listen(port, async () => {
     indexSupportedSchemas,
     indexClaimsStoredEvents,
     indexValueTransfer,
-    indexBatchValueTransfer,
+    // indexBatchValueTransfer,
     indexTransferSingleEvents,
     indexTransferBatchEvents,
     indexMetadata,
