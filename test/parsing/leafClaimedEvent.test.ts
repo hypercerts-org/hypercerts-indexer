@@ -15,7 +15,7 @@ describe("leafClaimedEvent", {}, () => {
         return HttpResponse.json(0);
       }),
     );
-    const address = getAddress(faker.finance.ethereumAddress());
+    const address = faker.finance.ethereumAddress();
     const tokenID = faker.number.bigInt();
     const leaf = faker.string.alphanumeric("10");
     const blockNumber = faker.number.bigInt();
@@ -38,7 +38,7 @@ describe("leafClaimedEvent", {}, () => {
         }) as any,
     );
 
-    const timestamp = 10;
+    const timestamp = 10n;
     const spy = vi.spyOn(client, "getBlock").mockImplementation(
       async () =>
         ({

@@ -1,12 +1,13 @@
 import { parseLeafClaimedEvent } from "@/parsing/leafClaimedEvent.js";
 import { getDeployment } from "@/utils/getDeployment.js";
-import { IndexerConfig, LeafClaimed } from "@/types/types.js";
+import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed.js";
 import { supabase } from "@/clients/supabaseClient.js";
 import { client } from "@/clients/evmClient.js";
+import { getAddress } from "viem";
 
 /*
  * This function indexes the logs of the LeafClaimed event emitted by the HypercertMinter contract. Based on the last
@@ -34,6 +35,11 @@ export const indexAllowlistSingleClaimMinted = async ({
     eventName,
   });
 
+  if (!contractsWithEvents || contractsWithEvents.length === 0) {
+    console.debug("[IndexAllowlistSingleClaimMinted] No contract events found");
+    return;
+  }
+
   const currentBlock = await client.getBlockNumber();
   const currentEventsClaimStored = await getContractEventsForChain({
     eventName: "ClaimStored",
@@ -52,21 +58,20 @@ export const indexAllowlistSingleClaimMinted = async ({
   // Do batch size based on latest indexed allowlist data for current chain
   const latestIndexedHypercertAllowlist = await supabase
     .from("hypercert_allowlists_with_claim")
-    .select("block_number")
+    .select("creation_block_number")
     .like("hypercert_id", `${chainId}-%`)
-    .order("block_number", { ascending: false })
+    .order("creation_block_number", { ascending: false })
     .limit(1)
     .maybeSingle();
 
   const latestIndexedAllowlistClaimBlock = latestIndexedHypercertAllowlist?.data
-    ?.block_number as number | undefined;
+    ?.creation_block_number as number | undefined;
 
   if (latestIndexedAllowlistClaimBlock === undefined) {
+    console.debug(
+      `[IndexAllowlistSingleClaimMinted] No allowlists found for chain ${chainId}`,
+    );
     // No allowlists known, so nothing to index
-    return;
-  }
-
-  if (!contractsWithEvents || contractsWithEvents.length === 0) {
     return;
   }
 
@@ -95,29 +100,29 @@ export const indexAllowlistSingleClaimMinted = async ({
         : maxEndBlock - fromBlock;
 
       // Get logs in batches
-      const logsFound = await getLogsForContractEvents({
+      const { logs, toBlock } = await getLogsForContractEvents({
         fromBlock,
         batchSize: adjustedBatchSize,
         contractEvent,
       });
 
-      if (!logsFound) {
+      if (logs.length === 0) {
         console.debug(
-          " [IndexAllowlistSingleClaimMinted] No logs found for contract event",
+          " [IndexAllowlistSingleClaimMinted] No logs found for Leaf Claimed event",
           contractEvent,
         );
-        return;
+        return {
+          contractEventUpdate: {
+            ...contractEvent,
+            last_block_indexed: toBlock,
+          },
+        };
       }
-
-      const { logs, toBlock } = logsFound;
 
       // parse logs to get claimID, contractAddress and cid
       const parsedEvents = (
         await Promise.all(logs.map(parseLeafClaimedEvent))
-      ).filter(
-        (claim): claim is Partial<LeafClaimed> =>
-          claim !== null && claim !== undefined,
-      );
+      ).filter((claim) => claim !== null && claim !== undefined);
 
       const claims = parsedEvents.map((claim) => ({
         ...claim,
@@ -136,23 +141,30 @@ export const indexAllowlistSingleClaimMinted = async ({
 
   const claims = results
     .flatMap((result) => (result?.claims ? result.claims : undefined))
-    .filter(
-      (claim): claim is LeafClaimed => claim !== null && claim !== undefined,
-    );
+    .filter((claim) => claim !== null && claim !== undefined);
+
+  if (claims.length === 0) {
+    await updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
+    });
+  }
 
   await Promise.all(
     claims.map(async (claim) => {
       return updateAllowlistRecordClaimed({
         tokenId: claim.token_id,
         leaf: claim.leaf,
-        userAddress: claim.creator_address as `0x${string}`,
+        userAddress: claim.creator_address,
       });
     }),
+  ).then(
+    async () =>
+      await updateLastBlockIndexedContractEvents({
+        contract_events: results.flatMap((res) =>
+          res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+        ),
+      }),
   );
-
-  await updateLastBlockIndexedContractEvents({
-    contract_events: results.flatMap((res) =>
-      res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-    ),
-  });
 };

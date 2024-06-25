@@ -1,8 +1,8 @@
 import { isAddress, isHex } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
-import { LeafClaimed } from "@/types/types.js";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
+import { messages } from "@/utils/validation.js";
 
 const LeafClaimedSchema = z.object({
   address: z.string().refine(isAddress),
@@ -14,6 +14,17 @@ const LeafClaimedSchema = z.object({
   transactionHash: z.string().refine(isHex),
 });
 
+const LeafClaimed = z.object({
+  creator_address: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  token_id: z.bigint(),
+  creation_block_timestamp: z.bigint(),
+  contract_address: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  leaf: z.string(),
+});
 /*
  * Helper method to get the tokenID, contract address, minter address and leaf hash from the event. Will return undefined when the event is
  * missing values.
@@ -28,13 +39,11 @@ export const parseLeafClaimedEvent = async (event: unknown) => {
     hash: transactionHash,
   });
 
-  const claim: Partial<LeafClaimed> = {
+  return LeafClaimed.parse({
     creator_address: transaction.from,
     token_id: args.tokenID,
     creation_block_timestamp: await getBlockTimestamp(blockNumber),
     contract_address: address,
     leaf: args.leaf,
-  };
-
-  return claim;
+  });
 };
