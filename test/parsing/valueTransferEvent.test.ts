@@ -14,7 +14,7 @@ describe("valueTransferEvent", () => {
   const value = faker.number.bigInt();
   const address = getAddress(faker.finance.ethereumAddress());
   const blockNumber = faker.number.bigInt();
-  const timestamp = faker.number.int();
+  const timestamp = faker.number.bigInt();
 
   const event = {
     address,
