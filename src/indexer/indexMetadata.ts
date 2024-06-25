@@ -1,7 +1,6 @@
 import { IndexerConfig } from "@/types/types.js";
 import { getMissingMetadataUris } from "@/storage/getMissingMetadataUris.js";
 import { storeMetadata } from "@/storage/storeMetadata.js";
-import { Tables } from "@/types/database.types.js";
 import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri.js";
 
 /*
@@ -54,10 +53,8 @@ const processMetadataBatch = async (batch: string[]) => {
         ...(await fetchMetadataFromUri({ uri })),
       })),
     )
-  ).filter(
-    (metadata): metadata is Tables<"metadata"> =>
-      metadata !== null && metadata !== undefined,
-  );
+  ).filter((metadata) => metadata !== null && metadata !== undefined);
 
+  // @ts-expect-error properties[] cannot be mapped to JSON
   await storeMetadata({ metadata });
 };
