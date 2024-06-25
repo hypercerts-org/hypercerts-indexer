@@ -75,7 +75,6 @@ export const indexAllowlistSingleClaimMinted = async ({
     return;
   }
 
-  console.log("PARSING CLAIMS FROM ALLOWLISTS");
   const results = await Promise.all(
     contractsWithEvents.flatMap(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;

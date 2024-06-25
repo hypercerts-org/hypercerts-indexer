@@ -32,7 +32,6 @@ const LeafClaimed = z.object({
  * @param event - The event object.
  * */
 export const parseLeafClaimedEvent = async (event: unknown) => {
-  console.log("PARSING LEAF CLAIMED EVENT");
   const { args, blockNumber, address, transactionHash } =
     LeafClaimedSchema.parse(event);
 
