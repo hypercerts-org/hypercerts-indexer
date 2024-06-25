@@ -40,7 +40,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
 
   await Promise.all(
     transfers.map(async (transfer) => {
-      console.log("TRANSFER: ", transfer);
       let fromToken = tokens.find(
         (token) => token.token_id === transfer.from_token_id.toString(),
       );
@@ -63,7 +62,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
       }
 
       if (!claimId) {
-        console.error(`[StoreUnitTransfer] Could net get claim_id.`);
+        console.error(`[StoreUnitTransfer] Could net create or get claim_id.`);
         return;
       }
 

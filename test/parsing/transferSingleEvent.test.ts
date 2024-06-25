@@ -10,7 +10,7 @@ import { getAddress } from "viem";
 
 describe("transferSingleEvent", {}, () => {
   const from = getAddress(faker.finance.ethereumAddress());
-  const timestamp = 10;
+  const timestamp = 10n;
   const contractAddress = getAddress(faker.finance.ethereumAddress());
   const operatorAddress = getAddress(faker.finance.ethereumAddress());
   const fromAddress = getAddress(faker.finance.ethereumAddress());
