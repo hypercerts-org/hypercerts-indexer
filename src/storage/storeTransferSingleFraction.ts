@@ -63,19 +63,6 @@ export const storeTransferSingleFraction = async ({
         };
       }
 
-      if (
-        token &&
-        token?.owner_address &&
-        token.owner_address.toLowerCase() !==
-          transfer.from_owner_address.toLowerCase()
-      ) {
-        console.error(
-          `[StoreTransferSingleFraction] Error while getting token; owner address mismatch.`,
-          `[${(token.owner_address.toLowerCase(), transfer.from_owner_address.toLowerCase())}]`,
-        );
-        return;
-      }
-
       if (!data?.claims_id) {
         const { data: claim, error: claimError } = await supabase.rpc(
           "get_or_create_claim",
@@ -119,7 +106,7 @@ export const storeTransferSingleFraction = async ({
 
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_update_block_timestamp"], ["desc"])
-    .uniqBy("token_id")
+    .uniqBy("fraction_id")
     .value();
 
   console.debug(
