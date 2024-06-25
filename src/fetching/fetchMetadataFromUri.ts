@@ -1,6 +1,5 @@
-import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
-import { Tables } from "@/types/database.types.js";
 import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
+import { HypercertMetadataValidator } from "@/utils/metadata.zod.js";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -39,19 +38,19 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
     return;
   }
 
-  const { valid, data, errors } = validateMetaData(fetchResult);
+  const res = HypercertMetadataValidator.safeParse(fetchResult);
 
-  if (!valid) {
+  if (!res.success) {
     console.warn(
       `[FetchMetadataFromUri] Invalid metadata for URI ${uri}`,
-      errors,
+      res.error,
     );
     return;
   }
 
-  const _metadata = data as HypercertMetadata;
+  const _metadata = res.data;
 
-  const metadata: Partial<Tables<"metadata">> = {
+  return {
     name: _metadata.name,
     description: _metadata.description,
     external_url: _metadata.external_url,
@@ -67,6 +66,4 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
     rights: _metadata.hypercert?.rights?.value,
     allow_list_uri: _metadata.allowList,
   };
-
-  return metadata;
 };
