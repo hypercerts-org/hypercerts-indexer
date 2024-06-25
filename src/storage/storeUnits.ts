@@ -1,6 +1,8 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { Tables } from "@/types/database.types";
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { chainId } from "@/utils/constants.js";
+import { getAddress } from "viem";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -51,14 +53,23 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
       let claimId = claimIds[claimTokenId];
 
       if (!claimId) {
-        const { data: claim } = await supabase
+        const { data: claim_id } = await supabase
           .rpc("get_or_create_claim", {
+            p_chain_id: chainId,
+            p_contract_address: getAddress(transfer.contract_address),
             p_token_id: claimTokenId,
-            p_contracts_id: transfer.contracts_id,
+            p_last_update_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            p_last_update_block_number:
+              transfer.last_update_block_number.toString(),
+            p_creation_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            p_creation_block_number:
+              transfer.last_update_block_number.toString(),
           })
           .throwOnError();
-        claimId = claim?.id;
-        claimIds[claimTokenId] = claim?.id;
+        claimId = claim_id;
+        claimIds[claimTokenId] = claim_id;
       }
 
       if (!claimId) {
@@ -173,6 +184,15 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
       last_update_block_timestamp: token.last_update_block_timestamp.toString(),
     };
   });
+
+  if (parsedTokens.some((token) => BigInt(token.units) < 0n)) {
+    console.error(
+      `[StoreUnitTransfer] Negative units found in tokens: ${JSON.stringify(
+        parsedTokens,
+      )}`,
+    );
+    return;
+  }
 
   await supabase
     .from("fractions")

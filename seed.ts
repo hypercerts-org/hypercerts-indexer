@@ -53,6 +53,11 @@ const main = async () => {
       contract_slug: minterContractSlug,
     },
     {
+      name: "BatchValueTransfer",
+      abi: "event BatchValueTransfer (uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
+      contract_slug: minterContractSlug,
+    },
+    {
       name: "AllowlistCreated",
       abi: "event AllowlistCreated(uint256 tokenID, bytes32 root)",
       contract_slug: minterContractSlug,

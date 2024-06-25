@@ -5,7 +5,7 @@ import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
 import { parseEther } from "viem";
 import { Tables } from "../src/types/database.types";
 import { submitMintClaimTransaction } from "../test/helpers/transactions";
-import { indexUnitTransfers } from "../src/indexer/indexUnitTransfers";
+import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 
 vi.mock("../src/clients/evmClient", () => {
@@ -80,7 +80,7 @@ describe("index TransferSingle events", async () => {
       eventName: "ClaimStored",
     });
 
-    await indexUnitTransfers({
+    await indexValueTransfer({
       batchSize: 1000n,
       eventName: "ValueTransfer",
     });

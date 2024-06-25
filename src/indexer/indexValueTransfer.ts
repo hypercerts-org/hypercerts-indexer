@@ -28,7 +28,7 @@ const defaultConfig = {
   eventName: "ValueTransfer",
 };
 
-export const indexUnitTransfers = async ({
+export const indexValueTransfer = async ({
   batchSize = defaultConfig.batchSize,
   eventName = defaultConfig.eventName,
 }: IndexerConfig = defaultConfig) => {
@@ -39,7 +39,7 @@ export const indexUnitTransfers = async ({
 
   if (!contractsWithEvents || contractsWithEvents.length === 0) {
     console.debug(
-      `[IndexUnitTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
+      `[IndexValueTransfers] No contract events found for ${eventName} event on chain ${chainId}`,
     );
     return;
   }
@@ -57,7 +57,7 @@ export const indexUnitTransfers = async ({
 
       if (!logsFound) {
         console.debug(
-          " [IndexUnitTransfers] No logs found for contract event",
+          " [IndexValueTransfers] No logs found for contract event",
           contractEvent,
         );
         return;

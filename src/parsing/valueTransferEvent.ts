@@ -14,7 +14,7 @@ const ValueTransferEventSchema = z.object({
   blockNumber: z.bigint(),
 });
 
-const ParsedValueTransfer = z.object({
+export const ParsedValueTransfer = z.object({
   claim_id: z.bigint(),
   contract_address: z
     .string()
