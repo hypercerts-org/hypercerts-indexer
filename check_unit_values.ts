@@ -38,6 +38,8 @@ const main = async () => {
       throw new Error("No fractions found in the database");
     }
 
+    console.log(fractions);
+
     const client = createPublicClient({
       chain: sepolia,
       transport: http(
@@ -90,7 +92,7 @@ const main = async () => {
     );
   }
 
-  console.log("🚀 Units indexed successfully!");
+  console.log("🚀 Units indexed correctly!");
   process.exit();
 };
 
