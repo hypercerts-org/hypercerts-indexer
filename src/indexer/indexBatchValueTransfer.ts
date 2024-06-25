@@ -9,15 +9,14 @@ import _ from "lodash";
 import { parseBatchValueTransfer } from "@/parsing/batchValueTransferEvent.js";
 
 /*
- * This function indexes the logs of the TransferSingle event emitted by the HypercertMinter contract. Based on the last
- * block indexed, it fetches the logs in batches, parses them, fetches the metadata, and stores the claim and fraction tokens in the
- * database.
+ * This function indexes the logs of the BatchTransferValue event emitted by the HypercertMinter contract. Based on the last
+ * block indexed, it fetches the logs in batches, parses them, create a flat list of transfers and stores those.
  *
  * @param [batchSize] - The number of logs to fetch and parse in each batch.
  *
  * @example
  * ```js
- * await indexTransferSingleEvents({ batchSize: 1000n });
+ * await indexBatchValueTransfer({ batchSize: 1000n });
  * ```
  */
 
