@@ -2,7 +2,7 @@ import { client } from "@/clients/evmClient.js";
 
 interface BlocksToFetchInput {
   contractCreationBlock: bigint;
-  fromBlock?: bigint;
+  lastBlockIndexed?: bigint;
   batchSize: bigint;
 }
 
@@ -15,7 +15,7 @@ interface BlocksToFetchInput {
  *
  * @param {BlocksToFetchInput} { contractCreationBlock, fromBlock, batchSize } - An object containing the contract creation block, the from block, and the batch size.
  * @param {bigint} contractCreationBlock - The block number when the contract was created.
- * @param {bigint} [fromBlock] - The block number to start fetching from. If not provided, it defaults to the contract creation block.
+ * @param {bigint} [lastBlockIndexed] - The last block with a succesful indexing cycle. If not provided, it defaults to the contract creation block.
  * @param {bigint} batchSize - The number of blocks to fetch in each batch.
  *
  * @returns {Promise<{ fromBlock: bigint, toBlock: bigint }>} A promise that resolves to an object containing the from block and the to block for fetching.
@@ -32,14 +32,15 @@ interface BlocksToFetchInput {
  * */
 export const getBlocksToFetch = async ({
   contractCreationBlock,
-  fromBlock,
+  lastBlockIndexed,
   batchSize,
 }: BlocksToFetchInput) => {
   try {
     const latestBlock = await client.getBlockNumber();
+    const nextBlock = lastBlockIndexed ? lastBlockIndexed + 1n : undefined;
     const _fromBlock =
-      fromBlock && fromBlock > contractCreationBlock
-        ? fromBlock
+      nextBlock && nextBlock > contractCreationBlock
+        ? nextBlock
         : contractCreationBlock;
     const _toBlock =
       _fromBlock + batchSize > latestBlock
