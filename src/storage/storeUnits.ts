@@ -37,8 +37,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
-  console.log("transfers: ", transfers);
-
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
@@ -85,8 +83,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         .maybeSingle()
         .throwOnError();
 
-      console.log("fromTokenData: ", fromTokenData);
-
       if (fromTokenData) {
         console.log("Setting from token with db response");
         fromToken = { ...fromTokenData, units: BigInt(fromTokenData.units) };
@@ -116,16 +112,12 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         .maybeSingle()
         .throwOnError();
 
-      console.log("toTokenData: ", toTokenData);
-
       if (toTokenData) {
-        console.log("Setting to token with db response");
         toToken = {
           ...toTokenData,
           units: toTokenData?.units ? BigInt(toTokenData.units) : 0n,
         };
       } else {
-        console.log("Setting to token with new token");
         toToken = {
           claims_id: claimId,
           token_id: transfer.to_token_id.toString(),

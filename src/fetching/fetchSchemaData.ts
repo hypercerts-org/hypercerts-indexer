@@ -1,6 +1,6 @@
 import { getDeployment } from "@/utils/getDeployment.js";
 import { client } from "@/clients/evmClient.js";
-import schemaRegistryAbi from "@/abis/schemaRegistry.json" assert { type: "json" };
+import schemaRegistryAbi from "@/abis/schemaRegistry.json" with { type: "json" };
 import { Hex, isAddress } from "viem";
 import { Tables } from "@/types/database.types.js";
 import { z } from "zod";
