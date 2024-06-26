@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
+
 dotenv.config();
 
 import "./instrument.js";
-
 import express from "express";
+import * as Sentry from "@sentry/node";
 import { delay, port } from "./utils/constants.js";
 import { indexAttestations } from "@/indexer/indexAttestations.js";
 import { indexClaimsStoredEvents } from "@/indexer/indexClaimsStored.js";
@@ -17,7 +18,6 @@ import { runIndexing } from "@/indexer/runIndexing.js";
 import { indexAllowlistSingleClaimMinted } from "@/indexer/indexAllowlistSingleClaimMinted.js";
 import { indexTakerBid } from "@/indexer/indexTakerBid.js";
 
-import * as Sentry from "@sentry/node";
 import { indexTransferBatchEvents } from "@/indexer/indexBatchFractionTransfers.js";
 import { indexBatchValueTransfer } from "@/indexer/indexBatchValueTransfer.js";
 
