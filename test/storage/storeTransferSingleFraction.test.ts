@@ -23,7 +23,10 @@ describe("storeTransferSingleFraction", () => {
     server.use(
       http.post(`${supabaseUrl}/*`, async ({ request }) => {
         const data = await request.json();
-        return HttpResponse.json(data);
+        return HttpResponse.json({
+          id: faker.string.uuid(),
+          claims_id: faker.string.uuid(),
+        });
       }),
     );
   });
