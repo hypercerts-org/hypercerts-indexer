@@ -37,6 +37,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
+  console.log("transfers: ", transfers);
+
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
@@ -83,9 +85,13 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         .maybeSingle()
         .throwOnError();
 
+      console.log("fromTokenData: ", fromTokenData);
+
       if (fromTokenData) {
+        console.log("Setting from token with db response");
         fromToken = { ...fromTokenData, units: BigInt(fromTokenData.units) };
       } else {
+        console.log("Setting from token with new token");
         fromToken = {
           claims_id: claimId,
           token_id: transfer.from_token_id.toString(),
@@ -110,9 +116,16 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         .maybeSingle()
         .throwOnError();
 
+      console.log("toTokenData: ", toTokenData);
+
       if (toTokenData) {
-        toToken = { toTokenData, units: BigInt(toTokenData.units) };
+        console.log("Setting to token with db response");
+        toToken = {
+          ...toTokenData,
+          units: toTokenData?.units ? BigInt(toTokenData.units) : 0n,
+        };
       } else {
+        console.log("Setting to token with new token");
         toToken = {
           claims_id: claimId,
           token_id: transfer.to_token_id.toString(),
@@ -137,8 +150,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     }
 
     if (transfer.from_token_id !== 0n) {
-      const fromUnits = fromToken?.units || 0n;
-      fromToken.units = BigInt(fromUnits) - transfer.units;
+      const fromUnits = fromToken?.units ? BigInt(fromToken.units) : 0n;
+      fromToken.units = fromUnits - transfer.units;
       fromToken.last_update_block_timestamp =
         transfer.last_update_block_timestamp.toString();
       fromToken.last_update_block_number =
@@ -146,8 +159,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     }
 
     if (transfer.to_token_id !== 0n) {
-      const toUnits = toToken?.units || 0n;
-      toToken.units = BigInt(toUnits) + transfer.units;
+      const toUnits = toToken?.units ? BigInt(toToken.units) : 0n;
+      toToken.units = toUnits + transfer.units;
 
       toToken.last_update_block_timestamp =
         transfer.last_update_block_timestamp.toString();

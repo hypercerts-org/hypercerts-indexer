@@ -7,7 +7,6 @@ import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed.js";
 import { supabase } from "@/clients/supabaseClient.js";
 import { client } from "@/clients/evmClient.js";
-import { getAddress } from "viem";
 
 /*
  * This function indexes the logs of the LeafClaimed event emitted by the HypercertMinter contract. Based on the last
@@ -78,8 +77,8 @@ export const indexAllowlistSingleClaimMinted = async ({
   const results = await Promise.all(
     contractsWithEvents.flatMap(async (contractEvent) => {
       const { last_block_indexed } = contractEvent;
-      const fromBlock = last_block_indexed ? last_block_indexed : 0n;
-      const proposedEndBlock = fromBlock + batchSize;
+      const lastBlockIndexed = last_block_indexed ? last_block_indexed : 0n;
+      const proposedEndBlock = lastBlockIndexed + batchSize;
 
       let maxEndBlock: bigint | undefined;
 
@@ -97,11 +96,11 @@ export const indexAllowlistSingleClaimMinted = async ({
 
       const adjustedBatchSize = claimStoredIndexingUpToDate
         ? batchSize
-        : maxEndBlock - fromBlock;
+        : maxEndBlock - lastBlockIndexed;
 
       // Get logs in batches
       const { logs, toBlock } = await getLogsForContractEvents({
-        fromBlock,
+        lastBlockIndexed,
         batchSize: adjustedBatchSize,
         contractEvent,
       });

@@ -46,7 +46,7 @@ export const indexClaimsStoredEvents = async ({
 
       // Get logs in batches
       const { logs, toBlock } = await getLogsForContractEvents({
-        fromBlock: last_block_indexed,
+        lastBlockIndexed: last_block_indexed,
         batchSize,
         contractEvent,
       });

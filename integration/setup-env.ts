@@ -1,10 +1,9 @@
-import { alchemyApiKey, supabaseUrl } from "../src/utils/constants";
-import { pool, testClient } from "../test/helpers/evm";
-import { afterAll, afterEach, beforeEach, expect, vi } from "vitest";
-import { fetchLogs } from "@viem/anvil";
+import { supabaseUrl } from "../src/utils/constants";
+import { afterAll, beforeEach, expect, vi } from "vitest";
 import { createClient } from "@supabase/supabase-js";
 import { Database, Tables } from "../src/types/database.types";
 import { supabase } from "../src/clients/supabaseClient";
+import { anvilInstance } from "../test/helpers/evm";
 
 const supabaseAdmin = createClient<Database>(
   supabaseUrl,
@@ -24,12 +23,8 @@ BigInt.prototype.fromJSON = function () {
 };
 
 // TODO improve waiting on cleanup
-beforeEach(async (context) => {
-  await testClient.reset({
-    jsonRpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`,
-    blockNumber: 4421945n,
-  });
-
+beforeEach(async () => {
+  await anvilInstance.restart();
   const { data: clearClaims } = await supabaseAdmin.rpc("sql", {
     query: "TRUNCATE TABLE public.claims RESTART IDENTITY",
   });
@@ -55,11 +50,8 @@ beforeEach(async (context) => {
   }
 });
 
-afterEach(async (context) => {
-  context.onTestFailed(async () => {
-    const logs = await fetchLogs("http://localhost:8545", pool);
-    console.log(...logs.slice(-20));
-  });
+afterAll(async () => {
+  await anvilInstance.stop();
 });
 
 afterAll(async () => {
