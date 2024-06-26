@@ -1,8 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/swcrc",
   "jsc": {
-          "baseUrl": ".",
-    "experimental": { "keepImportAssertions": true, "emitAssertForImportAttributes": true },
+    "baseUrl": ".",
+    "experimental": {
+      "keepImportAssertions": true
+    },
     "parser": {
       "syntax": "typescript",
       "decorators": true,
@@ -12,14 +14,14 @@
                 "./src/*"
             ]
     },
-    "target": "es2021",
+    "target": "esnext",
     "transform": {
     			"legacyDecorator": true,
     			"decoratorMetadata": true
     		},
   },
   "module": {
-  "type": "nodenext",
+    "type": "nodenext",
   },
   "minify": true
 }

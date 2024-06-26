@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "nodemon",
     "build": "rimraf dist && swc src --out-dir dist --copy-files",
@@ -48,7 +51,7 @@
     "nodemon": "^3.0.3",
     "postgres": "^3.4.4",
     "prettier": "3.2.5",
-    "prool": "^0.0.11",
+    "prool": "^0.0.15",
     "rimraf": "^5.0.5",
     "rollup-plugin-auto-external": "^2.0.0",
     "rollup-plugin-esbuild": "^6.1.1",

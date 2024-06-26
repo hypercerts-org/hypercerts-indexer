@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
 import { publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
@@ -15,17 +15,12 @@ vi.mock("../src/clients/evmClient", () => {
 });
 
 describe("index TransferSingle events", async () => {
-  beforeAll(async () => {
-    await testClient.impersonateAccount({
-      address: "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A",
-    });
-  });
+  const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
+  const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
+  const units = parseEther("1");
+  const cid = "ipfs://test_cid";
 
   it("observes and stores TransferSingle event", async () => {
-    const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
-    const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
-    const units = parseEther("1");
-    const cid = "ipfs://test_cid";
     const tx = await submitMintClaimTransaction({
       contractAddress,
       account,
@@ -54,16 +49,17 @@ describe("index TransferSingle events", async () => {
 
     expect(data?.length).toBe(1);
 
-    const fraction = data?.[0]!;
+    const fraction = data?.[0];
+
+    expect(fraction).toBeDefined();
+
+    if (!fraction) throw Error("fraction is undefined");
+
     expect(fraction.token_id).toBe("340282366920938463463374607431768211457");
     expect(fraction.owner_address).toBe(account);
   });
 
   it("observes and stores TransferSingle  event correctly after ValueTransfer", async () => {
-    const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
-    const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
-    const units = parseEther("1");
-    const cid = "ipfs://test_cid";
     const tx = await submitMintClaimTransaction({
       contractAddress,
       account,
@@ -97,9 +93,12 @@ describe("index TransferSingle events", async () => {
 
     expect(data?.length).toBe(1);
 
-    const fraction = data?.[0]!;
+    const fraction = data?.[0];
 
-    console.log(fraction);
+    expect(fraction).toBeDefined();
+
+    if (!fraction) throw Error("fraction is undefined");
+
     expect(fraction.token_id).toBe("340282366920938463463374607431768211457");
     expect(BigInt(fraction.units as string)).toBe(units);
     expect(fraction.owner_address).toBe(account);

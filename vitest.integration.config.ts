@@ -11,7 +11,6 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 30000,
     include: ["./integration/**/*.test.ts"],
-    globalSetup: ["./integration/globalSetup.ts"],
     setupFiles: ["./integration/setup-env.ts"],
     // https://github.com/davelosert/vitest-coverage-report-action
     coverage: {

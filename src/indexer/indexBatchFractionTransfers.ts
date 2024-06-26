@@ -49,7 +49,7 @@ export const indexTransferBatchEvents = async ({
 
       // Get logs in batches
       const logsFound = await getLogsForContractEvents({
-        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : 0n,
+        lastBlockIndexed: last_block_indexed,
         batchSize,
         contractEvent,
       });
