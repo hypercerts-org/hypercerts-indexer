@@ -40,13 +40,9 @@ export const indexAttestations = async ({
       const { id, uid, last_block_indexed } = supportedSchema;
       const attestedEvents = await getAttestationsForSchema({
         schema: { uid },
-        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : undefined,
+        lastBlockIndexed: last_block_indexed ? BigInt(last_block_indexed) : 0n,
         batchSize,
       });
-
-      if (!attestedEvents) {
-        return;
-      }
 
       const { logs, toBlock } = attestedEvents;
 
@@ -55,6 +51,15 @@ export const indexAttestations = async ({
           "[IndexAttestations] No logs found for supported schema",
           { supported_schema_id: id, uid },
         );
+
+        console.debug(`Storing updated supported schema: `, {
+          supportedSchemas: [
+            {
+              ...supportedSchema,
+              last_block_indexed: toBlock,
+            },
+          ],
+        });
 
         return await storeSupportedSchemas({
           supportedSchemas: [

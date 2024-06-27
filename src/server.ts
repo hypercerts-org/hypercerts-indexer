@@ -46,17 +46,17 @@ app.listen(port, async () => {
   console.log(`Indexer listening on port ${port}`);
   const indexingMethods = [
     indexSupportedSchemas,
-    indexClaimsStoredEvents,
-    indexValueTransfer,
-    indexBatchValueTransfer,
-    indexTransferSingleEvents,
-    indexTransferBatchEvents,
-    indexMetadata,
-    indexAllowListData,
-    indexAllowlistRecords,
+    // indexClaimsStoredEvents,
+    // indexValueTransfer,
+    // indexBatchValueTransfer,
+    // indexTransferSingleEvents,
+    // indexTransferBatchEvents,
+    // indexMetadata,
+    // indexAllowListData,
+    // indexAllowlistRecords,
     indexAttestations,
-    indexAllowlistSingleClaimMinted,
-    indexTakerBid,
+    // indexAllowlistSingleClaimMinted,
+    // indexTakerBid,
   ];
 
   await runIndexing(indexingMethods, delay);
