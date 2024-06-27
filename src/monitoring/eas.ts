@@ -24,11 +24,11 @@ import { getBlocksToFetch } from "@/utils/getBlocksToFetch.js";
 
 export const getAttestationsForSchema = async ({
   schema,
-  fromBlock = 0n,
+  lastBlockIndexed,
   batchSize,
 }: {
   schema: Pick<Tables<"supported_schemas">, "uid">;
-  fromBlock?: bigint;
+  lastBlockIndexed: bigint;
   batchSize: bigint;
 }) => {
   const { startBlock, easAddress } = getDeployment();
@@ -37,22 +37,22 @@ export const getAttestationsForSchema = async ({
     throw Error(`[GetAttestationForSchema] EAS is not available`);
   }
 
-  const { fromBlock: _fromBlock, toBlock: _toBlock } = await getBlocksToFetch({
+  const { fromBlock, toBlock } = await getBlocksToFetch({
     contractCreationBlock: startBlock,
-    fromBlock,
+    lastBlockIndexed,
     batchSize,
   });
 
   try {
     console.debug(
-      `[getAttestationsForSchema] Fetching attestation logs from ${_fromBlock} to ${_toBlock}`,
+      `[getAttestationsForSchema] Fetching attestation logs from ${fromBlock} to ${toBlock}`,
     );
 
     // TODO could be it's own schema
     const filter = await client.createEventFilter({
       address: easAddress,
-      fromBlock: _fromBlock,
-      toBlock: _toBlock,
+      fromBlock,
+      toBlock,
       event: parseAbiItem(
         "event Attested(address indexed recipient, address indexed attester, bytes32 uid, bytes32 indexed schema)",
       ),
@@ -63,8 +63,8 @@ export const getAttestationsForSchema = async ({
 
     return {
       logs: await client.getFilterLogs({ filter }),
-      fromBlock: _fromBlock,
-      toBlock: _toBlock,
+      fromBlock,
+      toBlock,
     };
   } catch (error) {
     console.error(
