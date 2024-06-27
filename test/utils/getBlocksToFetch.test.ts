@@ -30,8 +30,8 @@ describe("getBlocksToFetch", () => {
     readSpy.resolves(1500n);
     const result = await getBlocksToFetch(defaultInput);
     expect(result).toEqual({
-      fromBlock: defaultInput.lastBlockIndexed + 1n,
-      toBlock: 1438n,
+      fromBlock: defaultInput.lastBlockIndexed,
+      toBlock: 1437n,
     });
   });
 
@@ -53,7 +53,7 @@ describe("getBlocksToFetch", () => {
     readSpy.resolves(1400n);
     const result = await getBlocksToFetch(defaultInput);
     expect(result).toEqual({
-      fromBlock: defaultInput.lastBlockIndexed + 1n,
+      fromBlock: defaultInput.lastBlockIndexed,
       toBlock: 1400n,
     });
   });

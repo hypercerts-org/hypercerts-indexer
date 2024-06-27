@@ -45,7 +45,7 @@ const main = async () => {
       },
       {
         name: "TransferBatch",
-        abi: "event TransferBatch (index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
+        abi: "event TransferBatch(index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -55,7 +55,7 @@ const main = async () => {
       },
       {
         name: "BatchValueTransfer",
-        abi: "event BatchValueTransfer (uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
+        abi: "event BatchValueTransfer(uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {

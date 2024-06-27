@@ -3,6 +3,10 @@ import { Tables } from "@/types/database.types";
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
+import {
+  getHighestValue,
+  getLowestValue,
+} from "@/utils/getMostRecentOrDefined";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -37,6 +41,8 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
+  console.log("transfers", transfers);
+
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
@@ -51,28 +57,35 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     const claimTokenId = transfer.claim_id.toString();
     let claimId = claimIds[claimTokenId];
 
-    if (!claimId) {
-      const { data: claim_id } = await supabase
-        .rpc("get_or_create_claim", {
-          p_chain_id: chainId,
-          p_contract_address: getAddress(transfer.contract_address),
-          p_token_id: claimTokenId,
-          p_last_update_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          p_last_update_block_number:
-            transfer.last_update_block_number.toString(),
-          p_creation_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          p_creation_block_number: transfer.last_update_block_number.toString(),
-        })
-        .throwOnError();
-      claimId = claim_id;
-      claimIds[claimTokenId] = claim_id;
-    }
+    console.log("fromToken at start", fromToken);
+    console.log("toToken at start", toToken);
 
     if (!claimId) {
-      console.error(`[StoreUnitTransfer] Could net create or get claim_id.`);
-      return;
+      try {
+        const { data: claim_id } = await supabase
+          .rpc("get_or_create_claim", {
+            p_chain_id: chainId,
+            p_contract_address: getAddress(transfer.contract_address),
+            p_token_id: claimTokenId,
+            p_last_update_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            p_last_update_block_number:
+              transfer.last_update_block_number.toString(),
+            p_creation_block_timestamp:
+              transfer.last_update_block_timestamp.toString(),
+            p_creation_block_number:
+              transfer.last_update_block_number.toString(),
+          })
+          .throwOnError();
+        claimId = claim_id;
+        claimIds[claimTokenId] = claim_id;
+      } catch (e: unknown) {
+        console.error(
+          `[StoreUnitTransfer] Could net create or get claim_id.`,
+          e,
+        );
+        return;
+      }
     }
 
     if (!fromToken) {
@@ -84,21 +97,12 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
         .throwOnError();
 
       if (fromTokenData) {
-        console.log("Setting from token with db response");
         fromToken = { ...fromTokenData, units: BigInt(fromTokenData.units) };
       } else {
-        console.log("Setting from token with new token");
         fromToken = {
           claims_id: claimId,
           token_id: transfer.from_token_id.toString(),
           units: 0n,
-          last_update_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          last_update_block_number:
-            transfer.last_update_block_number.toString(),
-          creation_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          creation_block_number: transfer.last_update_block_number.toString(),
           value: 1n,
         };
       }
@@ -122,13 +126,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
           claims_id: claimId,
           token_id: transfer.to_token_id.toString(),
           units: 0n,
-          last_update_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          last_update_block_number:
-            transfer.last_update_block_number.toString(),
-          creation_block_timestamp:
-            transfer.last_update_block_timestamp.toString(),
-          creation_block_number: transfer.last_update_block_number.toString(),
           value: 1n,
         };
       }
@@ -144,20 +141,47 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     if (transfer.from_token_id !== 0n) {
       const fromUnits = fromToken?.units ? BigInt(fromToken.units) : 0n;
       fromToken.units = fromUnits - transfer.units;
-      fromToken.last_update_block_timestamp =
-        transfer.last_update_block_timestamp.toString();
-      fromToken.last_update_block_number =
-        transfer.last_update_block_number.toString();
+      fromToken.last_update_block_timestamp = getHighestValue(
+        fromToken?.last_update_block_timestamp,
+        transfer.last_update_block_timestamp,
+      );
+      fromToken.last_update_block_number = getHighestValue(
+        fromToken?.last_update_block_number,
+        transfer.last_update_block_number,
+      );
+      fromToken.creation_block_number = getLowestValue(
+        fromToken?.creation_block_number,
+        transfer.creation_block_number,
+      );
+      fromToken.creation_block_timestamp = getLowestValue(
+        fromToken?.creation_block_timestamp,
+        transfer.creation_block_timestamp,
+      );
     }
 
     if (transfer.to_token_id !== 0n) {
       const toUnits = toToken?.units ? BigInt(toToken.units) : 0n;
       toToken.units = toUnits + transfer.units;
 
-      toToken.last_update_block_timestamp =
-        transfer.last_update_block_timestamp.toString();
-      toToken.last_update_block_number =
-        transfer.last_update_block_number.toString();
+      toToken.last_update_block_timestamp = getHighestValue(
+        toToken?.last_update_block_timestamp,
+        transfer.last_update_block_timestamp,
+      );
+
+      toToken.last_update_block_number = getHighestValue(
+        toToken?.last_update_block_number,
+        transfer.last_update_block_number,
+      );
+
+      toToken.creation_block_number = getLowestValue(
+        toToken?.creation_block_number,
+        transfer.creation_block_number,
+      );
+
+      toToken.creation_block_timestamp = getLowestValue(
+        toToken?.creation_block_timestamp,
+        transfer.creation_block_timestamp,
+      );
     }
 
     const replaceToken = (array, token) => {
@@ -199,6 +223,7 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
   await supabase
     .from("fractions")
     .upsert(parsedTokens, {
+      onConflict: "claims_id, token_id",
       ignoreDuplicates: false,
       defaultToNull: false,
     })

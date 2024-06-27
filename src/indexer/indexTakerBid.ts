@@ -65,21 +65,24 @@ export const indexTakerBid = async ({
         const { last_block_indexed } = contractEvent;
 
         // Get logs in batches
-        const logsFound = await getLogsForContractEvents({
+        const { logs, toBlock } = await getLogsForContractEvents({
           lastBlockIndexed: last_block_indexed,
           batchSize,
           contractEvent,
         });
 
-        if (!logsFound) {
+        if (!logs || logs.length === 0) {
           console.debug(
             " [IndexTakerBid] No logs found for contract event",
             contractEvent,
           );
-          return;
+          return {
+            contractEventUpdate: {
+              ...contractEvent,
+              last_block_indexed: toBlock - 1n,
+            },
+          };
         }
-
-        const { logs, toBlock } = logsFound;
 
         // parse logs to get claimID, contractAddress and cid
         const takerBids = (
@@ -129,12 +132,11 @@ export const indexTakerBid = async ({
           takerBids,
           contractEventUpdate: {
             ...contractEvent,
-            last_block_indexed: toBlock,
+            last_block_indexed: toBlock - 1n,
           },
         };
       }),
   );
-
   return await storeTakerBid({
     takerBids: results
       .flatMap((res) => (res?.takerBids ? res.takerBids : []))

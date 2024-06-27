@@ -105,7 +105,7 @@ export const indexAllowlistSingleClaimMinted = async ({
         contractEvent,
       });
 
-      if (logs.length === 0) {
+      if (!logs || logs.length === 0) {
         console.debug(
           " [IndexAllowlistSingleClaimMinted] No logs found for Leaf Claimed event",
           contractEvent,
@@ -113,7 +113,7 @@ export const indexAllowlistSingleClaimMinted = async ({
         return {
           contractEventUpdate: {
             ...contractEvent,
-            last_block_indexed: toBlock,
+            last_block_indexed: toBlock - 1n,
           },
         };
       }
@@ -132,7 +132,7 @@ export const indexAllowlistSingleClaimMinted = async ({
         claims,
         contractEventUpdate: {
           ...contractEvent,
-          last_block_indexed: toBlock,
+          last_block_indexed: toBlock - 1n,
         },
       };
     }),
@@ -148,6 +148,8 @@ export const indexAllowlistSingleClaimMinted = async ({
         res?.contractEventUpdate ? [res.contractEventUpdate] : [],
       ),
     });
+
+    return;
   }
 
   await Promise.all(

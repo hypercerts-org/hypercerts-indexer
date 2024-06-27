@@ -48,21 +48,25 @@ export const indexTransferBatchEvents = async ({
       const { last_block_indexed } = contractEvent;
 
       // Get logs in batches
-      const logsFound = await getLogsForContractEvents({
+      const { logs, toBlock } = await getLogsForContractEvents({
         lastBlockIndexed: last_block_indexed,
         batchSize,
         contractEvent,
       });
 
-      if (!logsFound) {
+      if (!logs || logs.length === 0) {
         console.debug(
           "[IndexBatchTokenTransfers] No logs found for contract event",
           contractEvent,
         );
-        return;
+        return {
+          contractEventUpdate: {
+            ...contractEvent,
+            last_block_indexed: toBlock - 1n,
+          },
+        };
       }
 
-      const { logs, toBlock } = logsFound;
       console.debug(`[IndexBatchTokenTransfers] Found ${logs.length} logs`);
 
       // Split logs into chunks
@@ -101,7 +105,7 @@ export const indexTransferBatchEvents = async ({
         transfers: tokensToStore,
         contractEventUpdate: {
           ...contractEvent,
-          last_block_indexed: toBlock,
+          last_block_indexed: toBlock - 1n,
         },
       };
     }),
@@ -110,6 +114,15 @@ export const indexTransferBatchEvents = async ({
   const transfers = results
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
+
+  if (transfers.length === 0) {
+    await updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
+    });
+    return;
+  }
 
   // store the fraction tokens
   return await storeFractionTransfer({

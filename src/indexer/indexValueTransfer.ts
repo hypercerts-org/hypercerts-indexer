@@ -49,22 +49,24 @@ export const indexValueTransfer = async ({
       const { last_block_indexed } = contractEvent;
 
       // Get logs in batches
-      const logsFound = await getLogsForContractEvents({
+      const { logs, toBlock } = await getLogsForContractEvents({
         lastBlockIndexed: last_block_indexed,
         batchSize,
         contractEvent,
       });
 
-      if (!logsFound) {
+      if (!logs || logs.length === 0) {
         console.debug(
           " [IndexValueTransfers] No logs found for contract event",
           contractEvent,
         );
-        return;
+        return {
+          contractEventUpdate: {
+            ...contractEvent,
+            last_block_indexed: toBlock,
+          },
+        };
       }
-
-      const { logs, toBlock } = logsFound;
-
       // Split logs into chunks
       const logChunks = _.chunk(logs, 10);
 
@@ -102,6 +104,15 @@ export const indexValueTransfer = async ({
   const transfers = results
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
+
+  if (transfers.length === 0) {
+    await updateLastBlockIndexedContractEvents({
+      contract_events: results.flatMap((res) =>
+        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+      ),
+    });
+    return;
+  }
 
   // store the claim and fraction tokens
   return await storeUnitTransfer({ transfers }).then(() =>
