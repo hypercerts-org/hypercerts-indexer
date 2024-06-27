@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeAll, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
 import { anvilInstance, publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
@@ -9,7 +9,7 @@ import {
 import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 import { faker } from "@faker-js/faker";
-import { cleanupSupabase, supabaseAdmin } from "./setup-env";
+import { cleanupSupabase } from "./setup-env";
 
 vi.mock("../src/clients/evmClient", () => {
   return {

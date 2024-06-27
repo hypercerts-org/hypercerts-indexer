@@ -108,7 +108,7 @@ export const indexAllowlistSingleClaimMinted = async ({
       if (!logs || logs.length === 0) {
         console.debug(
           " [IndexAllowlistSingleClaimMinted] No logs found for Leaf Claimed event",
-          contractEvent,
+          { eventName: contractEvent.event_name },
         );
         return {
           contractEventUpdate: {

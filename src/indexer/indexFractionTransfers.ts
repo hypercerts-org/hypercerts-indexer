@@ -61,7 +61,7 @@ export const indexTransferSingleEvents = async ({
       if (!logs) {
         console.debug(
           "[IndexTokenTransfers] No logs found for contract event",
-          contractEvent,
+          { eventName: contractEvent.event_name },
         );
         return {
           contractEventUpdate: {

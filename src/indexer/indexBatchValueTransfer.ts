@@ -55,7 +55,7 @@ export const indexBatchValueTransfer = async ({
       if (!logs || logs.length === 0) {
         console.debug(
           " [IndexBatchValueTransfers] No logs found for contract event",
-          contractEvent,
+          { eventName: contractEvent.event_name },
         );
         return {
           contractEventUpdate: {

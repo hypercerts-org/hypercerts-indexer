@@ -6,7 +6,7 @@ import { getAddress } from "viem";
 import {
   getHighestValue,
   getLowestValue,
-} from "@/utils/getMostRecentOrDefined";
+} from "@/utils/getMostRecentOrDefined.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.

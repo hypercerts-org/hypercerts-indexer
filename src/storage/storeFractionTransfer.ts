@@ -4,11 +4,11 @@ import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
 import { Tables } from "@/types/database.types.js";
-import { ParsedTransferSingle } from "@/parsing/transferSingleEvent";
+import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
 import {
   getHighestValue,
   getLowestValue,
-} from "@/utils/getMostRecentOrDefined";
+} from "@/utils/getMostRecentOrDefined.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -62,8 +62,8 @@ export const storeFractionTransfer = async ({
       let data: Partial<Tables<"fractions">> = {};
       if (token) {
         data = {
-          id: token.id,
-          claims_id: token.claims_id,
+          // @ts-expect-error supabase return type is incorrect
+          ...token,
         };
       }
 
@@ -146,8 +146,6 @@ export const storeFractionTransfer = async ({
   console.debug(
     `[StoreTransferFraction] Found ${sortedUniqueTokens.length} unique tokens`,
   );
-
-  console.log("sortedUniqueTokens", sortedUniqueTokens);
 
   return await supabase
     .from("fractions")

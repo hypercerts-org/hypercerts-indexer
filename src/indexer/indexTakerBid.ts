@@ -72,10 +72,9 @@ export const indexTakerBid = async ({
         });
 
         if (!logs || logs.length === 0) {
-          console.debug(
-            " [IndexTakerBid] No logs found for contract event",
-            contractEvent,
-          );
+          console.debug(" [IndexTakerBid] No logs found for contract event", {
+            eventName: contractEvent.event_name,
+          });
           return {
             contractEventUpdate: {
               ...contractEvent,

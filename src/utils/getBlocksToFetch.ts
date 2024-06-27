@@ -48,9 +48,6 @@ export const getBlocksToFetch = async ({
         ? latestBlock
         : _fromBlock + batchSize;
 
-    console.log("FROM BLOCK", _fromBlock);
-    console.log("TO BLOCK", _toBlock);
-
     if (_fromBlock > _toBlock) {
       return { fromBlock: _toBlock, toBlock: _toBlock };
     }

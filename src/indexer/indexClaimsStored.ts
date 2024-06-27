@@ -52,10 +52,9 @@ export const indexClaimsStoredEvents = async ({
       });
 
       if (!logs || logs.length === 0) {
-        console.debug(
-          "[IndexClaimsStored] No logs found for contract event",
-          contractEvent,
-        );
+        console.debug("[IndexClaimsStored] No logs found for contract event", {
+          eventName: contractEvent.event_name,
+        });
         return {
           contractEventUpdate: {
             ...contractEvent,
