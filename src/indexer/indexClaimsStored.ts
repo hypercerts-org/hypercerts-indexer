@@ -51,6 +51,18 @@ export const indexClaimsStoredEvents = async ({
         contractEvent,
       });
 
+      if (!logs || logs.length === 0) {
+        console.debug("[IndexClaimsStored] No logs found for contract event", {
+          eventName: contractEvent.event_name,
+        });
+        return {
+          contractEventUpdate: {
+            ...contractEvent,
+            last_block_indexed: toBlock - 1n,
+          },
+        };
+      }
+
       // Split logs into chunks
       const logChunks = _.chunk(logs, 10);
 
@@ -70,16 +82,23 @@ export const indexClaimsStoredEvents = async ({
         allClaims = [...allClaims, ...claims];
       }
 
+      const claims = allClaims.filter(
+        (claim) => claim !== null && claim !== undefined,
+      );
+
       return {
-        claims: allClaims,
+        claims,
         contractEventUpdate: {
           ...contractEvent,
-          last_block_indexed: toBlock,
+          last_block_indexed: toBlock - 1n,
         },
       };
     }),
   );
-  const claims = results.flatMap((result) => result.claims);
+
+  const claims = results
+    .flatMap((result) => (result?.claims ? result.claims : undefined))
+    .filter((claim) => claim !== null && claim !== undefined);
 
   const contractEventUpdates = results.flatMap((result) => [
     result.contractEventUpdate,

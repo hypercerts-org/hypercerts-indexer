@@ -21,11 +21,18 @@ describe("storeTransferSingleFraction", () => {
 
   beforeEach(() => {
     server.use(
-      http.post(`${supabaseUrl}/*`, async ({ request }) => {
-        const data = await request.json();
+      http.get(`${supabaseUrl}/*`, async () => {
         return HttpResponse.json({
           id: faker.string.uuid(),
           claims_id: faker.string.uuid(),
+          token_id: transfer.token_id.toString(),
+        });
+      }),
+      http.post(`${supabaseUrl}/*`, async () => {
+        return HttpResponse.json({
+          id: faker.string.uuid(),
+          claims_id: faker.string.uuid(),
+          token_id: transfer.token_id.toString(),
         });
       }),
     );
@@ -46,7 +53,6 @@ describe("storeTransferSingleFraction", () => {
     server.use(
       http.post(`${supabaseUrl}/*`, async ({ request }) => {
         const data = await request.json();
-        console.log("data", data);
         // @ts-ignore
         theResult = data._fractions;
         return HttpResponse.json(data);

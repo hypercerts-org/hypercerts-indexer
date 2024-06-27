@@ -45,7 +45,7 @@ const main = async () => {
       },
       {
         name: "TransferBatch",
-        abi: "event TransferBatch (index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
+        abi: "event TransferBatch(index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -55,7 +55,7 @@ const main = async () => {
       },
       {
         name: "BatchValueTransfer",
-        abi: "event BatchValueTransfer (uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
+        abi: "event BatchValueTransfer(uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -127,22 +127,17 @@ const main = async () => {
   );
 
   console.log("🕊️ Seeding supported schemas...");
-  await supabase.from("supported_schemas").upsert(
-    [
-      {
-        chain_id: 11155111,
-        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-        last_block_indexed: 6098991,
-        resolver: null,
-        schema: null,
-        revocable: null,
-      },
-    ],
-    {
-      onConflict: "uid",
-      ignoreDuplicates: true,
-    },
-  );
+  await supabase.from("supported_schemas").insert({
+    chain_id: 11155111,
+    uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+    last_block_indexed: 6098991,
+  });
+
+  const { data: schemas } = await supabase
+    .from("supported_schemas")
+    .select("*");
+
+  console.log(schemas);
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");

@@ -43,7 +43,7 @@ export const getLogsForContractEvents = async ({
   batchSize,
   contractEvent,
 }: GetLogsForEventInput) => {
-  const { fromBlock: from, toBlock: to } = await getBlocksToFetch({
+  const { fromBlock, toBlock } = await getBlocksToFetch({
     contractCreationBlock: contractEvent.start_block,
     lastBlockIndexed,
     batchSize,
@@ -69,18 +69,18 @@ export const getLogsForContractEvents = async ({
     abi: getAbiByContractSlug(contractEvent.contract_slug),
     address: contractEvent.contract_address as `0x${string}`,
     eventName: contractEvent.event_name,
-    fromBlock: from,
-    toBlock: to,
+    fromBlock,
+    toBlock,
   });
 
   try {
     console.debug(
-      `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${from} to ${to}`,
+      `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${fromBlock} to ${toBlock}`,
     );
 
     const logs = await client.getFilterLogs({ filter });
 
-    return { logs, fromBlock: from, toBlock: to };
+    return { logs, fromBlock, toBlock };
   } catch (error) {
     console.error(
       `[GetLogsForContractEvents] Error while fetching logs for contract event ${contractEvent.event_name} on contract ${contractEvent.contract_address}`,

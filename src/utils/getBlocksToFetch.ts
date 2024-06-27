@@ -37,11 +37,12 @@ export const getBlocksToFetch = async ({
 }: BlocksToFetchInput) => {
   try {
     const latestBlock = await client.getBlockNumber();
-    const nextBlock = lastBlockIndexed ? lastBlockIndexed + 1n : undefined;
-    const _fromBlock =
-      nextBlock && nextBlock > contractCreationBlock
-        ? nextBlock
+    const nextBlock =
+      lastBlockIndexed !== undefined && lastBlockIndexed !== null
+        ? lastBlockIndexed
         : contractCreationBlock;
+    const _fromBlock =
+      nextBlock > contractCreationBlock ? nextBlock : contractCreationBlock;
     const _toBlock =
       _fromBlock + batchSize > latestBlock
         ? latestBlock

@@ -23,6 +23,7 @@ export const handlers = [
         return HttpResponse.json(await request.json());
     }
   }),
+
   http.all(`${supabaseUrl}/rest/v1/lastblockindexed`, ({ request }) => {
     switch (request.method) {
       case "GET":

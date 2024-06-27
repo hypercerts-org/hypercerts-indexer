@@ -4,7 +4,11 @@ import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
 import { Tables } from "@/types/database.types.js";
-import { ParsedTransferSingle } from "@/parsing/transferSingleEvent";
+import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
+import {
+  getHighestValue,
+  getLowestValue,
+} from "@/utils/getMostRecentOrDefined.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -58,8 +62,8 @@ export const storeFractionTransfer = async ({
       let data: Partial<Tables<"fractions">> = {};
       if (token) {
         data = {
-          id: token.id,
-          claims_id: token.claims_id,
+          // @ts-expect-error supabase return type is incorrect
+          ...token,
         };
       }
 
@@ -70,13 +74,22 @@ export const storeFractionTransfer = async ({
             p_chain_id: chainId,
             p_contract_address: getAddress(transfer.contract_address),
             p_token_id: getHypercertTokenId(transfer.token_id).toString(),
-            p_creation_block_number:
-              token?.creation_block_timestamp ??
-              transfer.block_timestamp.toString(),
-            p_creation_block_timestamp:
-              token?.creation_block_number ?? transfer.block_number.toString(),
-            p_last_update_block_number: transfer.block_number.toString(),
-            p_last_update_block_timestamp: transfer.block_timestamp.toString(),
+            p_creation_block_number: getLowestValue(
+              token?.creation_block_timestamp,
+              transfer.block_number,
+            ),
+            p_creation_block_timestamp: getLowestValue(
+              token?.creation_block_timestamp,
+              transfer.block_timestamp,
+            ),
+            p_last_update_block_number: getHighestValue(
+              token?.last_update_block_number,
+              transfer.block_number,
+            ),
+            p_last_update_block_timestamp: getHighestValue(
+              token?.last_update_block_timestamp,
+              transfer.block_timestamp,
+            ),
           },
         );
 
@@ -92,17 +105,29 @@ export const storeFractionTransfer = async ({
         data.claims_id = claim_id;
       }
 
+      console.log("token: ", token);
+
       return {
         ...data,
         fraction_id: `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
         token_id: token?.token_id.toString() ?? transfer.token_id.toString(),
-        creation_block_timestamp:
-          token?.creation_block_timestamp ??
-          transfer.block_timestamp.toString(),
-        creation_block_number:
-          token?.creation_block_number ?? transfer.block_number.toString(),
-        last_update_block_timestamp: transfer.block_timestamp.toString(),
-        last_update_block_number: transfer.block_number.toString(),
+        creation_block_timestamp: getLowestValue(
+          token?.creation_block_timestamp,
+          transfer.block_timestamp,
+        ),
+
+        creation_block_number: getLowestValue(
+          token?.creation_block_number,
+          transfer.block_number,
+        ),
+        last_update_block_timestamp: getHighestValue(
+          token?.last_update_block_timestamp,
+          transfer.block_timestamp,
+        ),
+        last_update_block_number: getHighestValue(
+          token?.last_update_block_number,
+          transfer.block_number,
+        ),
         owner_address: getAddress(transfer.to_owner_address),
         value: transfer.value.toString(),
       };
@@ -110,6 +135,8 @@ export const storeFractionTransfer = async ({
   );
 
   console.debug(`[StoreTransferFraction] Storing ${tokens.length} tokens`);
+
+  console.log("tokens", tokens);
 
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_update_block_timestamp"], ["desc"])
@@ -123,6 +150,7 @@ export const storeFractionTransfer = async ({
   return await supabase
     .from("fractions")
     .upsert(sortedUniqueTokens, {
+      onConflict: "claims_id, token_id",
       ignoreDuplicates: false,
       defaultToNull: false,
     })

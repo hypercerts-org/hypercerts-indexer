@@ -56,15 +56,21 @@ export const indexTransferSingleEvents = async ({
         contractEvent,
       });
 
-      if (!logsFound) {
+      const { logs, toBlock } = logsFound;
+
+      if (!logs) {
         console.debug(
           "[IndexTokenTransfers] No logs found for contract event",
-          contractEvent,
+          { eventName: contractEvent.event_name },
         );
-        return;
+        return {
+          contractEventUpdate: {
+            ...contractEvent,
+            last_block_indexed: toBlock,
+          },
+        };
       }
 
-      const { logs, toBlock } = logsFound;
       console.debug(`[IndexTokenTransfers] Found ${logs.length} logs`);
 
       // Split logs into chunks
