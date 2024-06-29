@@ -34,7 +34,7 @@ interface StoreClaimInput {
  * If the "contracts_id" and "token_id" of a claim already exist in the table, the existing row is updated with the new claim data.
  * If an error occurs while storing the claims, the error is logged and rethrown.
  *
- * @param {StoreClaimInput} { claims } - An object containing an array of claims to store. Each claim must match the ClaimSchema.
+ * @param {Claim[]} claims - An object containing an array of claims to store. Each claim must match the ClaimSchema.
  *
  * @throws {Error} If an error occurs while storing the claims, the error is logged and rethrown.
  *
@@ -55,7 +55,7 @@ interface StoreClaimInput {
  * await storeClaim({ claims });
  * ```
  * */
-export const storeClaim = async ({ claims }: StoreClaimInput) => {
+export const storeClaim = async (claims: Claim[]) => {
   if (!claims || claims.length === 0) {
     console.debug("[StoreClaim] No claims to store");
     return;
