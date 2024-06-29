@@ -10,8 +10,6 @@ import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 import { faker } from "@faker-js/faker";
 import { cleanupSupabase } from "./setup-env";
-import { parseEventLogs } from "viem";
-import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 
 vi.mock("../src/clients/evmClient", () => {
   return {

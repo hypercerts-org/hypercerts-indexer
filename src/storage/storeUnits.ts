@@ -41,8 +41,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
     `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
   );
 
-  console.log("transfers", transfers);
-
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
@@ -56,9 +54,6 @@ export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
 
     const claimTokenId = transfer.claim_id.toString();
     let claimId = claimIds[claimTokenId];
-
-    console.log("fromToken at start", fromToken);
-    console.log("toToken at start", toToken);
 
     if (!claimId) {
       try {

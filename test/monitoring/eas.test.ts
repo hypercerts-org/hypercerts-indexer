@@ -36,6 +36,7 @@ describe("getAttestationsForSchema", () => {
       async () =>
         await getAttestationsForSchema({
           schema: { uid: "0x123" },
+          lastBlockIndexed: 0n,
           batchSize: 100n,
         }),
     ).rejects.toThrowError();
@@ -51,6 +52,7 @@ describe("getAttestationsForSchema", () => {
       async () =>
         await getAttestationsForSchema({
           schema: { uid: "0x123" },
+          lastBlockIndexed: 0n,
           batchSize: 100n,
         }),
     ).rejects.toThrowError();
@@ -62,7 +64,7 @@ describe("getAttestationsForSchema", () => {
       easAddress: "0xc2679fbd37d54388ce493f1db75320d236e1815e",
     });
 
-    getBlockNumberSpy.resolves(5957292n);
+    getBlockNumberSpy.resolves(5957293n);
     createEventFilterSpy.resolves(mockFilter);
     getFilterLogsSpy.resolves(mockLogs);
 
@@ -70,13 +72,14 @@ describe("getAttestationsForSchema", () => {
       schema: {
         uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
       },
+      lastBlockIndexed: 0n,
       batchSize: 100n,
     });
 
     expect(result).toEqual({
       logs: mockLogs,
       fromBlock: 5957292n,
-      toBlock: 5957292n,
+      toBlock: 5957293n,
     });
   });
 
@@ -94,6 +97,7 @@ describe("getAttestationsForSchema", () => {
           schema: {
             uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
           },
+          lastBlockIndexed: 0n,
           batchSize: 100n,
         }),
     ).rejects.toThrowError();
@@ -105,7 +109,7 @@ describe("getAttestationsForSchema", () => {
       easAddress: "0xc2679fbd37d54388ce493f1db75320d236e1815e",
     });
 
-    getBlockNumberSpy.resolves(5957292n);
+    getBlockNumberSpy.resolves(5957293n);
     createEventFilterSpy.throws();
 
     await expect(
@@ -114,6 +118,7 @@ describe("getAttestationsForSchema", () => {
           schema: {
             uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
           },
+          lastBlockIndexed: 0n,
           batchSize: 100n,
         }),
     ).rejects.toThrowError();
@@ -125,7 +130,7 @@ describe("getAttestationsForSchema", () => {
       easAddress: "0xc2679fbd37d54388ce493f1db75320d236e1815e",
     });
 
-    getBlockNumberSpy.resolves(5957292n);
+    getBlockNumberSpy.resolves(5957293n);
     createEventFilterSpy.resolves(mockFilter);
     getFilterLogsSpy.throws();
 
@@ -135,6 +140,7 @@ describe("getAttestationsForSchema", () => {
           schema: {
             uid: "0x3c0d0488e4d50455ef511f2c518403d21d35aa671ca30644aa9f7f7bb2516e2f",
           },
+          lastBlockIndexed: 0n,
           batchSize: 100n,
         }),
     ).rejects.toThrowError();

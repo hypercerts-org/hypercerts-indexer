@@ -43,14 +43,17 @@ export const indexBatchValueTransfer = async ({
 
   const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
-      const { last_block_indexed } = contractEvent;
-
       // Get logs in batches
-      const { logs, toBlock } = await getLogsForContractEvents({
-        lastBlockIndexed: last_block_indexed ? BigInt(last_block_indexed) : 0n,
+      const logsFound = await getLogsForContractEvents({
         batchSize,
         contractEvent,
       });
+
+      if (!logsFound) {
+        return;
+      }
+
+      const { logs, toBlock } = logsFound;
 
       if (!logs || logs.length === 0) {
         console.debug(

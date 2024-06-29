@@ -1,8 +1,7 @@
 import { client } from "@/clients/evmClient.js";
 
 interface BlocksToFetchInput {
-  contractCreationBlock: bigint;
-  lastBlockIndexed?: bigint;
+  fromBlock: bigint;
   batchSize: bigint;
 }
 
@@ -31,28 +30,24 @@ interface BlocksToFetchInput {
  * ```
  * */
 export const getBlocksToFetch = async ({
-  contractCreationBlock,
-  lastBlockIndexed,
+  fromBlock,
   batchSize,
 }: BlocksToFetchInput) => {
   try {
     const latestBlock = await client.getBlockNumber();
-    const nextBlock =
-      lastBlockIndexed !== undefined && lastBlockIndexed !== null
-        ? lastBlockIndexed
-        : contractCreationBlock;
-    const _fromBlock =
-      nextBlock > contractCreationBlock ? nextBlock : contractCreationBlock;
-    const _toBlock =
-      _fromBlock + batchSize > latestBlock
-        ? latestBlock
-        : _fromBlock + batchSize;
 
-    if (_fromBlock > _toBlock) {
-      return { fromBlock: _toBlock, toBlock: _toBlock };
+    if (fromBlock >= latestBlock) {
+      console.debug(
+        `[getBlocksToFetch] No blocks to fetch. [fromBlock: ${fromBlock}, latestBlock: ${latestBlock}]`,
+      );
+      return;
     }
 
-    return { fromBlock: _fromBlock, toBlock: _toBlock };
+    const toBlock =
+      fromBlock + batchSize > latestBlock ? latestBlock : fromBlock + batchSize;
+
+    // TODO when fromBlock === toBlock abort indexing cycle
+    return { fromBlock, toBlock };
   } catch (error) {
     console.error(
       `[getBlocksToFetch] Error while fetching latest block number from the EVM client`,

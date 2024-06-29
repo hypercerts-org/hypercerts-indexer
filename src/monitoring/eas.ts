@@ -37,11 +37,16 @@ export const getAttestationsForSchema = async ({
     throw Error(`[GetAttestationForSchema] EAS is not available`);
   }
 
-  const { fromBlock, toBlock } = await getBlocksToFetch({
-    contractCreationBlock: startBlock,
-    lastBlockIndexed,
+  const blocks = await getBlocksToFetch({
+    fromBlock: startBlock > lastBlockIndexed ? startBlock : lastBlockIndexed,
     batchSize,
   });
+
+  if (!blocks) {
+    return;
+  }
+
+  const { fromBlock, toBlock } = blocks;
 
   try {
     console.debug(

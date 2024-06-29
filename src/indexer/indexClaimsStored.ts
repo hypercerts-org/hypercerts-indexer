@@ -42,14 +42,17 @@ export const indexClaimsStoredEvents = async ({
 
   const results = await Promise.all(
     contractsWithEvents.flatMap(async (contractEvent) => {
-      const { last_block_indexed } = contractEvent;
-
       // Get logs in batches
-      const { logs, toBlock } = await getLogsForContractEvents({
-        lastBlockIndexed: last_block_indexed,
+      const logsFound = await getLogsForContractEvents({
         batchSize,
         contractEvent,
       });
+
+      if (!logsFound) {
+        return;
+      }
+
+      const { logs, toBlock } = logsFound;
 
       if (!logs || logs.length === 0) {
         console.debug("[IndexClaimsStored] No logs found for contract event", {
