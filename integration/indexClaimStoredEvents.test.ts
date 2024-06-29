@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
 import { anvilInstance, publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";

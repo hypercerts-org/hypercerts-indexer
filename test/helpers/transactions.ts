@@ -119,41 +119,7 @@ export const submitAttestTransaction = async ({
   schemaUid: string;
   requestData: AttestationRequestData;
 }) => {
-  // /**
-  //  * @dev A struct representing the arguments of the attestation request.
-  //  */
-  // struct AttestationRequestData {
-  //   address recipient; // The recipient of the attestation.
-  //   uint64 expirationTime; // The time when the attestation expires (Unix timestamp).
-  //   bool revocable; // Whether the attestation is revocable.
-  //   bytes32 refUID; // The UID of the related attestation.
-  //   bytes data; // Custom attestation data.
-  //   uint256 value; // An explicit ETH amount to send to the resolver. This is important to prevent accidental user errors.
-  // }
-
-  const encodingSchema = `address, uint64, bool, bytes32, bytes, uint256`;
-
-  // const { request } = await publicClient.simulateContract({
-  //   address: contractAddress,
-  //   abi: easAbi,
-  //   functionName: "attest",
-  //   args: [
-  //     {
-  //       schema: schemaUid as `0x${string}`,
-  //       data: {
-  //         recipient: getAddress(requestData.recipient),
-  //         expirationTime: requestData.expirationTime ?? 0n,
-  //         revocable: requestData.revocable ?? false,
-  //         refUID: 0n,
-  //         data: requestData.data as `0x${string}`,
-  //         value: 0n,
-  //       },
-  //     },
-  //   ],
-  //   account,
-  // });
-  //
-  return await walletClient.writeContract({
+  const { request } = await publicClient.simulateContract({
     address: contractAddress,
     abi: easAbi,
     functionName: "attest",
@@ -173,6 +139,8 @@ export const submitAttestTransaction = async ({
     ],
     account,
   });
+
+  return await walletClient.writeContract(request);
 };
 
 export const submitRegisterSchemaTransaction = async ({
