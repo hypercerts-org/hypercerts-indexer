@@ -99,11 +99,16 @@ export const indexAllowlistSingleClaimMinted = async ({
         : maxEndBlock - lastBlockIndexed;
 
       // Get logs in batches
-      const { logs, toBlock } = await getLogsForContractEvents({
-        lastBlockIndexed,
+      const logsFound = await getLogsForContractEvents({
         batchSize: adjustedBatchSize,
         contractEvent,
       });
+
+      if (!logsFound) {
+        return;
+      }
+
+      const { logs, toBlock } = logsFound;
 
       if (!logs || logs.length === 0) {
         console.debug(

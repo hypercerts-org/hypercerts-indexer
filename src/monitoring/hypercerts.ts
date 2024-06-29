@@ -5,7 +5,6 @@ import { HypercertExchangeAbi } from "@hypercerts-org/contracts";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 
 interface GetLogsForEventInput {
-  lastBlockIndexed?: bigint;
   batchSize: bigint;
   contractEvent: EventToFetch;
 }
@@ -39,15 +38,22 @@ interface GetLogsForEventInput {
  * ```
  * */
 export const getLogsForContractEvents = async ({
-  lastBlockIndexed,
   batchSize,
   contractEvent,
 }: GetLogsForEventInput) => {
-  const { fromBlock, toBlock } = await getBlocksToFetch({
-    contractCreationBlock: contractEvent.start_block,
-    lastBlockIndexed,
+  const blocks = await getBlocksToFetch({
+    fromBlock:
+      contractEvent.last_block_indexed > contractEvent.start_block
+        ? contractEvent.last_block_indexed + 1n
+        : contractEvent.start_block,
     batchSize,
   });
+
+  if (!blocks) {
+    return;
+  }
+
+  const { fromBlock, toBlock } = blocks;
 
   // const from = 6140658n - 1n;
   // const to = 6140658n + 1n;

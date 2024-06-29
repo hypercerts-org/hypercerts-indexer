@@ -46,14 +46,17 @@ export const indexValueTransfer = async ({
 
   const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
-      const { last_block_indexed } = contractEvent;
-
       // Get logs in batches
-      const { logs, toBlock } = await getLogsForContractEvents({
-        lastBlockIndexed: last_block_indexed,
+      const logsFound = await getLogsForContractEvents({
         batchSize,
         contractEvent,
       });
+
+      if (!logsFound) {
+        return;
+      }
+
+      const { logs, toBlock } = logsFound;
 
       if (!logs || logs.length === 0) {
         console.debug(
@@ -105,21 +108,14 @@ export const indexValueTransfer = async ({
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
 
-  if (transfers.length === 0) {
-    await updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
-    });
-    return;
-  }
+  const contract_events = results.flatMap((res) =>
+    res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+  );
 
   // store the claim and fraction tokens
   return await storeUnitTransfer({ transfers }).then(() =>
     updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
+      contract_events,
     }),
   );
 };

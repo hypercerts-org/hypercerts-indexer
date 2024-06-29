@@ -44,6 +44,15 @@ export const indexAttestations = async ({
         batchSize,
       });
 
+      if (!attestedEvents) {
+        console.debug(
+          "[IndexAttestations] No attested events found for supported schema",
+          { supported_schema_id: id, uid },
+        );
+
+        return;
+      }
+
       const { logs, toBlock } = attestedEvents;
 
       if (!logs || logs.length === 0) {

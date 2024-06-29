@@ -47,14 +47,15 @@ export const indexTransferSingleEvents = async ({
 
   const results = await Promise.all(
     contractsWithEvents.map(async (contractEvent) => {
-      const { last_block_indexed } = contractEvent;
-
       // Get logs in batches
       const logsFound = await getLogsForContractEvents({
-        lastBlockIndexed: last_block_indexed,
         batchSize,
         contractEvent,
       });
+
+      if (!logsFound) {
+        return;
+      }
 
       const { logs, toBlock } = logsFound;
 
@@ -115,14 +116,16 @@ export const indexTransferSingleEvents = async ({
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
 
+  const contract_events = results.flatMap((res) =>
+    res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+  );
+
   // store the fraction tokens
   return await storeFractionTransfer({
     transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
+      contract_events,
     }),
   );
 };

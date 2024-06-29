@@ -62,15 +62,17 @@ export const indexTakerBid = async ({
     contractsWithEvents
       .filter((x) => x.contract_slug === "marketplace-contract")
       .map(async (contractEvent) => {
-        const { last_block_indexed } = contractEvent;
-
         // Get logs in batches
-        const { logs, toBlock } = await getLogsForContractEvents({
-          lastBlockIndexed: last_block_indexed,
+        const logsFound = await getLogsForContractEvents({
           batchSize,
           contractEvent,
         });
 
+        if (!logsFound) {
+          return;
+        }
+
+        const { logs, toBlock } = logsFound;
         if (!logs || logs.length === 0) {
           console.debug(" [IndexTakerBid] No logs found for contract event", {
             eventName: contractEvent.event_name,

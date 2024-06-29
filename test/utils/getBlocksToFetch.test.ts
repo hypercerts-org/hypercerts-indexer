@@ -7,8 +7,7 @@ describe("getBlocksToFetch", () => {
   const readSpy = sinon.stub(client, "getBlockNumber");
 
   const defaultInput = {
-    contractCreationBlock: 420n,
-    lastBlockIndexed: 1337n,
+    fromBlock: 1337n,
     batchSize: 100n,
   };
   afterEach(() => {
@@ -30,20 +29,8 @@ describe("getBlocksToFetch", () => {
     readSpy.resolves(1500n);
     const result = await getBlocksToFetch(defaultInput);
     expect(result).toEqual({
-      fromBlock: defaultInput.lastBlockIndexed,
+      fromBlock: defaultInput.fromBlock,
       toBlock: 1437n,
-    });
-  });
-
-  it("returns correct block range when fromBlock is less than contractCreationBlock", async ({
-    expect,
-  }) => {
-    readSpy.resolves(1500n);
-    const input = { ...defaultInput, lastBlockIndexed: 400n };
-    const result = await getBlocksToFetch(input);
-    expect(result).toEqual({
-      fromBlock: defaultInput.contractCreationBlock,
-      toBlock: 520n,
     });
   });
 
@@ -53,16 +40,16 @@ describe("getBlocksToFetch", () => {
     readSpy.resolves(1400n);
     const result = await getBlocksToFetch(defaultInput);
     expect(result).toEqual({
-      fromBlock: defaultInput.lastBlockIndexed,
+      fromBlock: defaultInput.fromBlock,
       toBlock: 1400n,
     });
   });
 
-  it("sets blocks to match when fromBlock is greater than toBlock", async ({
+  it("returns undefined when fromBlock is greater to or equal to than toBlock", async ({
     expect,
   }) => {
     readSpy.resolves(1300n);
     const result = await getBlocksToFetch(defaultInput);
-    expect(result).toEqual({ fromBlock: 1300n, toBlock: 1300n });
+    expect(result).toBeUndefined();
   });
 });

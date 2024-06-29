@@ -56,6 +56,11 @@ interface StoreClaimInput {
  * ```
  * */
 export const storeClaim = async ({ claims }: StoreClaimInput) => {
+  if (!claims || claims.length === 0) {
+    console.debug("[StoreClaim] No claims to store");
+    return;
+  }
+
   const _claims = claims.map((claim) => ({
     ...ClaimSchema.parse(claim),
     value: 1,
