@@ -2,7 +2,6 @@ import { getAttestationsForSchema } from "@/monitoring/eas.js";
 import { decodeAttestationData } from "@/parsing/attestationData.js";
 import { parseAttestedEvent } from "@/parsing/attestedEvent.js";
 
-import { IndexerConfig } from "@/types/types.js";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
 import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
 import { storeAttestations } from "@/storage/storeAttestations.js";
@@ -25,9 +24,7 @@ import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
 
 const defaultConfig = { batchSize: 10000n };
 
-export const indexAttestations = async ({
-  batchSize = defaultConfig.batchSize,
-}: IndexerConfig = defaultConfig) => {
+export const indexAttestations = async ({ logs, contracts_id }: LogParser) => {
   const supportedSchemas = await getSupportedSchemas();
 
   if (!supportedSchemas || supportedSchemas.length === 0) {

@@ -1,7 +1,7 @@
 import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { IndexerConfig } from "@/types/types.js";
-import { storeFractionTransfer } from "@/storage/storeFractionTransfer.js";
+import { storeTransferSingle } from "@/storage/storeTransferSingle";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
@@ -123,7 +123,7 @@ export const indexTransferBatchEvents = async ({
   );
 
   // store the fraction tokens
-  return await storeFractionTransfer({
+  return await storeTransferSingle({
     transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({

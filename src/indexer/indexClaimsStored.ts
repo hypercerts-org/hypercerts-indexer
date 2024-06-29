@@ -3,7 +3,7 @@ import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
-import { Claim, storeClaim } from "@/storage/storeClaim.js";
+import { Claim, storeClaim } from "@/storage/storeClaimStored";
 import _ from "lodash";
 
 const defaultConfig = {

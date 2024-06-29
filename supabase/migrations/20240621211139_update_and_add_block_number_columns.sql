@@ -15,7 +15,8 @@ SELECT halr.id,
        ald.root,
        halr.units,
        claims.hypercert_id,
-       claims.units AS total_units
+       claims.units AS total_units,
+       hal.id as hypercert_allow_lists_id
 FROM (((claims
     JOIN hypercert_allow_lists hal ON ((claims.id = hal.claims_id)))
     JOIN hypercert_allow_list_records halr ON ((hal.id = halr.hypercert_allow_lists_id)))

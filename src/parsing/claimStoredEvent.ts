@@ -2,7 +2,7 @@ import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
-import { ClaimSchema } from "@/storage/storeClaim.js";
+import { ClaimSchema } from "@/storage/storeClaimStored.js";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {

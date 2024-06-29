@@ -21,10 +21,6 @@ export const ClaimSchema = z.object({
 
 export type Claim = z.infer<typeof ClaimSchema>;
 
-interface StoreClaimInput {
-  claims: Claim[];
-}
-
 /**
  * Stores the provided claims in the database.
  *
@@ -55,7 +51,7 @@ interface StoreClaimInput {
  * await storeClaim({ claims });
  * ```
  * */
-export const storeClaim = async (claims: Claim[]) => {
+export const storeClaimStored = async <Claim>(claims: Claim[]) => {
   if (!claims || claims.length === 0) {
     console.debug("[StoreClaim] No claims to store");
     return;

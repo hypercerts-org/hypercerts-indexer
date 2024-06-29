@@ -75,10 +75,7 @@ const processAllowListBatch = async (
         } as Tables<"allow_list_data">;
       }),
     )
-  ).filter(
-    (data): data is Tables<"allow_list_data"> =>
-      data !== null && data !== undefined,
-  );
+  ).filter((data) => data !== null && data !== undefined);
 
   await storeAllowListData({
     allowListData,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { storeClaim } from "../../src/storage/storeClaim";
+import { storeClaim } from "../../src/storage/storeClaimStored";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
 import { supabaseUrl } from "../../src/utils/constants";

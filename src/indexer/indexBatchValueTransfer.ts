@@ -4,7 +4,7 @@ import { getContractEventsForChain } from "@/storage/getContractEventsForChain.j
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { getLogsForContractEvents } from "@/monitoring/hypercerts.js";
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
-import { storeUnitTransfer } from "@/storage/storeUnits.js";
+import { storeUnitTransfer } from "@/storage/storeValueTransfer";
 import _ from "lodash";
 import { parseBatchValueTransfer } from "@/parsing/batchValueTransferEvent.js";
 

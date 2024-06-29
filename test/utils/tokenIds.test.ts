@@ -2,8 +2,8 @@ import { expect, it, describe } from "vitest";
 
 import { isHypercertToken, getHypercertTokenId } from "@/utils/tokenIds.js";
 
-const claimTokenId = 18664487825613474720966097217632486398361600n;
-const fractionTokenId = 18664487825613474720966097217632486398361602n;
+const claimTokenId = 340282366920938463463374607431768211456n;
+const fractionTokenId = 340282366920938463463374607431768211457n;
 
 describe("isClaimTokenId", () => {
   it("should return true for a claim token id", () => {

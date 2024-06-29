@@ -3,8 +3,6 @@ import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import _ from "lodash";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
-import { Tables } from "@/types/database.types.js";
-import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
 import {
   getHighestValue,
   getLowestValue,
@@ -27,24 +25,11 @@ import {
     ```
  */
 
-interface StoreTransferSingle {
-  transfers?: ParsedTransferSingle[];
-}
-
-export const storeFractionTransfer = async ({
-  transfers,
-}: StoreTransferSingle) => {
-  if (!transfers || transfers.length === 0) {
-    console.debug("[StoreTransferSingle] No transfers to store");
-    return;
-  }
-
-  console.debug(
-    `[StoreTransferFraction] Storing ${transfers.length} transfers`,
-  );
-
+export const storeTransferSingle = async <ParsedTransferSingle>(
+  data: ParsedTransferSingle[],
+) => {
   const tokens = await Promise.all(
-    transfers.map(async (transfer) => {
+    data.map(async (transfer) => {
       const { data: token, error: tokenError } = await supabase
         .from("fractions")
         .select("*, token_id::text")
@@ -59,13 +44,7 @@ export const storeFractionTransfer = async ({
         return;
       }
 
-      let data: Partial<Tables<"fractions">> = {};
-      if (token) {
-        data = {
-          // @ts-expect-error supabase return type is incorrect
-          ...token,
-        };
-      }
+      const data = token ?? {};
 
       if (!data?.claims_id) {
         const { data: claim_id, error: claimError } = await supabase.rpc(
@@ -143,9 +122,18 @@ export const storeFractionTransfer = async ({
     `[StoreTransferFraction] Found ${sortedUniqueTokens.length} unique tokens`,
   );
 
-  return await supabase
+  const tokensToStore = sortedUniqueTokens.filter(
+    (token) => token !== undefined && token !== null,
+  );
+
+  if (tokensToStore.length === 0) {
+    console.debug("[StoreTransferFraction] No tokens to store");
+    return;
+  }
+
+  await supabase
     .from("fractions")
-    .upsert(sortedUniqueTokens, {
+    .upsert(tokensToStore, {
       onConflict: "claims_id, token_id",
       ignoreDuplicates: false,
       defaultToNull: false,

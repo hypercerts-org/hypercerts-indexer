@@ -45,7 +45,7 @@ const main = async () => {
       },
       {
         name: "TransferBatch",
-        abi: "event TransferBatch(index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
+        abi: "event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -70,7 +70,7 @@ const main = async () => {
       },
       {
         name: "TakerBid",
-        abi: "event TakerBid(tuple nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
+        abi: "event TakerBid((bytes32 orderHash, uint256 orderNonce, bool isNonceInvalidated) nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
         contract_slug: marketplaceContractSlug,
       },
     ],

@@ -25,26 +25,13 @@ import {
     ```
  */
 
-interface StoreUnitTransfer {
-  transfers?: ParsedValueTransfer[];
-}
-
-export const storeUnitTransfer = async ({ transfers }: StoreUnitTransfer) => {
-  if (!transfers || transfers.length === 0) {
-    console.debug(
-      "[StoreUnitTransfer] No transfer to store or contract ID provided",
-    );
-    return;
-  }
-
-  console.debug(
-    `[StoreUnitTransfer] Storing ${transfers.length} unit transfers`,
-  );
-
+export const storeValueTransfer = async <ParsedValueTransfer>(
+  data: ParsedValueTransfer[],
+) => {
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
-  for (const transfer of transfers) {
+  for (const transfer of data) {
     let fromToken = tokens.find(
       (token) => token.token_id === transfer.from_token_id.toString(),
     );

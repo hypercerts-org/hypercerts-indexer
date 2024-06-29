@@ -1,5 +1,4 @@
 export type IndexerConfig = {
-  eventName?: string;
   batchSize?: bigint;
 };
 

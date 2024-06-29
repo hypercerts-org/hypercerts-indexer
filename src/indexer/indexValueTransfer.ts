@@ -7,7 +7,7 @@ import {
   ParsedValueTransfer,
   parseValueTransfer,
 } from "@/parsing/valueTransferEvent.js";
-import { storeUnitTransfer } from "@/storage/storeUnits.js";
+import { storeUnitTransfer } from "@/storage/storeValueTransfer";
 import _ from "lodash";
 
 /*

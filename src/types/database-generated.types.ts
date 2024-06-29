@@ -369,6 +369,13 @@ export type Database = {
             foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
             columns: ["hypercert_allow_lists_id"]
             isOneToOne: false
+            referencedRelation: "claimable_fractions_with_proofs"
+            referencedColumns: ["hypercert_allow_lists_id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
             referencedRelation: "hypercert_allow_lists"
             referencedColumns: ["id"]
           },
@@ -576,6 +583,7 @@ export type Database = {
         Row: {
           claimed: boolean | null
           entry: number | null
+          hypercert_allow_lists_id: string | null
           hypercert_id: string | null
           id: string | null
           leaf: string | null

@@ -25,6 +25,8 @@ const LeafClaimed = z.object({
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
   leaf: z.string(),
 });
+
+export type LeafClaimed = z.infer<typeof LeafClaimed>;
 /*
  * Helper method to get the tokenID, contract address, minter address and leaf hash from the event. Will return undefined when the event is
  * missing values.

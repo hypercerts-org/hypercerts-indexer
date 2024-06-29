@@ -30,7 +30,6 @@ export const ParsedTransferSingle = z.object({
   from_owner_address: z
     .string()
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-  type: z.enum(["claim", "fraction"]),
   contracts_id: z.string().optional(),
 });
 
@@ -45,10 +44,6 @@ export type ParsedTransferSingle = z.infer<typeof ParsedTransferSingle>;
 export const parseTransferSingle = async (event: unknown) => {
   const { args, blockNumber, address } = TransferSingleEventSchema.parse(event);
 
-  const type: "claim" | "fraction" = isHypercertToken(args.id)
-    ? "claim"
-    : "fraction";
-
   return ParsedTransferSingle.parse({
     contract_address: address,
     token_id: args.id,
@@ -57,6 +52,5 @@ export const parseTransferSingle = async (event: unknown) => {
     value: args.value,
     to_owner_address: args.to,
     from_owner_address: args.from,
-    type,
   });
 };

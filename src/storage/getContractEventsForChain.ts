@@ -2,21 +2,36 @@ import { supabase } from "@/clients/supabaseClient.js";
 import { chainId } from "@/utils/constants.js";
 
 export type ContractEvents = {
-  eventName: string;
+  eventName?: string;
 };
 
 export const getContractEventsForChain = async ({
   eventName,
 }: ContractEvents) => {
   try {
-    const { data } = await supabase
-      .from("contract_events")
-      .select(
-        "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
-      )
-      .eq("contracts.chain_id", chainId)
-      .eq("events.name", eventName)
-      .throwOnError();
+    let data;
+    if (!eventName) {
+      const res = await supabase
+        .from("contract_events")
+        .select(
+          "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
+        )
+        .eq("contracts.chain_id", chainId)
+        .throwOnError();
+
+      data = res.data;
+    } else {
+      const res = await supabase
+        .from("contract_events")
+        .select(
+          "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
+        )
+        .eq("contracts.chain_id", chainId)
+        .eq("events.name", eventName)
+        .throwOnError();
+
+      data = res.data;
+    }
 
     if (!data) {
       console.debug(
