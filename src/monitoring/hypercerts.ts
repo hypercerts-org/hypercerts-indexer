@@ -44,7 +44,7 @@ export const getLogsForContractEvents = async ({
   const blocks = await getBlocksToFetch({
     fromBlock:
       contractEvent.last_block_indexed > contractEvent.start_block
-        ? contractEvent.last_block_indexed
+        ? contractEvent.last_block_indexed + 1n
         : contractEvent.start_block,
     batchSize,
   });

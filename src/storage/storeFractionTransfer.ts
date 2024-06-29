@@ -105,8 +105,6 @@ export const storeFractionTransfer = async ({
         data.claims_id = claim_id;
       }
 
-      console.log("token: ", token);
-
       return {
         ...data,
         fraction_id: `${chainId}-${getAddress(transfer.contract_address)}-${transfer.token_id}`,
@@ -135,8 +133,6 @@ export const storeFractionTransfer = async ({
   );
 
   console.debug(`[StoreTransferFraction] Storing ${tokens.length} tokens`);
-
-  console.log("tokens", tokens);
 
   const sortedUniqueTokens = _(tokens)
     .orderBy(["last_update_block_timestamp"], ["desc"])

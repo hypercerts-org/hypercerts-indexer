@@ -110,13 +110,15 @@ describe("getLogsForContractEvents", () => {
 
     expect(result).toEqual({
       logs: claimStoredEventLog,
-      fromBlock: blockNumber - 3n,
+      fromBlock: blockNumber - 2n,
       toBlock: blockNumber,
     });
   });
 
   it("throws when logs cannot be fetched", async () => {
     const startBlock = 5957292n;
+    const blockNumber = startBlock + 4n;
+    const lastBlockIndexed = startBlock + 2n;
     mocks.getDeployment.mockReturnValue({
       startBlock,
       addresses: {
@@ -124,7 +126,7 @@ describe("getLogsForContractEvents", () => {
       },
     });
 
-    getBlockNumberSpy.resolves(startBlock + 3n);
+    getBlockNumberSpy.resolves(blockNumber);
     //@ts-expect-error createEventFilterSpy is a Sinon spy
     createEventFilterSpy.resolves(claimStoredEventFilter);
     getFilterLogsSpy.throws();
@@ -134,7 +136,7 @@ describe("getLogsForContractEvents", () => {
         batchSize: 100n,
         contractEvent: {
           ...generateEventToFetch({
-            last_block_indexed: startBlock + 2n,
+            last_block_indexed: lastBlockIndexed,
             start_block: startBlock,
           }),
           contract_address:

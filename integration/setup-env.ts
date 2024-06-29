@@ -23,7 +23,7 @@ export const cleanupSupabase = async () => {
 
   const resetLastBlockIndexed = await supabaseAdmin
     .from("contract_events")
-    .upsert({ last_block_indexed: 0 })
+    .update({ last_block_indexed: "0" })
     .not("last_block_indexed", "eq", 0)
     .select();
 

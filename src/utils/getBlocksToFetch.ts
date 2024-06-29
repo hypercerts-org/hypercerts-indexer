@@ -13,8 +13,7 @@ interface BlocksToFetchInput {
  * The to block is calculated as the from block plus the batch size. However, if this exceeds the latest block number, the to block is set to the latest block number.
  *
  * @param {BlocksToFetchInput} { contractCreationBlock, fromBlock, batchSize } - An object containing the contract creation block, the from block, and the batch size.
- * @param {bigint} contractCreationBlock - The block number when the contract was created.
- * @param {bigint} [lastBlockIndexed] - The last block with a succesful indexing cycle. If not provided, it defaults to the contract creation block.
+ * @param {bigint} fromBlock - The block to start indexing from
  * @param {bigint} batchSize - The number of blocks to fetch in each batch.
  *
  * @returns {Promise<{ fromBlock: bigint, toBlock: bigint }>} A promise that resolves to an object containing the from block and the to block for fetching.
@@ -46,7 +45,6 @@ export const getBlocksToFetch = async ({
     const toBlock =
       fromBlock + batchSize > latestBlock ? latestBlock : fromBlock + batchSize;
 
-    // TODO when fromBlock === toBlock abort indexing cycle
     return { fromBlock, toBlock };
   } catch (error) {
     console.error(

@@ -10,6 +10,7 @@ import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 import { faker } from "@faker-js/faker";
 import { cleanupSupabase } from "./setup-env";
+import { ZERO_ADDRESS } from "../src/utils/constants";
 
 vi.mock("../src/clients/evmClient", () => {
   return {
@@ -96,9 +97,7 @@ describe("index unitsTransferred events mint and burn", async () => {
 
     if (!fractionAfterBurn) throw Error("fractionAfterBurn is undefined");
 
-    expect(BigInt(fractionAfterBurn.units as string)).toBe(units);
-    expect(fractionAfterBurn.owner_address).toBe(
-      "0x0000000000000000000000000000000000000000",
-    );
+    expect(BigInt(fractionAfterBurn.units as string)).toBe(0n);
+    expect(fractionAfterBurn.owner_address).toBe(ZERO_ADDRESS);
   });
 });

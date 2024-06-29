@@ -10,6 +10,7 @@ import { indexValueTransfer } from "../src/indexer/indexValueTransfer";
 import { indexTransferSingleEvents } from "../src/indexer/indexFractionTransfers";
 import { faker } from "@faker-js/faker";
 import { cleanupSupabase } from "./setup-env";
+import { ZERO_ADDRESS } from "../src/utils/constants";
 
 vi.mock("../src/clients/evmClient", () => {
   return {
@@ -67,6 +68,7 @@ describe("index unitsTransferred events mint and burn", async () => {
       .eq("owner_address", account);
 
     expect(fractions).toBeDefined();
+    expect(fractions?.length).toBe(1);
 
     if (!fractions) throw Error("fractions is undefined");
 
@@ -96,11 +98,6 @@ describe("index unitsTransferred events mint and burn", async () => {
       eventName: "TransferSingle",
     });
 
-    await indexTransferSingleEvents({
-      batchSize: 1000n,
-      eventName: "TransferSingle",
-    });
-
     await indexValueTransfer({
       batchSize: 1000n,
       eventName: "ValueTransfer",
@@ -112,6 +109,7 @@ describe("index unitsTransferred events mint and burn", async () => {
       .eq("token_id", tokenId)
       .single();
 
+    expect(fractionAfterBurn.owner_address).toBe(ZERO_ADDRESS);
     expect(BigInt(fractionAfterBurn.units as string)).toBe(0n);
   });
 });

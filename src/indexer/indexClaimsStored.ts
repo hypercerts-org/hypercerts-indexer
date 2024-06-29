@@ -61,7 +61,7 @@ export const indexClaimsStoredEvents = async ({
         return {
           contractEventUpdate: {
             ...contractEvent,
-            last_block_indexed: toBlock - 1n,
+            last_block_indexed: toBlock,
           },
         };
       }
@@ -93,7 +93,7 @@ export const indexClaimsStoredEvents = async ({
         claims,
         contractEventUpdate: {
           ...contractEvent,
-          last_block_indexed: toBlock - 1n,
+          last_block_indexed: toBlock,
         },
       };
     }),
@@ -103,9 +103,9 @@ export const indexClaimsStoredEvents = async ({
     .flatMap((result) => (result?.claims ? result.claims : undefined))
     .filter((claim) => claim !== null && claim !== undefined);
 
-  const contractEventUpdates = results.flatMap((result) => [
-    result.contractEventUpdate,
-  ]);
+  const contractEventUpdates = results.flatMap((result) => {
+    return result?.contractEventUpdate ? [result.contractEventUpdate] : [];
+  });
 
   return await storeClaim({
     claims,

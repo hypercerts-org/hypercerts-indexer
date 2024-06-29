@@ -118,23 +118,16 @@ export const indexTransferBatchEvents = async ({
     .flatMap((result) => (result?.transfers ? result.transfers : undefined))
     .filter((transfer) => transfer !== null && transfer !== undefined);
 
-  if (transfers.length === 0) {
-    await updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
-    });
-    return;
-  }
+  const contract_events = results.flatMap((res) =>
+    res?.contractEventUpdate ? [res.contractEventUpdate] : [],
+  );
 
   // store the fraction tokens
   return await storeFractionTransfer({
     transfers,
   }).then(() =>
     updateLastBlockIndexedContractEvents({
-      contract_events: results.flatMap((res) =>
-        res?.contractEventUpdate ? [res.contractEventUpdate] : [],
-      ),
+      contract_events,
     }),
   );
 };
