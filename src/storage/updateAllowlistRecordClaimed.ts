@@ -1,9 +1,9 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { Tables } from "@/types/database.types";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
+import { LeafClaimed } from "@/parsing/leafClaimedEvent";
 
-export const updateAllowlistRecordClaimed = async <LeafClaimed>(
-  data: LeafClaimed[],
-) => {
+export const updateAllowlistRecordClaimed = async (data: LeafClaimed[]) => {
   const records: Tables<"claimable_fractions_with_proofs">[] = [];
 
   for (const { leaf, token_id, creator_address } of data) {

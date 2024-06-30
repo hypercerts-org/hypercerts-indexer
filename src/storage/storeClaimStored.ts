@@ -51,7 +51,7 @@ export type Claim = z.infer<typeof ClaimSchema>;
  * await storeClaim({ claims });
  * ```
  * */
-export const storeClaimStored = async <Claim>(claims: Claim[]) => {
+export const storeClaimStored = async (claims: Claim[]) => {
   if (!claims || claims.length === 0) {
     console.debug("[StoreClaim] No claims to store");
     return;

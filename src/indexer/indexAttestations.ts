@@ -45,10 +45,7 @@ export const indexAttestations = async ({
       });
 
       if (!attestedEvents) {
-        console.debug(
-          "[IndexAttestations] No attested events found for supported schema",
-          { supported_schema_id: id, uid },
-        );
+        console.debug("[IndexAttestations] No attested events found");
 
         return;
       }
@@ -60,15 +57,6 @@ export const indexAttestations = async ({
           "[IndexAttestations] No logs found for supported schema",
           { supported_schema_id: id, uid },
         );
-
-        console.debug(`Storing updated supported schema: `, {
-          supportedSchemas: [
-            {
-              ...supportedSchema,
-              last_block_indexed: toBlock,
-            },
-          ],
-        });
 
         return await storeSupportedSchemas({
           supportedSchemas: [

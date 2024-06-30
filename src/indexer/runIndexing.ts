@@ -1,22 +1,15 @@
 import { IndexerConfig } from "@/types/types.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import { client } from "@/clients/evmClient.js";
-import { getAddress, parseAbi } from "viem";
+import { getAddress, parseAbi, RpcRequestError } from "viem";
 import _ from "lodash";
 import { batchSize } from "@/utils/constants.js";
-import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
-import { processLogs } from "@/indexer/processLogs.js";
-import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
-import { parseTransferSingle } from "@/parsing/transferSingleEvent.js";
-import { storeClaimStored } from "@/storage/storeClaimStored.js";
-import { storeValueTransfer } from "@/storage/storeValueTransfer.js";
-import { storeTransferSingle } from "@/storage/storeTransferSingle.js";
-import { parseLeafClaimedEvent } from "@/parsing/leafClaimedEvent.js";
-import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed.js";
 import { indexMetadata } from "@/indexer/indexMetadata.js";
 import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas.js";
+import { indexAttestations } from "@/indexer/indexAttestations.js";
+import { processEvent } from "@/indexer/eventHandlers.js";
 
 let isRunning = false;
 
@@ -45,14 +38,22 @@ export const runIndexing = async (
   }
 
   isRunning = true;
+  const currentBlock = await client.getBlockNumber();
 
-  console.log("startBlock", startBlock);
+  // Leave 1 block marging for RPC indexing to catch up
+  if (startBlock >= currentBlock - 1n) {
+    console.debug("[runIndexing] No new blocks to index.");
+    isRunning = false;
+    setTimeout(runIndexing, 2000, delay, startBlock, config);
+    return;
+  }
 
   try {
     // Get all relevant events for the current chain stored in the database
     const contractEvents = await getContractEventsForChain({});
 
     if (!contractEvents || contractEvents.length === 0) {
+      console.debug("[runIndexing] No contract events found.");
       return;
     }
 
@@ -60,6 +61,7 @@ export const runIndexing = async (
 
     const filtersPerContract = await Promise.all(
       Object.entries(eventsPerContract).map(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         async ([contracts_id, contractEvents]) => {
           const eventAbis = contractEvents.map((ce) => ce.abi);
 
@@ -84,6 +86,7 @@ export const runIndexing = async (
     const allContractEvents = contractEvents.flat();
 
     // Parse events per block and per event name
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [blockNumber, logsPerEventName] of Object.entries(
       logsPerBlockPerEventName,
     )) {
@@ -95,59 +98,41 @@ export const runIndexing = async (
       await indexSupportedSchemas();
 
       for (const [eventName, logs] of Object.entries(logsPerEventName)) {
-        if (eventName === "ClaimStored") {
-          const contracts_id = allContractEvents.filter(
-            (ce) => ce.event_name === logs[0].eventName,
-          )[0].contracts_id;
-          await processLogs({
-            logs,
-            contracts_id,
-            parsingMethod: parseClaimStoredEvent,
-            storageMethod: storeClaimStored,
-          });
+        console.debug(
+          `[runIndexing] Processing ${logs.length} ${eventName} events`,
+        );
+
+        const contractEvent = allContractEvents.find(
+          (ce) => ce.event_name === eventName,
+        );
+
+        if (!contractEvent) {
+          console.error(
+            `[runIndexing] Contract event not found for ${eventName}`,
+          );
+          continue;
         }
 
-        if (eventName === "ValueTransfer") {
-          const contracts_id = allContractEvents.filter(
-            (ce) => ce.event_name === logs[0].eventName,
-          )[0].contracts_id;
-          await processLogs({
-            logs,
-            contracts_id,
-            parsingMethod: parseValueTransfer,
-            storageMethod: storeValueTransfer,
-          });
-        }
-
-        if (eventName === "TransferSingle") {
-          const contracts_id = allContractEvents.filter(
-            (ce) => ce.event_name === logs[0].eventName,
-          )[0].contracts_id;
-          await processLogs({
-            logs,
-            contracts_id,
-            parsingMethod: parseTransferSingle,
-            storageMethod: storeTransferSingle,
-          });
-        }
-
-        if (eventName === "LeafClaimed") {
-          const contracts_id = allContractEvents.filter(
-            (ce) => ce.event_name === logs[0].eventName,
-          )[0].contracts_id;
-          await processLogs({
-            logs,
-            contracts_id,
-            parsingMethod: parseLeafClaimedEvent,
-            storageMethod: updateAllowlistRecordClaimed,
-          });
-        }
+        const { contracts_id, events_id } = contractEvent;
+        await processEvent({
+          eventName,
+          logs,
+          contracts_id,
+          events_id,
+          blockNumber: BigInt(blockNumber),
+        });
       }
     }
+
+    await indexAttestations();
 
     setTimeout(runIndexing, delay, delay, startBlock + batchSize, config);
   } catch (error) {
     console.error("[runIndexing] Failed to index events", error);
+    if (error instanceof RpcRequestError) {
+      console.warn(error.stack);
+      setTimeout(runIndexing, delay, delay, startBlock + batchSize, config);
+    }
   } finally {
     isRunning = false;
   }

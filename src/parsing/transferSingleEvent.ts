@@ -1,7 +1,6 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
-import { isHypercertToken } from "@/utils/tokenIds.js";
 import { messages } from "@/utils/validation.js";
 
 const TransferSingleEventSchema = z.object({

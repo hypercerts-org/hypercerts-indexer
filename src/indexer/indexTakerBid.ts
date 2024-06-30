@@ -128,7 +128,6 @@ export const indexTakerBid = async ({
             creation_block_number: bigint;
           } => takerBid !== null && takerBid !== undefined,
         );
-
         return {
           takerBids,
           contractEventUpdate: {

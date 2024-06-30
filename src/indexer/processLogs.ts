@@ -4,7 +4,7 @@ export interface LogParser<T> {
   logs: unkown[];
   contracts_id: string;
   parsingMethod: (event: unknown) => Promise<T>;
-  storageMethod: <T>(data: T[]) => Promise<void>;
+  storageMethod: (data: T[]) => Promise<void>;
 }
 
 export const processLogs = async <T>({
@@ -13,7 +13,6 @@ export const processLogs = async <T>({
   parsingMethod,
   storageMethod,
 }: LogParser<T>) => {
-  console.log(`Processing ${logs.length} logs`);
   // Split logs into chunks
   const logChunks = _.chunk(logs, 10);
 
@@ -35,5 +34,5 @@ export const processLogs = async <T>({
     allParsedLogs = [...allParsedLogs, ...parsedLogs];
   }
 
-  return await storageMethod<T>(allParsedLogs);
+  return await storageMethod(allParsedLogs);
 };

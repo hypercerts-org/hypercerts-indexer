@@ -31,6 +31,8 @@ export const storeValueTransfer = async <ParsedValueTransfer>(
   const tokens: Tables<"fractions">[] = [];
   const claimIds: { [key: string]: string } = {};
 
+  console.debug(`[StoreValueTransfer] Storing ${data.length} value transfers`);
+
   for (const transfer of data) {
     let fromToken = tokens.find(
       (token) => token.token_id === transfer.from_token_id.toString(),
