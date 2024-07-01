@@ -9,6 +9,8 @@ import {
 import { ethers } from "ethers";
 import { alchemyUrl } from "@/clients/evmClient.js";
 import { chainId } from "@/utils/constants.js";
+import { StorageMethod } from "@/indexer/processLogs.js";
+import _ from "lodash";
 
 export const TakerBid = z.object({
   buyer: z.string().refine(isAddress, { message: "Invalid buyer address" }),
@@ -61,18 +63,17 @@ export type TakerBid = z.infer<typeof TakerBid>;
  *
  * await storeTakerBid({ takerBids });
  **/
-export const storeTakerBid = async (data: TakerBid[]) => {
+export const storeTakerBid: StorageMethod<TakerBid> = async ({ data }) => {
+  if (_.isArray(data)) return;
   // Update taker bids in database
   try {
-    const _takerBids = data.map((takerBid) => TakerBid.parse(takerBid));
-    console.debug(`[StoreTakerBid] Storing ${_takerBids.length} taker bids`);
-    const _takerBidForStorage = _takerBids.map((takerBid) => ({
-      ...takerBid,
-      creation_block_timestamp: takerBid.creation_block_timestamp.toString(),
-      creation_block_number: takerBid.creation_block_number.toString(),
-      item_ids: takerBid.item_ids.map((id) => id.toString()),
-      amounts: takerBid.amounts.map((amount) => amount.toString()),
-    }));
+    const _takerBidForStorage = {
+      ...data,
+      creation_block_timestamp: data.creation_block_timestamp.toString(),
+      creation_block_number: data.creation_block_number.toString(),
+      item_ids: data.item_ids.map((id) => id.toString()),
+      amounts: data.amounts.map((amount) => amount.toString()),
+    };
 
     await supabase
       .from("sales")
@@ -90,11 +91,13 @@ export const storeTakerBid = async (data: TakerBid[]) => {
 
   try {
     // Check validity of existing orders for tokenIds
-    const allItemIds = data.flatMap((bid) => bid.item_ids);
-    const { data: allOrders, error } = await supabaseData
+    const { data: matchingOrders, error } = await supabaseData
       .from("marketplace_orders")
       .select("*")
-      .overlaps("itemIds", allItemIds);
+      .overlaps(
+        "itemIds",
+        data.item_ids.map((id) => id.toString()),
+      );
 
     if (error) {
       console.error(
@@ -112,7 +115,7 @@ export const storeTakerBid = async (data: TakerBid[]) => {
     const signatures: string[] = [];
     const orders: Maker[] = [];
 
-    allOrders.forEach((order) => {
+    matchingOrders.forEach((order) => {
       const { signature, chainId: _, id: __, ...orderWithoutSignature } = order;
       signatures.push(signature);
       orders.push(orderWithoutSignature);
@@ -130,7 +133,7 @@ export const storeTakerBid = async (data: TakerBid[]) => {
         );
 
         if (!isValid) {
-          const order = allOrders[index];
+          const order = matchingOrders[index];
           return {
             ...order,
             invalidated: true,

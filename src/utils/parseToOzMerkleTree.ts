@@ -1,6 +1,6 @@
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 
-export const parseToOzMerkleTree = (fetchResult: unknown, uri: string) => {
+export const parseToOzMerkleTree = (fetchResult: unknown, uri?: string) => {
   console.debug(`[parseToOzMerkleTree] Parsing allow list at ${uri}`);
 
   try {

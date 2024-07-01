@@ -1,38 +1,37 @@
-import _ from "lodash";
+export type LogParserContext = {
+  event_name: string;
+  chain_id: bigint | number;
+  events_id: string;
+  contracts_id: string;
+};
+
+export interface ParserMethod<T> {
+  (params: { log: unknown; context: LogParserContext }): Promise<T>;
+}
+
+export interface StorageMethod<T> {
+  (params: { data: T | T[]; context: LogParserContext }): Promise<void>;
+}
 
 export interface LogParser<T> {
-  logs: unkown[];
-  contracts_id: string;
-  parsingMethod: (event: unknown) => Promise<T>;
-  storageMethod: (data: T[]) => Promise<void>;
+  log: unknown;
+  parsingMethod: ParserMethod<T>;
+  storageMethod: StorageMethod<T>;
+  context: LogParserContext;
 }
 
 export const processLogs = async <T>({
-  logs,
-  contracts_id,
+  log,
   parsingMethod,
   storageMethod,
+  context,
 }: LogParser<T>) => {
-  // Split logs into chunks
-  const logChunks = _.chunk(logs, 10);
-
-  // Initialize an empty array to store all claims
-  let allParsedLogs: T[] = [];
-
   // Process each chunk one by one
-  for (const logChunk of logChunks) {
-    const events = await Promise.all(logChunk.map(parsingMethod));
-
-    const parsedLogs = events
-      .filter((event) => event !== null && event !== undefined)
-      .map((log) => ({
-        ...log,
-        contracts_id,
-      }));
-
-    // Add the claims from the current chunk to the allClaims array
-    allParsedLogs = [...allParsedLogs, ...parsedLogs];
+  try {
+    const parsed = await parsingMethod({ log, context });
+    await storageMethod({ data: parsed, context });
+  } catch (error) {
+    // TODO more refined error handling
+    console.error(`[processLogs] Error processing logs: ${error}`);
   }
-
-  return await storageMethod(allParsedLogs);
 };

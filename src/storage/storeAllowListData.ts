@@ -1,27 +1,20 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { Database } from "@/types/database.types.js";
-import _ from "lodash";
+import { StorageMethod } from "@/indexer/processLogs.js";
+import { z } from "zod";
 
-interface StoreAllowListData {
-  allowListData: Database["public"]["Tables"]["allow_list_data"]["Update"][];
-}
+const AllowListData = z.object({
+  uri: z.string(),
+  root: z.string(),
+  data: z.any(),
+});
 
-export const storeAllowListData = async ({
-  allowListData,
-}: StoreAllowListData) => {
-  const uniqueAllowListData = _.uniqBy(allowListData, "uri");
+export type AllowListData = z.infer<typeof AllowListData>;
 
-  if (uniqueAllowListData.length === 0) {
-    console.debug("[StoreAllowListData] No allow list data to store");
-    return;
-  }
-
-  console.debug(
-    `[StoreAllowListData] Storing allow list data: ${uniqueAllowListData.length} entries`,
-  );
-
+export const storeAllowListData: StorageMethod<AllowListData> = async ({
+  data,
+}) => {
   await supabase
     .from("allow_list_data")
-    .upsert(uniqueAllowListData, { onConflict: "uri", ignoreDuplicates: false })
+    .upsert(data, { onConflict: "uri", ignoreDuplicates: false })
     .throwOnError();
 };

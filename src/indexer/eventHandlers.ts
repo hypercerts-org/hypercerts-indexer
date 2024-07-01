@@ -11,6 +11,10 @@ import { parseTakerBidEvent } from "@/parsing/parseTakerBid.js";
 import { processLogs } from "@/indexer/processLogs.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { parseBatchValueTransfer } from "@/parsing/batchValueTransferEvent.js";
+import { storeTransferBatch } from "@/storage/storeTransferBatch.js";
+import { parseTransferBatch } from "@/parsing/transferBatchEvent.js";
+import { storeBatchValueTransfer } from "@/storage/storeBatchValueTransfer.js";
+import { chainId } from "@/utils/constants.js";
 
 export const eventHandlers = {
   ClaimStored: {
@@ -21,9 +25,13 @@ export const eventHandlers = {
     parsingMethod: parseValueTransfer,
     storageMethod: storeValueTransfer,
   },
-  TransferBatch: {
+  BatchValueTransfer: {
     parsingMethod: parseBatchValueTransfer,
-    storageMethod: storeTransferSingle,
+    storageMethod: storeBatchValueTransfer,
+  },
+  TransferBatch: {
+    parsingMethod: parseTransferBatch,
+    storageMethod: storeTransferBatch,
   },
   TransferSingle: {
     parsingMethod: parseTransferSingle,
@@ -41,7 +49,7 @@ export const eventHandlers = {
 
 export interface ProcessEventParams {
   eventName: string;
-  logs: unknown[];
+  log: unknown;
   contracts_id: string;
   events_id: string;
   blockNumber: bigint;
@@ -49,7 +57,7 @@ export interface ProcessEventParams {
 
 export const processEvent = async ({
   eventName,
-  logs,
+  log,
   contracts_id,
   events_id,
   blockNumber,
@@ -62,10 +70,15 @@ export const processEvent = async ({
 
   const { parsingMethod, storageMethod } = handler;
   await processLogs({
-    logs,
-    contracts_id,
+    log,
     parsingMethod,
     storageMethod,
+    context: {
+      chain_id: chainId,
+      contracts_id,
+      events_id,
+      event_name: eventName,
+    },
   }).then(() =>
     updateLastBlockIndexedContractEvents({
       contracts_id,

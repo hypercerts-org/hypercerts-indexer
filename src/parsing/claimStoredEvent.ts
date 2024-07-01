@@ -2,7 +2,8 @@ import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
-import { ClaimSchema } from "@/storage/storeClaimStored.js";
+import { Claim, ClaimSchema } from "@/storage/storeClaimStored.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {
@@ -26,9 +27,12 @@ export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  * @returns {Promise<Claim>} A promise that resolves to an object containing the parsed event data.
  * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
-export const parseClaimStoredEvent = async (event: unknown) => {
+export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
+  log,
+  context,
+}) => {
   const { args, address, transactionHash, blockNumber } =
-    ClaimStoredEventSchema.parse(event);
+    ClaimStoredEventSchema.parse(log);
 
   try {
     const transaction = await client.getTransaction({
@@ -36,6 +40,7 @@ export const parseClaimStoredEvent = async (event: unknown) => {
     });
 
     return ClaimSchema.parse({
+      contracts_id: context.contracts_id,
       owner_address: "0x0000000000000000000000000000000000000000",
       creator_address: transaction.from,
       token_id: args.claimID,

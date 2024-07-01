@@ -61,7 +61,7 @@ export const decodeAttestationData = ({
   schema: Pick<Tables<"supported_schemas">, "schema" | "id">;
 }) => {
   if (!schema.schema) {
-    console.error("[DecodeAttestationData] Schema is missing", schema);
+    console.debug("[DecodeAttestationData] Schema is missing", schema);
     return;
   }
 

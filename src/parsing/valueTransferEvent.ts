@@ -2,6 +2,7 @@ import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 const ValueTransferEventSchema = z.object({
   address: z.string().refine(isAddress),
@@ -37,8 +38,10 @@ export type ParsedValueTransfer = z.infer<typeof ParsedValueTransfer>;
  *
  * @param event - The event object.
  * */
-export const parseValueTransfer = async (event: unknown) => {
-  const { args, blockNumber, address } = ValueTransferEventSchema.parse(event);
+export const parseValueTransfer: ParserMethod<ParsedValueTransfer> = async ({
+  log,
+}) => {
+  const { args, blockNumber, address } = ValueTransferEventSchema.parse(log);
 
   return ParsedValueTransfer.parse({
     claim_id: args.claimID,

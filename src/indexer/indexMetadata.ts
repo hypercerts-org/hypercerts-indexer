@@ -2,6 +2,7 @@ import { IndexerConfig } from "@/types/types.js";
 import { getMissingMetadataUris } from "@/storage/getMissingMetadataUris.js";
 import { storeMetadata } from "@/storage/storeMetadata.js";
 import { fetchMetadataFromUri } from "@/fetching/fetchMetadataFromUri.js";
+import _ from "lodash";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -30,17 +31,13 @@ export const indexMetadata = async ({
     return;
   }
 
-  const _size = Number(batchSize);
-
   console.debug(
     `[IndexMetadata] Processing ${missingUris.length} metadata URIs`,
   );
 
-  // Process metadata in batches
-  for (let i = 0; i < missingUris.length; i += _size) {
-    const batch = missingUris.slice(i, i + _size);
-
-    await processMetadataBatch(batch);
+  const logChunks = _.chunk(missingUris, Number(batchSize));
+  for (const chunk of logChunks) {
+    await processMetadataBatch(chunk);
   }
 };
 

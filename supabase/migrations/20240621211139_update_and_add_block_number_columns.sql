@@ -31,12 +31,6 @@ SELECT hal.id AS hypercert_allow_list_id,
 FROM (hypercert_allow_lists hal
     JOIN claims c ON ((c.id = hal.claims_id)));
 
-DROP FUNCTION transfer_fractions_batch(p_transfers transfer_fractions_type[]);
-DROP FUNCTION transfer_units_batch(p_transfers transfer_units_type[]);
-
-DROP TYPE transfer_fractions_type;
-DROP TYPE transfer_units_type;
-
 
 
 

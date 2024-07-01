@@ -7,6 +7,7 @@ import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { chainId } from "@/utils/constants.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.
@@ -74,11 +75,11 @@ const TakerBidEventSchema = z.object({
 
 export type TakerBidEvent = z.infer<typeof TakerBidEventSchema>;
 
-export const parseTakerBidEvent = async (event: unknown) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
   const { addresses } = getDeployment();
 
   try {
-    const bid = TakerBidEventSchema.parse(event);
+    const bid = TakerBidEventSchema.parse(log);
 
     // parse logs to get claimID, contractAddress and cid
     const transactionLogs = await client

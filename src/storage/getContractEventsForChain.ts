@@ -5,44 +5,30 @@ export type ContractEvents = {
   eventName?: string;
 };
 
-export const getContractEventsForChain = async ({
-  eventName,
-}: ContractEvents) => {
+export const getContractEventsForChain = async () => {
   try {
-    let data;
-    if (!eventName) {
-      const res = await supabase
-        .from("contract_events")
-        .select(
-          "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
-        )
-        .eq("contracts.chain_id", chainId)
-        .throwOnError();
+    const res = await supabase
+      .from("contract_events")
+      .select(
+        "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
+      )
+      .eq("contracts.chain_id", chainId)
+      .throwOnError();
 
-      data = res.data;
-    } else {
-      const res = await supabase
-        .from("contract_events")
-        .select(
-          "contract:contracts!inner(id,contract_address,start_block,contract_slug),event:events!inner(id,name,abi),last_block_indexed",
-        )
-        .eq("contracts.chain_id", chainId)
-        .eq("events.name", eventName)
-        .throwOnError();
-
-      data = res.data;
+    if (!res) {
+      console.debug(
+        `[GetContractEvents] No contract events found for chain ${chainId}`,
+      );
     }
+
+    const { data } = res;
 
     if (!data) {
       console.debug(
-        `[GetContractEvents] No contract events found for ${eventName} on chain ${chainId}`,
+        `[GetContractEvents] No contract events found for chain ${chainId}`,
       );
       return;
     }
-
-    console.debug(
-      `[GetContractEvents] Found ${data.length} contract events for ${eventName} on chain ${chainId}`,
-    );
 
     return data.map((contractEvent) => ({
       // @ts-expect-error incorrect typing as array
@@ -72,7 +58,7 @@ export const getContractEventsForChain = async ({
     }));
   } catch (error) {
     console.error(
-      `[GetContractEvents] Error while fetching supported contracts for ${eventName} on chain ${chainId}`,
+      `[GetContractEvents] Error while fetching contract events for chain ${chainId}`,
       error,
     );
     throw error;

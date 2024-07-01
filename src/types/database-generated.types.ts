@@ -693,28 +693,6 @@ export type Database = {
           data: Json
         }[]
       }
-      store_allow_list_records: {
-        Args: {
-          _claims_id: string
-          _allow_list_data_id: string
-          _records: Json[]
-        }
-        Returns: undefined
-      }
-      store_fraction: {
-        Args: {
-          _fractions: Database["public"]["CompositeTypes"]["fraction_type"][]
-        }
-        Returns: {
-          fraction_id: string
-        }[]
-      }
-      store_hypercert_allow_list_roots: {
-        Args: {
-          p_hc_allow_list_roots: Database["public"]["CompositeTypes"]["hc_allow_list_root_type"][]
-        }
-        Returns: undefined
-      }
     }
     Enums: {
       [_ in never]: never
@@ -732,6 +710,13 @@ export type Database = {
         contract_id: string | null
         token_id: number | null
         root: string | null
+      }
+      transfer_units_type: {
+        claim_id: string | null
+        from_token_id: number | null
+        to_token_id: number | null
+        block_timestamp: number | null
+        units_transferred: number | null
       }
     }
   }

@@ -3,6 +3,7 @@ import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 const LeafClaimedSchema = z.object({
   address: z.string().refine(isAddress),
@@ -33,9 +34,11 @@ export type LeafClaimed = z.infer<typeof LeafClaimed>;
  *
  * @param event - The event object.
  * */
-export const parseLeafClaimedEvent = async (event: unknown) => {
+export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
+  log,
+}) => {
   const { args, blockNumber, address, transactionHash } =
-    LeafClaimedSchema.parse(event);
+    LeafClaimedSchema.parse(log);
 
   const transaction = await client.getTransaction({
     hash: transactionHash,
