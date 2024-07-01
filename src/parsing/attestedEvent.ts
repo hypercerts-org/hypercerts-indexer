@@ -1,5 +1,4 @@
 import { isAddress } from "viem";
-import { Tables } from "@/types/database.types.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
@@ -41,16 +40,17 @@ const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
   });
 };
 
-export type ParsedAttestedEvent = Pick<
-  Tables<"attestations">,
-  | "attester"
-  | "recipient"
-  | "uid"
-  | "creation_block_timestamp"
-  | "creation_block_number"
-  | "last_block_update_number"
-  | "last_block_update_timestamp"
->;
+const ParsedAttestedEventSchema = z.object({
+  recipient: z.string(),
+  attester: z.string(),
+  uid: z.string(),
+  creation_block_number: z.bigint(),
+  creation_block_timestamp: z.bigint(),
+  last_block_update_number: z.bigint(),
+  last_block_update_timestamp: z.bigint(),
+});
+
+export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
 
 /**
  * Parses an attested event to extract the recipient, attester, attestation UID and block timestamp.
@@ -78,14 +78,12 @@ export type ParsedAttestedEvent = Pick<
  * console.log(parsedEvent); // { recipient: "0x5678", attester: "0x9abc", uid: "abcdef", block_timestamp: 1234567890n }
  * ```
  */
-export const parseAttestedEvent = async (
-  log: unknown,
-): Promise<ParsedAttestedEvent> => {
+export const parseAttestedEvent = async (log: unknown) => {
   const { easAddress } = getDeployment();
   const validator = createAttestedEventSchema({ easAddress });
   const { args, blockNumber } = validator.parse(log);
 
-  return {
+  return ParsedAttestedEventSchema.parse({
     recipient: args.recipient,
     attester: args.attester,
     uid: args.uid,
@@ -93,5 +91,5 @@ export const parseAttestedEvent = async (
     creation_block_timestamp: await getBlockTimestamp(blockNumber),
     last_block_update_number: blockNumber,
     last_block_update_timestamp: await getBlockTimestamp(blockNumber),
-  };
+  });
 };

@@ -160,10 +160,6 @@ describe("index TransferSingle events", async () => {
       eventName: "ValueTransfer",
     });
 
-    const contract_events = await supabaseAdmin
-      .from("contract_events")
-      .select("*");
-
     const { data: fraction } = await supabase
       .from("fractions")
       .select("*, token_id::text, units::text")

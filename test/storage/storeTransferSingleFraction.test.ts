@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { storeFractionTransfer } from "../../src/storage/storeFractionTransfer";
+import { storeTransferSingle } from "../../src/storage/storeTransferSingle";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
@@ -39,7 +39,7 @@ describe("storeTransferSingleFraction", () => {
   });
 
   it("should store the fraction tokens", async () => {
-    const response = await storeFractionTransfer({
+    const response = await storeTransferSingle({
       transfers: [transfer],
     });
 
@@ -65,7 +65,7 @@ describe("storeTransferSingleFraction", () => {
       value: transfer.value - 1n,
     };
 
-    await storeFractionTransfer({
+    await storeTransferSingle({
       transfers: [transferOld, transfer],
     });
 
@@ -76,7 +76,7 @@ describe("storeTransferSingleFraction", () => {
     expect(theResult.length).toBe(1);
     expect(theResult[0].value).toBe(transfer.value.toString());
 
-    await storeFractionTransfer({
+    await storeTransferSingle({
       transfers: [transfer, transferOld],
     });
     if (!theResult) {

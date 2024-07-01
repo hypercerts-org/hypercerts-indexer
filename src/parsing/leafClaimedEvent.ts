@@ -3,6 +3,7 @@ import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 const LeafClaimedSchema = z.object({
   address: z.string().refine(isAddress),
@@ -25,15 +26,19 @@ const LeafClaimed = z.object({
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
   leaf: z.string(),
 });
+
+export type LeafClaimed = z.infer<typeof LeafClaimed>;
 /*
  * Helper method to get the tokenID, contract address, minter address and leaf hash from the event. Will return undefined when the event is
  * missing values.
  *
  * @param event - The event object.
  * */
-export const parseLeafClaimedEvent = async (event: unknown) => {
+export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
+  log,
+}) => {
   const { args, blockNumber, address, transactionHash } =
-    LeafClaimedSchema.parse(event);
+    LeafClaimedSchema.parse(log);
 
   const transaction = await client.getTransaction({
     hash: transactionHash,

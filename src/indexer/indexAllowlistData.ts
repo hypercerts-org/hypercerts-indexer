@@ -3,6 +3,8 @@ import { fetchAllowListFromUri } from "@/fetching/fetchAllowlistFromUri.js";
 import { storeAllowListData } from "@/storage/storeAllowListData.js";
 import { Tables } from "@/types/database.types.js";
 import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists.js";
+import _ from "lodash";
+import { LogParserContext } from "@/indexer/processLogs.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -17,13 +19,10 @@ import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists.js";
  * ```
  */
 
-const defaultConfig = {
-  batchSize: 5n,
-};
-
 export const indexAllowListData = async ({
-  batchSize = defaultConfig.batchSize,
-}: IndexerConfig = defaultConfig) => {
+  batchSize,
+  context,
+}: IndexerConfig) => {
   const missingAllowLists = await getUnparsedAllowLists();
 
   if (!missingAllowLists || missingAllowLists.length === 0) {
@@ -31,35 +30,30 @@ export const indexAllowListData = async ({
     return;
   }
 
-  const _size = Number(batchSize);
+  const allowlistChunks = _.chunk(missingAllowLists, Number(batchSize));
 
-  console.debug(
-    `[IndexAllowListData] Processing ${missingAllowLists.length} allow lists`,
-  );
-
-  // Process metadata in batches
-  for (let i = 0; i < missingAllowLists.length; i += _size) {
-    const batch = missingAllowLists.slice(i, i + _size);
-
-    await processAllowListBatch(batch);
+  for (const chunk of allowlistChunks) {
+    await processAllowListBatch(chunk, context);
   }
 };
 
 const processAllowListBatch = async (
   batch: Partial<Tables<"allow_list_data">>[],
+  context: LogParserContext,
 ) => {
   const allowListData = (
     await Promise.all(
       batch.map(async (missingList) => {
-        if (!missingList.uri) {
+        const { id, uri } = missingList;
+        if (!uri) {
           console.error(
-            `[IndexAllowListData] Missing URI for allow list ${missingList.id}`,
+            `[IndexAllowListData] Missing URI for allow list ${id}`,
           );
           return;
         }
 
         const allowList = await fetchAllowListFromUri({
-          uri: missingList.uri,
+          uri,
         });
 
         if (!allowList) {
@@ -67,20 +61,18 @@ const processAllowListBatch = async (
         }
 
         return {
-          id: missingList.id,
-          data: JSON.parse(JSON.stringify(allowList.dump())),
+          id,
+          data: allowList.dump(),
           root: allowList.root,
-          uri: missingList.uri,
+          uri,
           parsed: true,
-        } as Tables<"allow_list_data">;
+        };
       }),
     )
-  ).filter(
-    (data): data is Tables<"allow_list_data"> =>
-      data !== null && data !== undefined,
-  );
+  ).filter((data) => data !== null && data !== undefined);
 
   await storeAllowListData({
-    allowListData,
+    data: allowListData,
+    context,
   });
 };

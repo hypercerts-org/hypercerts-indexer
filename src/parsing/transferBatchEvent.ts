@@ -1,8 +1,8 @@
 import { isAddress } from "viem";
 import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
-import { isHypercertToken } from "@/utils/tokenIds.js";
 import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 const TransferBatchEventSchema = z.object({
   address: z.string().refine(isAddress),
@@ -22,14 +22,13 @@ const TransferBatchEventSchema = z.object({
  *
  * @param event - The event object.
  * */
-export const parseTransferBatch = async (event: unknown) => {
-  const { args, blockNumber, address } = TransferBatchEventSchema.parse(event);
+export const parseTransferBatch: ParserMethod<ParsedTransferSingle[]> = async ({
+  log,
+}) => {
+  const { args, blockNumber, address } = TransferBatchEventSchema.parse(log);
 
   const transfers = await Promise.all(
     args.ids.map(async (id, index) => {
-      const type: "claim" | "fraction" = isHypercertToken(id)
-        ? "claim"
-        : "fraction";
       return {
         contract_address: address,
         block_number: blockNumber,
@@ -38,7 +37,6 @@ export const parseTransferBatch = async (event: unknown) => {
         from_owner_address: args.from,
         token_id: id,
         value: args.values[index],
-        type,
       };
     }),
   );

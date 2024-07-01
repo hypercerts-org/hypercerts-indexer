@@ -72,66 +72,6 @@ create type transfer_units_type as
     units_transferred numeric(78, 0)
 );
 
-CREATE OR REPLACE FUNCTION transfer_units_batch(p_transfers transfer_units_type[])
-    RETURNS void
-    LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    transfer         transfer_units_type;
-    from_token_units numeric(78, 0);
-    to_token_units   numeric(78, 0);
-    p_contracts_id   uuid;
-BEGIN
-    FOR transfer IN SELECT * FROM unnest(p_transfers)
-        LOOP
-            IF transfer.from_token_id != 0 THEN
-                SELECT fractions.units, claims.contracts_id
-                INTO from_token_units, p_contracts_id
-                FROM fractions
-                         JOIN claims ON fractions.claims_id = claims.id
-                WHERE fractions.token_id = transfer.from_token_id
-                  AND claims_id = transfer.claim_id;
-
-                IF NOT FOUND THEN
-                    RAISE 'from_token_id does not exist in fractions table';
-                END IF;
-
-                IF from_token_units >= transfer.units_transferred THEN
-                    UPDATE fractions
-                    SET units                       = units - transfer.units_transferred,
-                        last_block_update_timestamp = transfer.block_timestamp
-                    WHERE claims_id = transfer.claim_id
-                      AND token_id = transfer.from_token_id;
-                ELSE
-                    RAISE 'Insufficient units in from_token_id';
-                END IF;
-            END IF;
-
-            -- Try to fetch the current units of to_token_id
-            SELECT fractions.units
-            INTO to_token_units
-            FROM fractions
-            WHERE fractions.token_id = transfer.to_token_id
-              AND fractions.claims_id = transfer.claim_id;
-
-            -- If to_token_id exists, update its units
-            IF FOUND THEN
-                UPDATE fractions
-                SET units                       = to_token_units + transfer.units_transferred,
-                    last_block_update_timestamp = transfer.block_timestamp
-                WHERE fractions.claims_id = transfer.claim_id
-                  AND fractions.token_id = transfer.to_token_id;
-            ELSE
-                -- If to_token_id does not exist, create it with the provided amount of units
-                INSERT INTO fractions (claims_id, token_id, units, last_block_update_timestamp)
-                VALUES (transfer.claim_id, transfer.to_token_id, transfer.units_transferred,
-                        transfer.block_timestamp);
-            END IF;
-        END LOOP;
-END;
-$$;
-
 CREATE OR REPLACE FUNCTION get_missing_metadata_uris()
     RETURNS TABLE
             (
@@ -161,38 +101,6 @@ CREATE TYPE hc_allow_list_root_type AS
     token_id    numeric(78, 0),
     root        TEXT
 );
-
-CREATE OR REPLACE FUNCTION store_hypercert_allow_list_roots(p_hc_allow_list_roots hc_allow_list_root_type[])
-    RETURNS VOID AS
-$$
-DECLARE
-    input    hc_allow_list_root_type;
-    claim_id UUID;
-BEGIN
-    FOREACH input IN ARRAY p_hc_allow_list_roots
-        LOOP
-            -- Fetch the hypercert_token_id
-            SELECT id
-            INTO claim_id
-
-            FROM claims
-            WHERE contracts_id = input.contract_id
-              AND token_id = input.token_id;
-
-            -- If hypercert_token_id is not found, insert a new one
-            IF NOT FOUND THEN
-                INSERT INTO claims (contracts_id, token_id)
-                VALUES (input.contract_id, input.token_id)
-                RETURNING id INTO claim_id;
-            END IF;
-
-            -- Insert a new row into hypercert_allow_lists
-            INSERT INTO hypercert_allow_lists (claims_id, root)
-            VALUES (claim_id, input.root)
-            ON CONFLICT (claims_id) DO NOTHING;
-        END LOOP;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION insert_allow_list_uri()
     RETURNS TRIGGER AS
@@ -227,54 +135,6 @@ CREATE TYPE fraction_type AS
     owner_address               TEXT,
     value                       NUMERIC(78, 0)
 );
-
-CREATE OR REPLACE FUNCTION store_fraction(
-    _fractions fraction_type[]
-)
-    RETURNS TABLE
-            (
-                fraction_id UUID
-            )
-    LANGUAGE plpgsql
-AS
-$$
-DECLARE
-    _fraction    fraction_type;
-    _fraction_id UUID;
-BEGIN
-    -- Loop over the array to store each record
-    FOR _fraction IN SELECT * FROM unnest(_fractions)
-        LOOP
-            -- Check if an entry for claims_id and token_id exists in fractions
-            IF EXISTS (SELECT 1
-                       FROM fractions
-                       WHERE claims_id = _fraction.claims_id
-                         AND token_id = _fraction.token_id) THEN
-                -- If it exists, update last_block_update_timestamp, owner_address, and value
-                UPDATE fractions
-                SET last_block_update_timestamp = _fraction.last_block_update_timestamp,
-                    owner_address               = _fraction.owner_address,
-                    value                       = _fraction.value
-                WHERE claims_id = _fraction.claims_id
-                  AND token_id = _fraction.token_id
-                RETURNING id INTO _fraction_id;
-            ELSE
-                -- If it does not exist, insert a new row
-                INSERT INTO fractions (claims_id, token_id, creation_block_timestamp, last_block_update_timestamp,
-                                       owner_address, value)
-                VALUES (_fraction.claims_id,
-                        _fraction.token_id,
-                        _fraction.creation_block_timestamp,
-                        _fraction.last_block_update_timestamp,
-                        _fraction.owner_address,
-                        _fraction.value)
-                RETURNING id INTO _fraction_id;
-            END IF;
-            fraction_id := _fraction_id;
-            RETURN NEXT;
-        END LOOP;
-END;
-$$;
 
 create function claim_attestation_count(claims) returns bigint as
 $$

@@ -72,6 +72,9 @@ importers:
       '@sentry/types':
         specifier: ^8.13.0
         version: 8.13.0
+      '@swc-node/register':
+        specifier: ^1.10.0
+        version: 1.10.0(@swc/core@1.5.25)(@swc/types@0.1.9)(typescript@5.5.2)
       '@swc/cli':
         specifier: ^0.3.14
         version: 0.3.14(@swc/core@1.5.25)(chokidar@3.6.0)
@@ -1414,6 +1417,22 @@ packages:
   '@supabase/supabase-js@2.44.2':
     resolution: {integrity: sha512-fouCwL1OxqftOwLNgdDUPlNnFuCnt30nS4kLcnTpe6NYKn1PmjxRRBFmKscgHs6FjWyU+32ZG4uBJ29+/BWiDw==}
 
+  '@swc-node/core@1.13.1':
+    resolution: {integrity: sha512-emB5l2nZsXjUEAuusqjYvWnQMLWZp6K039Mv8aq5SX1rsNM/N7DNhw1i4/DX7AyzNZ0tT+ASWyTvqEURldp5HA==}
+    engines: {node: '>= 10'}
+    peerDependencies:
+      '@swc/core': '>= 1.4.13'
+      '@swc/types': '>= 0.1'
+
+  '@swc-node/register@1.10.0':
+    resolution: {integrity: sha512-38w10C3fWLi5nd1BltCjj75p5JUn35o8Qvp9yg4y59WrOMLqJ2vzjUva/v7E5IxpY7irE9RMovoxI6uF8/QXJg==}
+    peerDependencies:
+      '@swc/core': '>= 1.4.13'
+      typescript: '>= 4.3'
+
+  '@swc-node/sourcemap-support@0.5.0':
+    resolution: {integrity: sha512-fbhjL5G0YvFoWwNhWleuBUfotiX+USiA9oJqu9STFw+Hb0Cgnddn+HVS/K5fI45mn92e8V+cHD2jgFjk4w2T9Q==}
+
   '@swc/cli@0.3.14':
     resolution: {integrity: sha512-0vGqD6FSW67PaZUZABkA+ADKsX7OUY/PwNEz1SbQdCvVk/e4Z36Gwh7mFVBQH9RIsMonTyhV1RHkwkGnEfR3zQ==}
     engines: {node: '>= 16.14.0'}
@@ -2273,6 +2292,9 @@ packages:
 
   color-name@1.1.4:
     resolution: {integrity: sha512-dOy+3AuW3a2wNbZHIuMZpTcgjGuLU/uBL/ubcZF9OXbDo8ff4O8yVp5Bf0efS8uEoYo5q4Fx7dY9OgQGXgAsQA==}
+
+  colorette@2.0.20:
+    resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -3733,6 +3755,10 @@ packages:
   pify@2.3.0:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
     engines: {node: '>=0.10.0'}
+
+  pirates@4.0.6:
+    resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
+    engines: {node: '>= 6'}
 
   piscina@4.5.1:
     resolution: {integrity: sha512-DVhySLPfqAW+uRH9dF0bjA2xEWr5ANLAzkYXx5adSLMFnwssSIVJYhg0FlvgYsnT/khILQJ3WkjqbAlBvt+maw==}
@@ -6340,6 +6366,30 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@swc-node/core@1.13.1(@swc/core@1.5.25)(@swc/types@0.1.9)':
+    dependencies:
+      '@swc/core': 1.5.25
+      '@swc/types': 0.1.9
+
+  '@swc-node/register@1.10.0(@swc/core@1.5.25)(@swc/types@0.1.9)(typescript@5.5.2)':
+    dependencies:
+      '@swc-node/core': 1.13.1(@swc/core@1.5.25)(@swc/types@0.1.9)
+      '@swc-node/sourcemap-support': 0.5.0
+      '@swc/core': 1.5.25
+      colorette: 2.0.20
+      debug: 4.3.5
+      pirates: 4.0.6
+      tslib: 2.6.3
+      typescript: 5.5.2
+    transitivePeerDependencies:
+      - '@swc/types'
+      - supports-color
+
+  '@swc-node/sourcemap-support@0.5.0':
+    dependencies:
+      source-map-support: 0.5.21
+      tslib: 2.6.3
+
   '@swc/cli@0.3.14(@swc/core@1.5.25)(chokidar@3.6.0)':
     dependencies:
       '@mole-inc/bin-wrapper': 8.0.1
@@ -7314,6 +7364,8 @@ snapshots:
   color-name@1.1.3: {}
 
   color-name@1.1.4: {}
+
+  colorette@2.0.20: {}
 
   combined-stream@1.0.8:
     dependencies:
@@ -9045,6 +9097,8 @@ snapshots:
   picomatch@2.3.1: {}
 
   pify@2.3.0: {}
+
+  pirates@4.0.6: {}
 
   piscina@4.5.1:
     optionalDependencies:

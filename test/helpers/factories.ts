@@ -6,7 +6,7 @@ import { SchemaRecord } from "../../src/fetching/fetchSchemaData";
 import { Tables } from "../../src/types/database.types";
 import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
 import { easAttestation } from "./data";
-import { Claim } from "../../src/storage/storeClaim";
+import { Claim } from "../../src/storage/storeClaimStored";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { EventToFetch } from "../../src/types/types";
 

@@ -14,43 +14,21 @@ export type Database = MergeDeep<
           token_id: bigint | string | null;
           root: string | null;
         };
-        fraction_type: {
-          contract_id: string | null;
-          token_id: bigint | string | null;
-          value: bigint | string | null;
-          creation_block_timestamp: bigint | string | null;
-          last_block_update_timestamp: bigint | string | null;
-        };
-        transfer_units_type: {
-          claim_id: string | null;
-          from_token_id: bigint | string | null;
-          to_token_id: bigint | string | null;
-          block_timestamp: number | null;
-          units_transferred: bigint | string | null;
-        };
       };
       Functions: {
-        // get_or_create_claim: {
-        //   Args: {
-        //     p_token_id: bigint | string;
-        //   };
-        //   Returns: {
-        //     token_id: bigint | string;
-        //   };
-        // };
+        get_or_create_claim: {
+          Args: {
+            p_token_id: bigint | string;
+          };
+          Returns: {
+            token_id: bigint | string;
+          };
+        };
         store_claim: {
           Args: {
             p_token_id: bigint | string;
             p_block_timestamp: bigint | number | string;
             p_units: bigint | string;
-          };
-        };
-        upsert_fraction: {
-          Args: {
-            p_token_id: bigint | string;
-            p_creation_block_timestamp: bigint | number | string;
-            p_last_block_update_timestamp: bigint | number | string;
-            p_value: bigint | string;
           };
         };
       };

@@ -1,6 +1,13 @@
-import { isAddress } from "viem";
+import { isAddress, parseEventLogs } from "viem";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { client } from "@/clients/evmClient.js";
+import { HypercertMinterAbi } from "@hypercerts-org/sdk";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { chainId } from "@/utils/constants.js";
+import { TakerBid } from "@/storage/storeTakerBid.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.
@@ -63,15 +70,55 @@ const TakerBidEventSchema = z.object({
     feeAmounts: z.array(z.bigint()),
   }),
   blockNumber: z.bigint(),
+  transactionHash: z.string(),
 });
 
 export type TakerBidEvent = z.infer<typeof TakerBidEventSchema>;
 
-export const parseTakerBidEvent = async (event: unknown) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
+  const { addresses } = getDeployment();
+
   try {
-    return TakerBidEventSchema.parse(event);
+    const bid = TakerBidEventSchema.parse(log);
+
+    // parse logs to get claimID, contractAddress and cid
+    const transactionLogs = await client
+      .getTransactionReceipt({
+        hash: bid.transactionHash as `0x${string}`,
+      })
+      .then((res) => {
+        return res.logs.filter(
+          (log) =>
+            log.address.toLowerCase() ===
+            addresses?.HypercertMinterUUPS?.toLowerCase(),
+        );
+      });
+    const batchValueTransferLog = parseEventLogs({
+      abi: HypercertMinterAbi,
+      logs: transactionLogs,
+      // @ts-expect-error eventName is missing in the type
+    }).find((log) => log.eventName === "BatchValueTransfer");
+
+    // @ts-expect-error args is missing in the type
+    const hypercertId = `${chainId}-${bid.args?.collection}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+
+    const timestamp = await getBlockTimestamp(bid.blockNumber);
+
+    return TakerBid.parse({
+      amounts: bid.args.amounts,
+      seller: bid.args.bidRecipient,
+      buyer: bid.args.bidUser,
+      currency: bid.args.currency,
+      collection: bid.args.collection,
+      item_ids: bid.args.itemIds,
+      strategy_id: bid.args.strategyId,
+      hypercert_id: hypercertId,
+      transaction_hash: bid.transactionHash,
+      creation_block_number: bid.blockNumber,
+      creation_block_timestamp: timestamp,
+    });
   } catch (e) {
     console.error("[parseTakerBidEvent] Error parsing event", e);
-    return;
+    throw e;
   }
 };

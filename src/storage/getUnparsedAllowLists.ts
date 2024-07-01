@@ -4,7 +4,7 @@ export const getUnparsedAllowLists = async () => {
   const { data } = await supabase
     .from("allow_list_data")
     .select()
-    .is("parsed", null);
+    .not("parsed", "is", true);
 
   console.debug(
     `[GetUnparsedAllowLists] Fetched ${data?.length} unparsed allow lists`,
