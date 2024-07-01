@@ -1,5 +1,4 @@
 import { isAddress } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { ParserMethod } from "@/indexer/processLogs.js";
@@ -43,6 +42,7 @@ export type ParsedTransferSingle = z.infer<typeof ParsedTransferSingle>;
  * */
 export const parseTransferSingle: ParserMethod<ParsedTransferSingle> = async ({
   log,
+  context: { block },
 }) => {
   const { args, blockNumber, address } = TransferSingleEventSchema.parse(log);
 
@@ -50,7 +50,7 @@ export const parseTransferSingle: ParserMethod<ParsedTransferSingle> = async ({
     contract_address: address,
     token_id: args.id,
     block_number: blockNumber,
-    block_timestamp: await getBlockTimestamp(blockNumber),
+    block_timestamp: block.timestamp,
     value: args.value,
     to_owner_address: args.to,
     from_owner_address: args.from,

@@ -59,11 +59,6 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
-        name: "AllowlistCreated",
-        abi: "event AllowlistCreated(uint256 tokenID, bytes32 root)",
-        contract_slug: minterContractSlug,
-      },
-      {
         name: "LeafClaimed",
         abi: "event LeafClaimed(uint256 tokenID, bytes32 leaf)",
         contract_slug: minterContractSlug,

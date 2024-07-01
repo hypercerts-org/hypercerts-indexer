@@ -3,7 +3,7 @@ import { getContractEventsForChain } from "@/storage/getContractEventsForChain.j
 import { client } from "@/clients/evmClient.js";
 import { getAddress, parseAbi, RpcRequestError } from "viem";
 import _ from "lodash";
-import { batchSize } from "@/utils/constants.js";
+import { batchSize, chainId } from "@/utils/constants.js";
 import { indexSupportedSchemas } from "@/indexer/indexSupportedSchemas.js";
 import { indexAttestations } from "@/indexer/indexAttestations.js";
 import { processEvent } from "@/indexer/eventHandlers.js";
@@ -38,121 +38,111 @@ export const runIndexing = async (delay: number, config?: IndexerConfig) => {
     // Get all relevant events for the current chain stored in the database
     const contractEvents = await getContractEventsForChain();
 
-    if (!contractEvents || contractEvents.length === 0) {
-      console.debug("[runIndexing] No contract events found.");
+    const eventsPerContract = _.groupBy(contractEvents, "contracts_id");
+
+    if (Object.keys(eventsPerContract).length === 0) {
       return;
     }
 
-    const eventsPerContract = _.groupBy(contractEvents, "contracts_id");
-    const configPerContract: {
-      [key: string]: {
-        fromBlock: bigint;
-        toBlock: bigint;
-        contractAddress: string;
-      };
-    } = {};
+    const parseRequests = await Promise.all(
+      Object.entries(eventsPerContract).map(async ([contracts_id, events]) => {
+        const res = await supabase
+          .from("contracts")
+          .select("*")
+          .eq("id", contracts_id)
+          .single()
+          .throwOnError();
 
-    for (const [contracts_id] of Object.entries(eventsPerContract)) {
-      const res = await supabase
-        .from("contracts")
-        .select("*")
-        .eq("id", contracts_id)
-        .single()
-        .throwOnError();
+        if (!res?.data) return;
 
-      if (!res?.data) continue;
+        const blocks = await getBlocksToFetch({
+          fromBlock: BigInt(res.data.start_block),
+          batchSize,
+        });
 
-      const blocks = await getBlocksToFetch({
-        fromBlock: BigInt(res.data.start_block),
-        batchSize,
-      });
+        if (!blocks) return;
 
-      if (!blocks) continue;
+        const filter = await client.createEventFilter({
+          events: parseAbi(events.map((e) => e.abi)),
+          address: getAddress(res.data.contract_address),
+          ...blocks,
+        });
 
-      configPerContract[contracts_id] = {
-        ...blocks,
-        contractAddress: res.data.contract_address,
-      };
-    }
+        return {
+          ...blocks,
+          contractAddress: getAddress(res.data.contract_address),
+          contracts_id,
+          abi: events.map((e) => e.abi),
+          filter,
+        };
+      }),
+    );
 
-    if (Object.keys(configPerContract).length === 0) {
+    const requests = parseRequests.filter((r) => r !== undefined && r !== null);
+
+    if (requests.length === 0) {
       console.debug("[runIndexing] Nothing to index");
       setTimeout(runIndexing, 3000, delay, config);
       return;
     }
 
-    const filtersPerContract = await Promise.all(
-      Object.entries(eventsPerContract).map(
-        async ([contracts_id, contractEvents]) => {
-          if (!configPerContract[contracts_id]) return;
-          const eventAbis = contractEvents.map((ce) => ce.abi);
-
-          return await client.createEventFilter({
-            events: parseAbi(eventAbis),
-            address: getAddress(
-              configPerContract[contracts_id].contractAddress,
-            ),
-            fromBlock: configPerContract[contracts_id].fromBlock,
-            toBlock: configPerContract[contracts_id].toBlock,
-          });
-        },
-      ),
+    const results = await Promise.all(
+      requests.map(async (request) => {
+        const logs = await client.getFilterLogs({ filter: request.filter });
+        const groupedLogs = _.chain(logs)
+          .groupBy("blockNumber")
+          .mapValues((logs) => _.sortBy(logs, "logIndex"))
+          .value();
+        return { ...request, logs: groupedLogs };
+      }),
     );
-
-    const logsPerFilter = await Promise.all(
-      filtersPerContract.flatMap((filter) =>
-        filter ? client.getFilterLogs({ filter }) : [],
-      ),
-    );
-
-    const logsPerBlockSortedByLogIndex = _(logsPerFilter)
-      .flatten()
-      .groupBy("blockNumber")
-      .mapValues((logs) => _.sortBy(logs, "logIndex"))
-      .value();
-
-    const allContractEvents = contractEvents.flat();
 
     // Parse events per block and per event name
-    for (const [blockNumber, logs] of Object.entries(
-      logsPerBlockSortedByLogIndex,
-    )) {
-      console.info(`[runIndexing] Processing block ${blockNumber}`);
-      for (const log of logs) {
-        const { contracts_id, events_id } =
-          allContractEvents.find((ce) => ce.event_name === log.eventName) || {};
-
-        if (!contracts_id || !events_id) {
-          console.error(
-            `[runIndexing] Contract event not found for ${log.eventName}`,
-          );
-          continue;
-        }
-
-        await processEvent({
-          eventName: log.eventName,
-          log,
-          contracts_id,
-          events_id,
+    for (const { logs } of results) {
+      for (const [blockNumber, events] of Object.entries(logs)) {
+        const block = await client.getBlock({
           blockNumber: BigInt(blockNumber),
         });
-      }
+        console.info(
+          `[runIndexing] Processing ${events.length} for block ${blockNumber}`,
+        );
+        for (const log of events) {
+          const contractEvent = contractEvents?.find(
+            (ce) => ce.event_name === log.eventName,
+          );
 
-      console.info(
-        `[runIndexing] Finished processing block ${blockNumber} with ${logs.length} matching logs.`,
-      );
+          if (!contractEvent) {
+            console.error(`Contract event not found for ${log.eventName}`);
+            continue;
+          }
+
+          await processEvent({
+            log,
+            context: {
+              event_name: log.eventName,
+              chain_id: chainId,
+              contracts_id: contractEvent.contracts_id,
+              events_id: contractEvent.events_id,
+              block,
+            },
+          });
+        }
+
+        console.info(`[runIndexing] Finished processing block ${blockNumber}.`);
+      }
     }
 
-    await indexAttestations();
-    await indexSupportedSchemas();
-
-    for (const [contracts_id, config] of Object.entries(configPerContract)) {
+    for (const { contracts_id, toBlock } of requests) {
       await supabase
         .from("contracts")
-        .update({ start_block: config.toBlock })
+        .update({ start_block: toBlock })
         .eq("id", contracts_id)
         .throwOnError();
     }
+
+    // Indexing of attestations on EAS and supported schema data as well
+    await indexAttestations();
+    await indexSupportedSchemas();
 
     setTimeout(runIndexing, delay, delay, config);
   } catch (error) {

@@ -20,10 +20,7 @@ export const storeAttestations = async ({
   attestations,
 }: StoreAttestations) => {
   const _attestations = attestations.filter(
-    (
-      attestation,
-    ): attestation is Database["public"]["Tables"]["attestations"]["Update"] =>
-      attestation !== null && attestation !== undefined,
+    (attestation) => attestation !== null && attestation !== undefined,
   );
 
   if (!_attestations || _attestations.length === 0) {

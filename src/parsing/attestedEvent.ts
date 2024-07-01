@@ -1,8 +1,8 @@
 import { isAddress } from "viem";
 import { getDeployment } from "@/utils/getDeployment.js";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 
 export const AttestationSchema = z.object({
   uid: z.string(),

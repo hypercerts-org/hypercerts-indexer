@@ -1,7 +1,6 @@
 import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { Claim, ClaimSchema } from "@/storage/storeClaimStored.js";
 import { ParserMethod } from "@/indexer/processLogs.js";
 
@@ -29,7 +28,7 @@ export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  */
 export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   log,
-  context,
+  context: { block, contracts_id },
 }) => {
   const { args, address, transactionHash, blockNumber } =
     ClaimStoredEventSchema.parse(log);
@@ -40,15 +39,15 @@ export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
     });
 
     return ClaimSchema.parse({
-      contracts_id: context.contracts_id,
+      contracts_id: contracts_id,
       owner_address: "0x0000000000000000000000000000000000000000",
       creator_address: transaction.from,
       token_id: args.claimID,
       uri: args.uri,
       creation_block_number: blockNumber,
-      creation_block_timestamp: await getBlockTimestamp(blockNumber),
+      creation_block_timestamp: block.timestamp,
       last_update_block_number: blockNumber,
-      last_update_block_timestamp: await getBlockTimestamp(blockNumber),
+      last_update_block_timestamp: block.timestamp,
       units: args.totalUnits,
     });
   } catch (error) {

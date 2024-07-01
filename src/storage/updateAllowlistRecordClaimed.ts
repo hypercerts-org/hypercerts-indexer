@@ -11,9 +11,9 @@ export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
   const { leaf, token_id, creator_address } = data;
   try {
     // Get an allowlist record for corresponding tokenId and leaf that has not been claimed
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("claimable_fractions_with_proofs")
-      .select("*")
+      .select("*, token_id::text")
       .eq("leaf", leaf)
       .ilike("user_address", creator_address)
       .eq("claimed", false)
@@ -24,7 +24,7 @@ export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
     if (!data) {
       const alreadyClaimedRecord = await supabase
         .from("claimable_fractions_with_proofs")
-        .select("*")
+        .select("*, token_id::text")
         .eq("leaf", leaf)
         .ilike("user_address", creator_address)
         .eq("claimed", true)
@@ -34,16 +34,19 @@ export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
 
       if (alreadyClaimedRecord.data) {
         console.error(
-          "[UpdateAllowlistRecordClaimed] Allowlist record already claimed or not yet indexed",
+          "[UpdateAllowlistRecordClaimed] Allowlist record already claimed",
           alreadyClaimedRecord.data,
         );
+
+        return;
       }
 
-      return;
+      console.error(
+        "[UpdateAllowlistRecordClaimed] Allowlist record not found",
+        data,
+      );
 
-      // throw new Error(
-      //   `Could not find unclaimed allowlist record for tokenId ${token_id}, leaf ${leaf} and userAddress ${creator_address}, ${error?.message}`,
-      // );
+      return;
     }
 
     await supabase

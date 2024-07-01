@@ -11,10 +11,6 @@ import { Tables } from "@/types/database.types.js";
  * @throws {Error} - Throws an error if there is an error in the fetch operation.
  */
 export const getSupportedSchemas = async () => {
-  console.debug(
-    `[GetSupportedSchema] Fetching supported EAS schema for chain ID ${chainId}`,
-  );
-
   try {
     const { data } = await supabase
       .from("supported_schemas")
