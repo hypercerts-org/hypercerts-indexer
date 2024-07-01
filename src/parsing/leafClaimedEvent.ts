@@ -1,5 +1,4 @@
 import { isAddress, isHex } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
@@ -36,9 +35,9 @@ export type LeafClaimed = z.infer<typeof LeafClaimed>;
  * */
 export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
   log,
+  context: { block },
 }) => {
-  const { args, blockNumber, address, transactionHash } =
-    LeafClaimedSchema.parse(log);
+  const { args, address, transactionHash } = LeafClaimedSchema.parse(log);
 
   const transaction = await client.getTransaction({
     hash: transactionHash,
@@ -47,7 +46,7 @@ export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
   return LeafClaimed.parse({
     creator_address: transaction.from,
     token_id: args.tokenID,
-    creation_block_timestamp: await getBlockTimestamp(blockNumber),
+    creation_block_timestamp: block.timestamp,
     contract_address: address,
     leaf: args.leaf,
   });

@@ -3,37 +3,37 @@ import { z } from "zod";
 
 const claimData: z.ZodType<HypercertClaimdata> = z.object({
   impact_scope: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.string()),
-    excludes: z.array(z.string()),
-    display_value: z.string(),
+    excludes: z.array(z.string()).optional(),
+    display_value: z.string().optional(),
   }),
   work_scope: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.string()),
-    excludes: z.array(z.string()),
-    display_value: z.string(),
+    excludes: z.array(z.string()).optional(),
+    display_value: z.string().optional(),
   }),
   work_timeframe: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.number()),
-    display_value: z.string(),
+    display_value: z.string().optional(),
   }),
   impact_timeframe: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.number()),
-    display_value: z.string(),
+    display_value: z.string().optional(),
   }),
   contributors: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.string()),
-    display_value: z.string(),
+    display_value: z.string().optional(),
   }),
   rights: z.object({
-    name: z.string(),
+    name: z.string().optional(),
     value: z.array(z.string()),
-    excludes: z.array(z.string()),
-    display_value: z.string(),
+    excludes: z.array(z.string()).optional(),
+    display_value: z.string().optional(),
   }),
 });
 

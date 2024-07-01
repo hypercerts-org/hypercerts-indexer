@@ -1,10 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { chainId } from "@/utils/constants.js";
 
-export type ContractEvents = {
-  eventName?: string;
-};
-
 export const getContractEventsForChain = async () => {
   try {
     const res = await supabase
@@ -14,12 +10,6 @@ export const getContractEventsForChain = async () => {
       )
       .eq("contracts.chain_id", chainId)
       .throwOnError();
-
-    if (!res) {
-      console.debug(
-        `[GetContractEvents] No contract events found for chain ${chainId}`,
-      );
-    }
 
     const { data } = res;
 

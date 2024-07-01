@@ -3,8 +3,7 @@ import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
 import { faker } from "@faker-js/faker";
 import { client } from "@/clients/evmClient.js";
 import { getAddress, GetTransactionReturnType } from "viem";
-import { generateClaimStoredEvent } from "../helpers/factories";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { generateClaimStoredEvent } from "../helpers/factories.js";
 
 vi.mock("../../src/utils/getBlockTimestamp.js");
 
@@ -20,8 +19,6 @@ describe("claimStoredEvent", {}, () => {
     } as GetTransactionReturnType);
 
     vi.spyOn(client, "readContract").mockResolvedValue(owner);
-
-    vi.mocked(getBlockTimestamp).mockResolvedValue(42n);
 
     const parsed = await parseClaimStoredEvent(mockEvent);
 

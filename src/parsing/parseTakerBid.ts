@@ -3,7 +3,6 @@ import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { client } from "@/clients/evmClient.js";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { chainId } from "@/utils/constants.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
@@ -75,7 +74,10 @@ const TakerBidEventSchema = z.object({
 
 export type TakerBidEvent = z.infer<typeof TakerBidEventSchema>;
 
-export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
+  log,
+  context: { block },
+}) => {
   const { addresses } = getDeployment();
 
   try {
@@ -102,8 +104,6 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
     // @ts-expect-error args is missing in the type
     const hypercertId = `${chainId}-${bid.args?.collection}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
-    const timestamp = await getBlockTimestamp(bid.blockNumber);
-
     return TakerBid.parse({
       amounts: bid.args.amounts,
       seller: bid.args.bidRecipient,
@@ -115,7 +115,7 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
       hypercert_id: hypercertId,
       transaction_hash: bid.transactionHash,
       creation_block_number: bid.blockNumber,
-      creation_block_timestamp: timestamp,
+      creation_block_timestamp: block.timestamp,
     });
   } catch (e) {
     console.error("[parseTakerBidEvent] Error parsing event", e);

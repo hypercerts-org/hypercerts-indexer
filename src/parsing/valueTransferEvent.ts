@@ -1,5 +1,4 @@
 import { isAddress } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { ParserMethod } from "@/indexer/processLogs.js";
@@ -40,6 +39,7 @@ export type ParsedValueTransfer = z.infer<typeof ParsedValueTransfer>;
  * */
 export const parseValueTransfer: ParserMethod<ParsedValueTransfer> = async ({
   log,
+  context: { block },
 }) => {
   const { args, blockNumber, address } = ValueTransferEventSchema.parse(log);
 
@@ -49,9 +49,9 @@ export const parseValueTransfer: ParserMethod<ParsedValueTransfer> = async ({
     from_token_id: args.fromTokenID,
     to_token_id: args.toTokenID,
     creation_block_number: blockNumber,
-    creation_block_timestamp: await getBlockTimestamp(blockNumber),
+    creation_block_timestamp: block.timestamp,
     last_update_block_number: blockNumber,
-    last_update_block_timestamp: await getBlockTimestamp(blockNumber),
+    last_update_block_timestamp: block.timestamp,
     units: args.value,
   });
 };
