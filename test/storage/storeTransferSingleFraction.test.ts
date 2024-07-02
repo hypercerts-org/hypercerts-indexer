@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { storeFractionTransfer } from "../../src/storage/storeFractionTransfer";
+import { storeTransferSingle } from "../../src/storage/storeTransferSingle";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
@@ -21,18 +21,25 @@ describe("storeTransferSingleFraction", () => {
 
   beforeEach(() => {
     server.use(
-      http.post(`${supabaseUrl}/*`, async ({ request }) => {
-        const data = await request.json();
+      http.get(`${supabaseUrl}/*`, async () => {
         return HttpResponse.json({
           id: faker.string.uuid(),
           claims_id: faker.string.uuid(),
+          token_id: transfer.token_id.toString(),
+        });
+      }),
+      http.post(`${supabaseUrl}/*`, async () => {
+        return HttpResponse.json({
+          id: faker.string.uuid(),
+          claims_id: faker.string.uuid(),
+          token_id: transfer.token_id.toString(),
         });
       }),
     );
   });
 
   it("should store the fraction tokens", async () => {
-    const response = await storeFractionTransfer({
+    const response = await storeTransferSingle({
       transfers: [transfer],
     });
 
@@ -46,7 +53,6 @@ describe("storeTransferSingleFraction", () => {
     server.use(
       http.post(`${supabaseUrl}/*`, async ({ request }) => {
         const data = await request.json();
-        console.log("data", data);
         // @ts-ignore
         theResult = data._fractions;
         return HttpResponse.json(data);
@@ -59,7 +65,7 @@ describe("storeTransferSingleFraction", () => {
       value: transfer.value - 1n,
     };
 
-    await storeFractionTransfer({
+    await storeTransferSingle({
       transfers: [transferOld, transfer],
     });
 
@@ -70,7 +76,7 @@ describe("storeTransferSingleFraction", () => {
     expect(theResult.length).toBe(1);
     expect(theResult[0].value).toBe(transfer.value.toString());
 
-    await storeFractionTransfer({
+    await storeTransferSingle({
       transfers: [transfer, transferOld],
     });
     if (!theResult) {

@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
-import { NewAllowList } from "@/types/types.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 /**
  * Parses an event object to extract the tokenID and root.
@@ -28,7 +28,7 @@ import { messages } from "@/utils/validation.js";
  * console.log(parsedEvent); // { token_id: 5678n, root: "0x5678" }
  * */
 
-const AllowListCreatedEventSchema = z.object({
+const AllowListCreatedEvent = z.object({
   address: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
   args: z.object({
     tokenID: z.bigint(),
@@ -37,20 +37,18 @@ const AllowListCreatedEventSchema = z.object({
   blockNumber: z.bigint(),
 });
 
-export type AllowListCreatedEvent = z.infer<typeof AllowListCreatedEventSchema>;
+export type AllowListCreatedEvent = z.infer<typeof AllowListCreatedEvent>;
 
-export const parseAllowListCreated = async (event: unknown) => {
+export const parseAllowListCreated: ParserMethod<any> = async (
+  event: unknown,
+) => {
   try {
-    AllowListCreatedEventSchema.parse(event);
+    const { args } = AllowListCreatedEvent.parse(event);
 
-    const { args } = event as AllowListCreatedEvent;
-
-    const row: Partial<NewAllowList> = {
+    return {
       token_id: args.tokenID,
       root: args.root,
     };
-
-    return row;
   } catch (e) {
     console.error("[parseAllowListCreated] Error parsing event", e);
     return;

@@ -5,7 +5,6 @@ import { HypercertExchangeAbi } from "@hypercerts-org/contracts";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 
 interface GetLogsForEventInput {
-  lastBlockIndexed?: bigint;
   batchSize: bigint;
   contractEvent: EventToFetch;
 }
@@ -39,15 +38,22 @@ interface GetLogsForEventInput {
  * ```
  * */
 export const getLogsForContractEvents = async ({
-  lastBlockIndexed,
   batchSize,
   contractEvent,
 }: GetLogsForEventInput) => {
-  const { fromBlock: from, toBlock: to } = await getBlocksToFetch({
-    contractCreationBlock: contractEvent.start_block,
-    lastBlockIndexed,
+  const blocks = await getBlocksToFetch({
+    fromBlock:
+      contractEvent.last_block_indexed > contractEvent.start_block
+        ? contractEvent.last_block_indexed + 1n
+        : contractEvent.start_block,
     batchSize,
   });
+
+  if (!blocks) {
+    return;
+  }
+
+  const { fromBlock, toBlock } = blocks;
 
   // const from = 6140658n - 1n;
   // const to = 6140658n + 1n;
@@ -69,18 +75,18 @@ export const getLogsForContractEvents = async ({
     abi: getAbiByContractSlug(contractEvent.contract_slug),
     address: contractEvent.contract_address as `0x${string}`,
     eventName: contractEvent.event_name,
-    fromBlock: from,
-    toBlock: to,
+    fromBlock,
+    toBlock,
   });
 
   try {
     console.debug(
-      `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${from} to ${to}`,
+      `[GetLogsForContractEvents] Fetching ${contractEvent.event_name} logs from ${fromBlock} to ${toBlock}`,
     );
 
     const logs = await client.getFilterLogs({ filter });
 
-    return { logs, fromBlock: from, toBlock: to };
+    return { logs, fromBlock, toBlock };
   } catch (error) {
     console.error(
       `[GetLogsForContractEvents] Error while fetching logs for contract event ${contractEvent.event_name} on contract ${contractEvent.contract_address}`,

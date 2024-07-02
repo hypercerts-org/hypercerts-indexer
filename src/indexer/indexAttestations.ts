@@ -7,6 +7,7 @@ import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
 import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
 import { storeAttestations } from "@/storage/storeAttestations.js";
 import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
+import { batchSize } from "@/utils/constants.js";
 
 /**
  * Indexes attestation logs for all supported schemas. Attestation logs are fetched from the chain and parsed into attestation data.
@@ -23,11 +24,7 @@ import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
  * ```
  */
 
-const defaultConfig = { batchSize: 10000n };
-
-export const indexAttestations = async ({
-  batchSize = defaultConfig.batchSize,
-}: IndexerConfig = defaultConfig) => {
+export const indexAttestations = async (config?: IndexerConfig) => {
   const supportedSchemas = await getSupportedSchemas();
 
   if (!supportedSchemas || supportedSchemas.length === 0) {
@@ -40,11 +37,13 @@ export const indexAttestations = async ({
       const { id, uid, last_block_indexed } = supportedSchema;
       const attestedEvents = await getAttestationsForSchema({
         schema: { uid },
-        fromBlock: last_block_indexed ? BigInt(last_block_indexed) : undefined,
+        lastBlockIndexed: last_block_indexed ? BigInt(last_block_indexed) : 0n,
         batchSize,
       });
 
       if (!attestedEvents) {
+        console.debug("[IndexAttestations] No attested events found");
+
         return;
       }
 

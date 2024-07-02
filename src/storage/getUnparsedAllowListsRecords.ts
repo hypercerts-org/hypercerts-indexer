@@ -17,9 +17,5 @@ export const getUnparsedAllowListRecords = async () => {
     return null;
   }
 
-  console.debug(
-    `[GetUnparsedAllowListRecords] Fetched ${data?.length} unparsed allow list records`,
-  );
-
   return data;
 };

@@ -1,34 +1,34 @@
 import { supabase } from "@/clients/supabaseClient.js";
+import { LeafClaimed } from "@/parsing/leafClaimedEvent.js";
+import { StorageMethod } from "@/indexer/processLogs.js";
+import _ from "lodash";
 
-export const updateAllowlistRecordClaimed = async ({
-  tokenId,
-  leaf,
-  userAddress,
-}: {
-  tokenId: bigint;
-  leaf: string;
-  userAddress: `0x${string}`;
+export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
+  data,
 }) => {
+  if (_.isArray(data)) return;
+
+  const { leaf, token_id, creator_address } = data;
   try {
     // Get an allowlist record for corresponding tokenId and leaf that has not been claimed
-    const record = await supabase
+    const { data } = await supabase
       .from("claimable_fractions_with_proofs")
-      .select("*")
+      .select("*, token_id::text")
       .eq("leaf", leaf)
-      .eq("user_address", userAddress)
+      .ilike("user_address", creator_address)
       .eq("claimed", false)
-      .eq("token_id", tokenId.toString())
+      .eq("token_id", token_id.toString())
       .maybeSingle()
       .throwOnError();
 
-    if (!record.data) {
+    if (!data) {
       const alreadyClaimedRecord = await supabase
         .from("claimable_fractions_with_proofs")
-        .select("*")
+        .select("*, token_id::text")
         .eq("leaf", leaf)
-        .eq("user_address", userAddress)
+        .ilike("user_address", creator_address)
         .eq("claimed", true)
-        .eq("token_id", tokenId.toString())
+        .eq("token_id", token_id.toString())
         .maybeSingle()
         .throwOnError();
 
@@ -37,19 +37,23 @@ export const updateAllowlistRecordClaimed = async ({
           "[UpdateAllowlistRecordClaimed] Allowlist record already claimed",
           alreadyClaimedRecord.data,
         );
+
         return;
       }
 
-      throw new Error(
-        `Could not find unclaimed allowlist record for tokenId ${tokenId}, leaf ${leaf} and userAddress ${userAddress}, ${record.error?.message}`,
+      console.error(
+        "[UpdateAllowlistRecordClaimed] Allowlist record not found",
+        { leaf, token_id, creator_address },
       );
+
+      return;
     }
 
-    // Update that record to claimed
     await supabase
       .from("hypercert_allow_list_records")
       .update({ claimed: true })
-      .eq("id", record.data.id);
+      .eq("id", data.id)
+      .throwOnError();
   } catch (e) {
     console.error(
       "[UpdateAllowlistRecordClaimed] Error while updating allow list record as claimed",

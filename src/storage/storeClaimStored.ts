@@ -1,6 +1,11 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
+import { StorageMethod } from "@/indexer/processLogs.js";
+import _ from "lodash";
+import { indexMetadata } from "@/indexer/indexMetadata.js";
+import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
+import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
 
 export const ClaimSchema = z.object({
   contracts_id: z.string().optional(),
@@ -21,10 +26,6 @@ export const ClaimSchema = z.object({
 
 export type Claim = z.infer<typeof ClaimSchema>;
 
-interface StoreClaimInput {
-  claims: Claim[];
-}
-
 /**
  * Stores the provided claims in the database.
  *
@@ -34,7 +35,7 @@ interface StoreClaimInput {
  * If the "contracts_id" and "token_id" of a claim already exist in the table, the existing row is updated with the new claim data.
  * If an error occurs while storing the claims, the error is logged and rethrown.
  *
- * @param {StoreClaimInput} { claims } - An object containing an array of claims to store. Each claim must match the ClaimSchema.
+ * @param {Claim} claim - An object containing an array of claims to store. Each claim must match the ClaimSchema.
  *
  * @throws {Error} If an error occurs while storing the claims, the error is logged and rethrown.
  *
@@ -55,28 +56,37 @@ interface StoreClaimInput {
  * await storeClaim({ claims });
  * ```
  * */
-export const storeClaim = async ({ claims }: StoreClaimInput) => {
-  const _claims = claims.map((claim) => ({
-    ...ClaimSchema.parse(claim),
+export const storeClaimStored: StorageMethod<Claim> = async ({
+  data,
+  context,
+}) => {
+  // TODO toggle single/array parsing
+  if (_.isArray(data)) return;
+
+  const _claim = {
+    ...data,
     value: 1,
-    token_id: claim.token_id.toString(),
-    creation_block_number: claim.creation_block_number.toString(),
-    creation_block_timestamp: claim.creation_block_timestamp.toString(),
-    last_update_block_number: claim.last_update_block_number.toString(),
-    last_update_block_timestamp: claim.last_update_block_timestamp.toString(),
-    units: claim.units.toString(),
-  }));
+    token_id: data.token_id.toString(),
+    creation_block_number: data.creation_block_number.toString(),
+    creation_block_timestamp: data.creation_block_timestamp.toString(),
+    last_update_block_number: data.last_update_block_number.toString(),
+    last_update_block_timestamp: data.last_update_block_timestamp.toString(),
+    units: data.units.toString(),
+  };
 
   try {
-    console.debug(`[StoreClaim] Storing ${_claims.length} claims`);
-
     await supabase
       .from("claims")
-      .upsert(_claims, {
+      .upsert(_claim, {
         onConflict: "contracts_id, token_id",
         ignoreDuplicates: false,
       })
       .throwOnError();
+
+    // TODO is this the best place for handling the additional data fetching?
+    await indexMetadata({ batchSize: 10n, context });
+    await indexAllowListData({ batchSize: 10n, context });
+    await indexAllowlistRecords({ batchSize: 10n, context });
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
     throw error;

@@ -1,6 +1,8 @@
+import { LogParserContext } from "@/indexer/processLogs.js";
+
 export type IndexerConfig = {
-  eventName?: string;
   batchSize?: bigint;
+  context: LogParserContext;
 };
 
 export type EventToFetch = {
@@ -12,10 +14,4 @@ export type EventToFetch = {
   last_block_indexed: bigint;
   contract_slug: string;
   start_block: bigint;
-};
-
-export type NewAllowList = {
-  contracts_id: string;
-  token_id: bigint | string;
-  root: string;
 };

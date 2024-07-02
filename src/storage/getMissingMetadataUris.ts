@@ -16,14 +16,9 @@ export const getMissingMetadataUris = async () => {
     return;
   }
 
-  const parsed = data
+  return data
     .filter(
       ({ missing_uri }) => missing_uri !== null && missing_uri !== undefined,
     )
     .map(({ missing_uri }) => missing_uri);
-
-  console.debug(
-    `[getMissingMetadataUris] Found ${parsed.length} missing metadata URIs`,
-  );
-  return parsed;
 };

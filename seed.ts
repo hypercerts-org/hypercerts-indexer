@@ -45,7 +45,7 @@ const main = async () => {
       },
       {
         name: "TransferBatch",
-        abi: "event TransferBatch (index_topic_1 address operator, index_topic_2 address from, index_topic_3 address to, uint256[] ids, uint256[] values)",
+        abi: "event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -55,12 +55,7 @@ const main = async () => {
       },
       {
         name: "BatchValueTransfer",
-        abi: "event BatchValueTransfer (uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
-        contract_slug: minterContractSlug,
-      },
-      {
-        name: "AllowlistCreated",
-        abi: "event AllowlistCreated(uint256 tokenID, bytes32 root)",
+        abi: "event BatchValueTransfer(uint256[] claimIDs, uint256[] fromTokenIDs, uint256[] toTokenIDs, uint256[] values)",
         contract_slug: minterContractSlug,
       },
       {
@@ -70,7 +65,7 @@ const main = async () => {
       },
       {
         name: "TakerBid",
-        abi: "event TakerBid(tuple nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
+        abi: "event TakerBid((bytes32 orderHash, uint256 orderNonce, bool isNonceInvalidated) nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
         contract_slug: marketplaceContractSlug,
       },
     ],
@@ -96,7 +91,7 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
-        chain_id: 845322,
+        chain_id: 84532,
         contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
         start_block: 6771210,
         contract_slug: minterContractSlug,
@@ -109,7 +104,7 @@ const main = async () => {
       },
       {
         chain_id: 10,
-        contract_address: "0x822f17a9a5eecfd66dbaff7946a8071c265d1d07",
+        contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
         start_block: 76066993,
         contract_slug: minterContractSlug,
       },
@@ -127,22 +122,17 @@ const main = async () => {
   );
 
   console.log("🕊️ Seeding supported schemas...");
-  await supabase.from("supported_schemas").upsert(
-    [
-      {
-        chain_id: 11155111,
-        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-        last_block_indexed: 6098991,
-        resolver: null,
-        schema: null,
-        revocable: null,
-      },
-    ],
-    {
-      onConflict: "uid",
-      ignoreDuplicates: true,
-    },
-  );
+  await supabase.from("supported_schemas").insert({
+    chain_id: 11155111,
+    uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+    last_block_indexed: 6098991,
+  });
+
+  const { data: schemas } = await supabase
+    .from("supported_schemas")
+    .select("*");
+
+  console.log(schemas);
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");

@@ -3,6 +3,8 @@ import { storeAllowListRecords } from "@/storage/storeAllowListRecords.js";
 import { getUnparsedAllowListRecords } from "@/storage/getUnparsedAllowListsRecords.js";
 import { Database } from "@/types/database.types.js";
 import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
+import _ from "lodash";
+import { getAddress } from "viem";
 
 /**
  * This function indexes the unparsed allow lists in batches.
@@ -20,37 +22,18 @@ import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
  * ```
  */
 
-const defaultConfig = {
-  batchSize: 2n,
-};
-
 //TODO allow list records parsing based on created allowlists and claims
-export const indexAllowlistRecords = async ({
-  batchSize = defaultConfig.batchSize,
-}: IndexerConfig = defaultConfig) => {
+export const indexAllowlistRecords = async ({ batchSize }: IndexerConfig) => {
   const unparsedAllowLists = await getUnparsedAllowListRecords();
 
   if (!unparsedAllowLists || unparsedAllowLists.length === 0) {
-    console.debug(
-      "[IndexAllowlistRecords] No parsable unparsed allow lists found",
-    );
     return;
   }
 
-  const _size = Number(batchSize);
+  const allowlistChunks = _.chunk(unparsedAllowLists, Number(batchSize));
 
-  console.debug(
-    `[IndexAllowlistRecords] Processing ${unparsedAllowLists.length} allow lists`,
-  );
-
-  // Process metadata in batches
-  for (let i = 0; i < unparsedAllowLists.length; i += _size) {
-    console.debug(
-      `[IndexAllowlistRecords] Processing batch ${i} - ${i + _size - 1}`,
-    );
-    const batch = unparsedAllowLists.slice(i, i + _size);
-
-    await processAllowListEntriesBatch(batch);
+  for (const chunk of allowlistChunks) {
+    await processAllowListEntriesBatch(chunk);
   }
 };
 
@@ -59,7 +42,6 @@ const processAllowListEntriesBatch = async (
 ) => {
   const allowListsToStore = await Promise.all(
     batch.map(async (allowList) => {
-      // TODO
       const tree = parseToOzMerkleTree(allowList?.data);
       if (!tree) {
         console.error(
@@ -74,11 +56,12 @@ const processAllowListEntriesBatch = async (
         const leaf = tree.leafHash(v);
         const proof = tree.getProof(v);
         rows.push({
-          user_address: v[0],
+          user_address: getAddress(v[0]),
           entry: i,
           units: v[1],
           leaf,
           proof,
+          claimed: false,
         });
       }
 
@@ -99,7 +82,7 @@ const processAllowListEntriesBatch = async (
         storeAllowListRecords({
           claim_id: data?.claim_id,
           allow_list_data_id: data?.al_data_id,
-          // @ts-expect-error Typing issue with records
+          // @ts-ignore
           records: data?.records,
         });
       }),

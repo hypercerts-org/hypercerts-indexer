@@ -1,11 +1,12 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { supabase } from "../src/clients/supabaseClient";
-import { publicClient, testClient } from "../test/helpers/evm";
+import { anvilInstance, publicClient, testClient } from "../test/helpers/evm";
 import { indexClaimsStoredEvents } from "../src/indexer/indexClaimsStored";
 import { getAddress, parseEther } from "viem";
 import { Tables } from "../src/types/database.types";
 import { submitMintClaimTransaction } from "../test/helpers/transactions";
 import { ZERO_ADDRESS } from "../src/utils/constants";
+import { cleanupSupabase } from "./setup-env";
 
 vi.mock("../src/clients/evmClient", () => {
   return {
@@ -14,17 +15,18 @@ vi.mock("../src/clients/evmClient", () => {
 });
 
 describe("index claimStored events", async () => {
-  beforeAll(async () => {
-    await testClient.impersonateAccount({
-      address: "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A",
-    });
+  const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
+  const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
+  const units = parseEther("1");
+  const cid = "ipfs://test_cid";
+
+  beforeEach(async () => {
+    await cleanupSupabase();
+
+    await anvilInstance.restart();
   });
 
   it("observes and stores mintClaim event", async () => {
-    const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
-    const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
-    const units = parseEther("1");
-    const cid = "ipfs://test_cid";
     const tx = await submitMintClaimTransaction({
       contractAddress,
       account,
@@ -63,10 +65,6 @@ describe("index claimStored events", async () => {
   });
 
   it("observes and stores multiple mintClaim events with identical input as two entries", async () => {
-    const contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941";
-    const account = "0xdf2C3dacE6F31e650FD03B8Ff72beE82Cb1C199A";
-    const units = parseEther("1");
-    const cid = "ipfs://test_cid";
     const tx_one = await submitMintClaimTransaction({
       contractAddress,
       account,

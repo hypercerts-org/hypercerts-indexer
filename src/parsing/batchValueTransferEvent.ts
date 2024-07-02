@@ -1,7 +1,7 @@
 import { isAddress } from "viem";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
 import { z } from "zod";
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { ParserMethod } from "@/indexer/processLogs.js";
 
 const ValueTransferEventSchema = z.object({
   address: z.string().refine(isAddress),
@@ -20,8 +20,10 @@ const ValueTransferEventSchema = z.object({
  *
  * @param event - The event object.
  * */
-export const parseBatchValueTransfer = async (event: unknown) => {
-  const { args, blockNumber, address } = ValueTransferEventSchema.parse(event);
+export const parseBatchValueTransfer: ParserMethod<
+  ParsedValueTransfer[]
+> = async ({ log, context: { block } }) => {
+  const { args, blockNumber, address } = ValueTransferEventSchema.parse(log);
 
   return Promise.all(
     args.claimIDs.map(async (claimID, index) => {
@@ -32,9 +34,9 @@ export const parseBatchValueTransfer = async (event: unknown) => {
         to_token_id: args.toTokenIDs[index],
         units: args.values[index],
         creation_block_number: blockNumber,
-        creation_block_timestamp: await getBlockTimestamp(blockNumber),
+        creation_block_timestamp: block.timestamp,
         last_update_block_number: blockNumber,
-        last_update_block_timestamp: await getBlockTimestamp(blockNumber),
+        last_update_block_timestamp: block.timestamp,
       });
     }),
   );

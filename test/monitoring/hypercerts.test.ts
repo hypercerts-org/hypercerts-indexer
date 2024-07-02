@@ -56,7 +56,6 @@ describe("getLogsForContractEvents", () => {
       async () =>
         await getLogsForContractEvents({
           batchSize: 100n,
-          fromBlock: 100n,
           contractEvent: eventToFetch,
         }),
     ).rejects.toThrowError();
@@ -64,15 +63,17 @@ describe("getLogsForContractEvents", () => {
 
   it("throws when event filter cannot be created", async () => {
     // createEventFilter will throw when client cannot create event filter
-    getBlockNumberSpy.resolves(100n);
+    getBlockNumberSpy.resolves(102n);
     createEventFilterSpy.throws();
 
     await expect(
       async () =>
         await getLogsForContractEvents({
           batchSize: 100n,
-          fromBlock: 100n,
-          contractEvent: eventToFetch,
+          contractEvent: generateEventToFetch({
+            last_block_indexed: 100n,
+            start_block: 90n,
+          }),
         }),
     ).rejects.toThrowError();
   });
@@ -85,7 +86,9 @@ describe("getLogsForContractEvents", () => {
       },
     });
 
-    getBlockNumberSpy.resolves(5957292n);
+    const blockNumber = 1000n;
+
+    getBlockNumberSpy.resolves(blockNumber);
     //@ts-expect-error createEventFilterSpy is a Sinon spy
     createEventFilterSpy.resolves(claimStoredEventFilter);
     //@ts-expect-error getFilterLogsSpy is a Sinon spy
@@ -93,9 +96,11 @@ describe("getLogsForContractEvents", () => {
 
     const result = await getLogsForContractEvents({
       batchSize: 100n,
-      fromBlock: 100n,
       contractEvent: {
-        ...eventToFetch,
+        ...generateEventToFetch({
+          last_block_indexed: blockNumber - 3n,
+          start_block: blockNumber - 6n,
+        }),
         contract_address:
           "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941" as `0x${string}`,
         event_name: "ClaimStored",
@@ -105,20 +110,23 @@ describe("getLogsForContractEvents", () => {
 
     expect(result).toEqual({
       logs: claimStoredEventLog,
-      fromBlock: 5957292n,
-      toBlock: 5957292n,
+      fromBlock: blockNumber - 2n,
+      toBlock: blockNumber,
     });
   });
 
   it("throws when logs cannot be fetched", async () => {
+    const startBlock = 5957292n;
+    const blockNumber = startBlock + 4n;
+    const lastBlockIndexed = startBlock + 2n;
     mocks.getDeployment.mockReturnValue({
-      startBlock: 5957292n,
+      startBlock,
       addresses: {
         HypercertMinterUUPS: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
       },
     });
 
-    getBlockNumberSpy.resolves(5957292n);
+    getBlockNumberSpy.resolves(blockNumber);
     //@ts-expect-error createEventFilterSpy is a Sinon spy
     createEventFilterSpy.resolves(claimStoredEventFilter);
     getFilterLogsSpy.throws();
@@ -126,9 +134,11 @@ describe("getLogsForContractEvents", () => {
     await expect(async () => {
       await getLogsForContractEvents({
         batchSize: 100n,
-        fromBlock: 100n,
         contractEvent: {
-          ...eventToFetch,
+          ...generateEventToFetch({
+            last_block_indexed: lastBlockIndexed,
+            start_block: startBlock,
+          }),
           contract_address:
             "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941" as `0x${string}`,
           event_name: "ClaimStored",
