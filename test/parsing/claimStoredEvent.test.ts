@@ -20,7 +20,11 @@ describe("claimStoredEvent", {}, () => {
 
     vi.spyOn(client, "readContract").mockResolvedValue(owner);
 
-    const parsed = await parseClaimStoredEvent(mockEvent);
+    const parsed = await parseClaimStoredEvent(mockEvent, {
+      block: {
+        blockNumber: 42n,
+      },
+    });
 
     expect(parsed).toEqual({
       creation_block_number: mockEvent.blockNumber,

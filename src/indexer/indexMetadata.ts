@@ -17,17 +17,10 @@ import _ from "lodash";
  * ```
  */
 
-const defaultConfig = {
-  batchSize: 5n,
-};
-
-export const indexMetadata = async ({
-  batchSize = defaultConfig.batchSize,
-}: IndexerConfig = defaultConfig) => {
+export const indexMetadata = async ({ batchSize }: IndexerConfig) => {
   const missingUris = await getMissingMetadataUris();
 
   if (!missingUris || missingUris.length === 0) {
-    console.debug("[IndexMetadata] No missing metadata URIs found");
     return;
   }
 

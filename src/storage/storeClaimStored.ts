@@ -84,7 +84,7 @@ export const storeClaimStored: StorageMethod<Claim> = async ({
       .throwOnError();
 
     // TODO is this the best place for handling the additional data fetching?
-    await indexMetadata();
+    await indexMetadata({ batchSize: 10n, context });
     await indexAllowListData({ batchSize: 10n, context });
     await indexAllowlistRecords({ batchSize: 10n, context });
   } catch (error) {

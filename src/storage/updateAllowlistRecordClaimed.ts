@@ -43,7 +43,7 @@ export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
 
       console.error(
         "[UpdateAllowlistRecordClaimed] Allowlist record not found",
-        data,
+        { leaf, token_id, creator_address },
       );
 
       return;

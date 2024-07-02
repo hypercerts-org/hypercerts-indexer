@@ -4,7 +4,7 @@ import { storeAllowListData } from "@/storage/storeAllowListData.js";
 import { Tables } from "@/types/database.types.js";
 import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists.js";
 import _ from "lodash";
-import { LogParserContext } from "@/indexer/processLogs.js";
+import { ParserContext } from "@/indexer/processLogs.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last
@@ -26,7 +26,6 @@ export const indexAllowListData = async ({
   const missingAllowLists = await getUnparsedAllowLists();
 
   if (!missingAllowLists || missingAllowLists.length === 0) {
-    console.debug("[IndexAllowListData] No missing allow lists found");
     return;
   }
 
@@ -39,7 +38,7 @@ export const indexAllowListData = async ({
 
 const processAllowListBatch = async (
   batch: Partial<Tables<"allow_list_data">>[],
-  context: LogParserContext,
+  context: ParserContext,
 ) => {
   const allowListData = (
     await Promise.all(
