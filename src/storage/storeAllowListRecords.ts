@@ -1,5 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { Tables } from "@/types/database.types.js";
+import { getAddress } from "viem";
 
 interface StoreAllowListRecords {
   claim_id?: string;
@@ -28,7 +29,7 @@ export const storeAllowListRecords = async ({
 
   const recordsToInsert = records.map((record) => ({
     hypercert_allow_lists_id: data.id,
-    user_address: record.user_address?.toLowerCase(),
+    user_address: getAddress(record.user_address),
     units: record.units,
     entry: record.entry,
     leaf: record.leaf,

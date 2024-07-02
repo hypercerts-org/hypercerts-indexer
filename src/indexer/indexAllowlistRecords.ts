@@ -4,6 +4,7 @@ import { getUnparsedAllowListRecords } from "@/storage/getUnparsedAllowListsReco
 import { Database } from "@/types/database.types.js";
 import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 import _ from "lodash";
+import { getAddress } from "viem";
 
 /**
  * This function indexes the unparsed allow lists in batches.
@@ -26,17 +27,10 @@ export const indexAllowlistRecords = async ({ batchSize }: IndexerConfig) => {
   const unparsedAllowLists = await getUnparsedAllowListRecords();
 
   if (!unparsedAllowLists || unparsedAllowLists.length === 0) {
-    console.debug(
-      "[IndexAllowlistRecords] No parsable unparsed allow lists found",
-    );
     return;
   }
 
   const allowlistChunks = _.chunk(unparsedAllowLists, Number(batchSize));
-
-  console.debug(
-    `[IndexAllowlistRecords] Processing ${unparsedAllowLists.length} allow lists`,
-  );
 
   for (const chunk of allowlistChunks) {
     await processAllowListEntriesBatch(chunk);
@@ -48,7 +42,6 @@ const processAllowListEntriesBatch = async (
 ) => {
   const allowListsToStore = await Promise.all(
     batch.map(async (allowList) => {
-      // TODO
       const tree = parseToOzMerkleTree(allowList?.data);
       if (!tree) {
         console.error(
@@ -63,7 +56,7 @@ const processAllowListEntriesBatch = async (
         const leaf = tree.leafHash(v);
         const proof = tree.getProof(v);
         rows.push({
-          user_address: v[0],
+          user_address: getAddress(v[0]),
           entry: i,
           units: v[1],
           leaf,

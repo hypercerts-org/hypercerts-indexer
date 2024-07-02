@@ -1,4 +1,4 @@
-import { Block, Log } from "viem";
+import { Block } from "viem";
 
 export type ParserContext = {
   event_name: string;
@@ -17,7 +17,7 @@ export interface StorageMethod<T> {
 }
 
 export interface LogParser<T> {
-  log: Log;
+  log: unknown;
   parsingMethod: ParserMethod<T>;
   storageMethod: StorageMethod<T>;
   context: ParserContext;

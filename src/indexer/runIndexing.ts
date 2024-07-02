@@ -104,7 +104,7 @@ export const runIndexing = async (delay: number, config?: IndexerConfig) => {
           blockNumber: BigInt(blockNumber),
         });
         console.info(
-          `[runIndexing] Processing ${events.length} for block ${blockNumber}`,
+          `[runIndexing] Processing ${events.length} events for block ${blockNumber}`,
         );
         for (const log of events) {
           const contractEvent = contractEvents?.find(

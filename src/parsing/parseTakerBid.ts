@@ -1,4 +1,4 @@
-import { isAddress, parseEventLogs } from "viem";
+import { getAddress, isAddress, parseEventLogs } from "viem";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { client } from "@/clients/evmClient.js";
@@ -72,8 +72,6 @@ const TakerBidEventSchema = z.object({
   transactionHash: z.string(),
 });
 
-export type TakerBidEvent = z.infer<typeof TakerBidEventSchema>;
-
 export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
   log,
   context: { block },
@@ -102,14 +100,14 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
     }).find((log) => log.eventName === "BatchValueTransfer");
 
     // @ts-expect-error args is missing in the type
-    const hypercertId = `${chainId}-${bid.args?.collection}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+    const hypercertId = `${chainId}-${getAddress(bid.args?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
     return TakerBid.parse({
       amounts: bid.args.amounts,
-      seller: bid.args.bidRecipient,
-      buyer: bid.args.bidUser,
-      currency: bid.args.currency,
-      collection: bid.args.collection,
+      seller: getAddress(bid.args.bidRecipient),
+      buyer: getAddress(bid.args.bidUser),
+      currency: getAddress(bid.args.currency),
+      collection: getAddress(bid.args.collection),
       item_ids: bid.args.itemIds,
       strategy_id: bid.args.strategyId,
       hypercert_id: hypercertId,
