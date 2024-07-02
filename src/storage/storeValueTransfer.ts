@@ -61,6 +61,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
     .from("fractions")
     .select("*, token_id::text, units::text")
     .eq("token_id", data.from_token_id.toString())
+    .eq("claims_id", claimId.toString())
     .maybeSingle()
     .throwOnError();
 
@@ -79,6 +80,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
     .from("fractions")
     .select("*, token_id::text, units::text")
     .eq("token_id", data.to_token_id.toString())
+    .eq("claims_id", claimId.toString())
     .maybeSingle()
     .throwOnError();
 

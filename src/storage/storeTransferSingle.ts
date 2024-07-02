@@ -33,34 +33,17 @@ export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
 
   if (hypercertTokenId.toString() === data.token_id.toString()) return;
 
-  let claims_id = null;
+  let claims_id;
 
-  const { data: token, error } = await supabase
-    .from("fractions")
-    .select("*, token_id::text")
-    .eq("token_id", data.token_id.toString())
-    .maybeSingle();
-
-  if (error) {
-    console.error(`[storeTransferSingle] Error while getting token.`, error);
-    return;
-  }
-
-  if (!token?.claims_id) {
+  try {
     const { data: claim_id, error: claimError } = await supabase.rpc(
       "get_or_create_claim",
       {
         p_chain_id: chainId,
         p_contract_address: getAddress(data.contract_address),
         p_token_id: hypercertTokenId.toString(),
-        p_creation_block_number: getLowestValue(
-          token?.creation_block_timestamp,
-          data.block_number,
-        ),
-        p_creation_block_timestamp: getLowestValue(
-          token?.creation_block_timestamp,
-          data.block_timestamp,
-        ),
+        p_creation_block_number: data.block_number,
+        p_creation_block_timestamp: data.block_timestamp,
         p_last_update_block_timestamp: data.block_timestamp,
         p_last_update_block_number: data.block_number,
       },
@@ -75,6 +58,21 @@ export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
     }
 
     claims_id = claim_id;
+  } catch (e: unknown) {
+    console.error(`[StoreUnitTransfer] Could net create or get claim_id.`, e);
+    return;
+  }
+
+  const { data: token, error } = await supabase
+    .from("fractions")
+    .select("*, token_id::text")
+    .eq("token_id", data.token_id.toString())
+    .ilike("fraction_id", `${chainId}-${getAddress(data.contract_address)}-%`)
+    .maybeSingle();
+
+  if (error) {
+    console.error(`[storeTransferSingle] Error while getting token.`, error);
+    return;
   }
 
   const _token = {
