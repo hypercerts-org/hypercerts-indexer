@@ -16,7 +16,7 @@ const enabled =
 // Ensure to call this before importing any other modules!
 Sentry.init({
   dsn: enabled ? assertExists(process.env.SENTRY_DSN, "SENTRY_DSN") : undefined,
-  integrations: [nodeProfilingIntegration()],
+  integrations: [nodeProfilingIntegration(), Sentry.captureConsoleIntegration({ levels: ["warn", "error"] })],
   enabled,
 
   // Add Tracing by setting tracesSampleRate
@@ -25,5 +25,5 @@ Sentry.init({
 
   // Set sampling rate for profiling
   // This is relative to tracesSampleRate
-  profilesSampleRate: 1.0,
+  profilesSampleRate: 1.0
 });
