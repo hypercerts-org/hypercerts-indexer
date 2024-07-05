@@ -1,7 +1,7 @@
 import { getDeployment } from "@/utils/getDeployment.js";
 import { client } from "@/clients/evmClient.js";
-import schemaRegistryAbi from "@/abis/schemaRegistry.json" with { type: "json" };
-import { Hex, isAddress } from "viem";
+import SchemaRegistryAbi from "@/abis/schemaRegistry.js";
+import { Hex, isAddress, stringToHex } from "viem";
 import { Tables } from "@/types/database.types.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
@@ -58,9 +58,9 @@ export const fetchSchemaData = async ({
   try {
     const _schemaData = await client.readContract({
       address: schemaRegistryAddress as `0x${string}`,
-      abi: schemaRegistryAbi,
+      abi: SchemaRegistryAbi,
       functionName: "getSchema",
-      args: [uid],
+      args: [uid as `0x${string}`],
     });
 
     return validationSchema.parse(_schemaData);

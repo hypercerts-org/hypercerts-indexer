@@ -1,14 +1,14 @@
 import { faker } from "@faker-js/faker";
-import { ClaimStoredEvent } from "../../src/parsing/claimStoredEvent";
+import { ClaimStoredEvent } from "../../src/parsing/claimStoredEvent.js";
 import { getAddress, Hex } from "viem";
-import { EasAttestation } from "../../src/fetching/fetchAttestationData";
-import { SchemaRecord } from "../../src/fetching/fetchSchemaData";
-import { Tables } from "../../src/types/database.types";
-import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent";
-import { easAttestation } from "./data";
-import { Claim } from "../../src/storage/storeClaimStored";
+import { EasAttestation } from "../../src/fetching/fetchAttestationData.js";
+import { SchemaRecord } from "../../src/fetching/fetchSchemaData.js";
+import { Tables } from "../../src/types/database.types.js";
+import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent.js";
+import { easAttestation } from "./data.js";
+import { Claim } from "../../src/storage/storeClaimStored.js";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
-import { EventToFetch } from "../../src/types/types";
+import { EventToFetch } from "../../src/types/types.js";
 
 export const generateClaim = (overrides?: Partial<Claim>): Claim => {
   return {
@@ -16,10 +16,6 @@ export const generateClaim = (overrides?: Partial<Claim>): Claim => {
     creator_address: getAddress(faker.finance.ethereumAddress()),
     owner_address: getAddress(faker.finance.ethereumAddress()),
     token_id: faker.number.bigInt(),
-    creation_block_number: faker.number.bigInt(),
-    creation_block_timestamp: faker.number.bigInt(),
-    last_update_block_timestamp: faker.number.bigInt(),
-    last_update_block_number: faker.number.bigInt(),
     units: faker.number.bigInt(),
     uri: faker.internet.url(),
     ...overrides,
@@ -31,9 +27,8 @@ export const generateClaimStoredEvent = (
 ): ClaimStoredEvent => {
   return {
     address: getAddress(faker.finance.ethereumAddress()),
-    blockNumber: faker.number.bigInt(),
     transactionHash: faker.string.hexadecimal({ length: 64 }) as Hex,
-    args: {
+    params: {
       uri: faker.internet.url(),
       claimID: faker.number.bigInt(),
       totalUnits: faker.number.bigInt(),

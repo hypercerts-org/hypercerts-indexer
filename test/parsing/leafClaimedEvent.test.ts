@@ -7,8 +7,20 @@ import { client } from "../../src/clients/evmClient";
 
 import { alchemyUrl } from "../resources/alchemyUrl";
 import { getAddress } from "viem";
+import { chainId } from "../../src/utils/constants";
 
 describe("leafClaimedEvent", {}, () => {
+  const block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    timestamp: faker.number.int(),
+  };
+
+  const context = {
+    block,
+  };
+
   it("parses a leaf claimed event", {}, async () => {
     server.use(
       http.post(`${alchemyUrl}/*`, () => {
@@ -24,7 +36,7 @@ describe("leafClaimedEvent", {}, () => {
       address,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
-      args: {
+      params: {
         tokenID,
         leaf,
       },
@@ -39,20 +51,12 @@ describe("leafClaimedEvent", {}, () => {
     );
 
     const timestamp = 10n;
-    const spy = vi.spyOn(client, "getBlock").mockImplementation(
-      async () =>
-        ({
-          timestamp,
-        }) as any,
-    );
 
-    const parsed = await parseLeafClaimedEvent(event);
+    const [claim] = await parseLeafClaimedEvent({ log: event, context });
 
-    expect(spy).toHaveBeenCalledWith({ blockNumber });
-    expect(parsed).toEqual({
+    expect(claim).toEqual({
       contract_address: address,
       creator_address: from,
-      creation_block_timestamp: timestamp,
       token_id: tokenID,
       leaf,
     });
@@ -67,13 +71,13 @@ describe("leafClaimedEvent", {}, () => {
       address,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
-      args: {
+      params: {
         tokenID,
       },
     };
 
     await expect(
-      async () => await parseLeafClaimedEvent(event),
+      async () => await parseLeafClaimedEvent({ log: event, context }),
     ).rejects.toThrowError();
   });
 
@@ -86,13 +90,13 @@ describe("leafClaimedEvent", {}, () => {
       address,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
-      args: {
+      params: {
         leaf,
       },
     };
 
     await expect(
-      async () => await parseLeafClaimedEvent(event),
+      async () => await parseLeafClaimedEvent({ log: event, context }),
     ).rejects.toThrowError();
   });
 
@@ -102,14 +106,14 @@ describe("leafClaimedEvent", {}, () => {
       id: "0x3e7d7e4c4f3d5a7f2b3d6c5",
       event: "LeafClaimed",
       address,
-      args: {
+      params: {
         uri: "https://example.com/claim",
         claimID: "0x3e7d7e4c4f3d5a7f2b3d6c5",
       },
     };
 
     await expect(
-      async () => await parseLeafClaimedEvent(event),
+      async () => await parseLeafClaimedEvent({ log: event, context }),
     ).rejects.toThrowError();
   });
 });

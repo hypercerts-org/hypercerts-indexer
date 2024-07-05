@@ -82,7 +82,6 @@ describe("index attested events", async () => {
 
     const { data } = await supabase.from("attestations").select("*");
 
-    console.log(data);
     expect(data?.length).toBe(1);
     expect(data?.[0].contract_address).toBe(contractAddress);
     expect(data?.[0].token_id.toString()).toBe(token_id.toString());

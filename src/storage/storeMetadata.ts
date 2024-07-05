@@ -1,5 +1,6 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { Database } from "@/types/database.types.js";
+import _ from "lodash";
 
 /* 
     This function stores the chain, contract address, token ID, metadata and URI of a hypercert in the database.
@@ -23,22 +24,22 @@ import { Database } from "@/types/database.types.js";
     ```
  */
 
-interface StoreMetadata {
-  metadata?: Database["public"]["Tables"]["metadata"]["Update"][];
-}
-
-export const storeMetadata = async ({ metadata }: StoreMetadata) => {
-  if (!metadata || metadata.length === 0) {
+export const storeMetadata = async ({
+  data,
+}: {
+  data: Database["public"]["Tables"]["metadata"]["Update"][];
+}) => {
+  if (!data || data.length === 0) {
     console.error("[StoreMetadata] No data or contract provided");
     return;
   }
 
-  console.debug(`[StoreMetadata] Storing ${metadata.length} metadata entries`);
-
   try {
+    const dataToStore = _.unionBy(data, "uri");
+
     await supabase
       .from("metadata")
-      .upsert(metadata, {
+      .upsert(dataToStore, {
         onConflict: "uri",
         ignoreDuplicates: false,
         defaultToNull: true,

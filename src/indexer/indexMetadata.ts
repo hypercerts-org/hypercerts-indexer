@@ -24,10 +24,6 @@ export const indexMetadata = async ({ batchSize }: IndexerConfig) => {
     return;
   }
 
-  console.debug(
-    `[IndexMetadata] Processing ${missingUris.length} metadata URIs`,
-  );
-
   const logChunks = _.chunk(missingUris, Number(batchSize));
   for (const chunk of logChunks) {
     await processMetadataBatch(chunk);
@@ -35,16 +31,17 @@ export const indexMetadata = async ({ batchSize }: IndexerConfig) => {
 };
 
 const processMetadataBatch = async (batch: string[]) => {
-  const metadata = (
-    await Promise.all(
-      batch.map(async (uri) => ({
-        uri,
-        parsed: true,
-        ...(await fetchMetadataFromUri({ uri })),
-      })),
-    )
-  ).filter((metadata) => metadata !== null && metadata !== undefined);
+  const data = await Promise.all(
+    batch.map(async (uri) => await fetchMetadataFromUri({ uri })),
+  );
 
-  // @ts-expect-error properties[] cannot be mapped to JSON
-  await storeMetadata({ metadata });
+  const filtered = data.filter(
+    (metadata) => metadata !== null && metadata !== undefined,
+  );
+
+  if (!filtered || filtered.length === 0) {
+    return;
+  }
+
+  await storeMetadata({ data: filtered });
 };

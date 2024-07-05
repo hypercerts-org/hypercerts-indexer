@@ -1,14 +1,8 @@
 import { publicClient, walletClient } from "./evm";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
-import easAbi from "@/abis/eas.json" assert { type: "json" };
-import {
-  encodeAbiParameters,
-  getAddress,
-  keccak256,
-  numberToBytes,
-  stringToBytes,
-} from "viem";
-import { schemaRegistryAbi } from "../resources/schemaRegistryAbi";
+import easAbi from "../../src/abis/eas.js";
+import { getAddress } from "viem";
+import SchemaRegistryAbi from "../resources/schemaRegistryAbi.js";
 
 export const submitMintClaimTransaction = async ({
   contractAddress = "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941" as `0x${string}`,
@@ -158,7 +152,7 @@ export const submitRegisterSchemaTransaction = async ({
 }) => {
   const { request } = await publicClient.simulateContract({
     address: contractAddress,
-    abi: schemaRegistryAbi,
+    abi: SchemaRegistryAbi,
     functionName: "register",
     args: [schema, resolver, revocable],
     account,

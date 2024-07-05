@@ -1,5 +1,6 @@
 import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
 import { HypercertMetadataValidator } from "@/utils/metadata.zod.js";
+import { Database } from "@/types/database.types.js";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -50,11 +51,12 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
 
   const _metadata = res.data;
 
-  return {
+  const row: Database["public"]["Tables"]["metadata"]["Insert"] = {
     name: _metadata.name,
     description: _metadata.description,
     external_url: _metadata.external_url,
     image: _metadata.image,
+    // @ts-expect-error - json array typing error
     properties: _metadata.properties,
     contributors: _metadata.hypercert?.contributors.value,
     impact_scope: _metadata.hypercert?.impact_scope.value,
@@ -65,5 +67,9 @@ export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
     work_timeframe_to: _metadata.hypercert?.work_timeframe?.value?.[1],
     rights: _metadata.hypercert?.rights?.value,
     allow_list_uri: _metadata.allowList,
+    uri,
+    parsed: true,
   };
+
+  return row;
 };

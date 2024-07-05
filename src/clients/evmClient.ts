@@ -77,6 +77,13 @@ const drpcUrl = () => {
 
 const rpc_timeout = 20_000;
 
+export const getRpcUrl = () => {
+  const alchemy = alchemyUrl();
+  const infura = infuraUrl();
+  const drpc = drpcUrl();
+  return [alchemy, infura, drpc].filter((url) => url)[0];
+};
+
 const fallBackProvider = () => {
   const alchemy = alchemyUrl()
     ? [http(alchemyUrl(), { timeout: rpc_timeout })]
@@ -93,12 +100,6 @@ const fallBackProvider = () => {
 /* Returns a PublicClient instance for the configured network. */
 // @ts-expect-error viem typings
 export const client = createPublicClient({
-  cacheTime: 10_000,
   chain: selectedNetwork(),
   transport: fallBackProvider(),
-  batch: {
-    multicall: {
-      wait: 32,
-    },
-  },
 });

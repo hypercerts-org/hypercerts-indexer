@@ -1,18 +1,17 @@
 import { isAddress } from "viem";
 import { z } from "zod";
 import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
-import { ParserMethod } from "@/indexer/processLogs.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
 
 const TransferBatchEventSchema = z.object({
   address: z.string().refine(isAddress),
-  args: z.object({
+  params: z.object({
     operator: z.string().refine(isAddress),
     from: z.string().refine(isAddress),
     to: z.string().refine(isAddress),
-    ids: z.array(z.bigint()),
-    values: z.array(z.bigint()),
+    ids: z.array(z.coerce.bigint()),
+    values: z.array(z.coerce.bigint()),
   }),
-  blockNumber: z.bigint(),
 });
 
 /*
@@ -21,25 +20,18 @@ const TransferBatchEventSchema = z.object({
  *
  * @param event - The event object.
  * */
-export const parseTransferBatch: ParserMethod<ParsedTransferSingle[]> = async ({
+export const parseTransferBatch: ParserMethod<ParsedTransferSingle> = async ({
   log,
-  context: { block },
 }) => {
-  const { args, blockNumber, address } = TransferBatchEventSchema.parse(log);
+  const { params, address } = TransferBatchEventSchema.parse(log);
 
-  const transfers = await Promise.all(
-    args.ids.map(async (id, index) => {
-      return {
-        contract_address: address,
-        block_number: blockNumber,
-        block_timestamp: block.timestamp,
-        to_owner_address: args.to,
-        from_owner_address: args.from,
-        token_id: id,
-        value: args.values[index],
-      };
+  return params.ids.map((id, index) =>
+    ParsedTransferSingle.parse({
+      contract_address: address,
+      to_owner_address: params.to,
+      from_owner_address: params.from,
+      token_id: id,
+      value: params.values[index],
     }),
   );
-
-  return transfers.map((transfer) => ParsedTransferSingle.parse(transfer));
 };

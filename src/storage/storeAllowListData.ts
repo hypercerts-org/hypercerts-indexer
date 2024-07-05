@@ -1,6 +1,7 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { StorageMethod } from "@/indexer/processLogs.js";
+import { StorageMethod } from "@/indexer/LogParser.js";
 import { z } from "zod";
+import _ from "lodash";
 
 const AllowListData = z.object({
   uri: z.string(),
@@ -13,8 +14,17 @@ export type AllowListData = z.infer<typeof AllowListData>;
 export const storeAllowListData: StorageMethod<AllowListData> = async ({
   data,
 }) => {
-  await supabase
-    .from("allow_list_data")
-    .upsert(data, { onConflict: "uri", ignoreDuplicates: false })
-    .throwOnError();
+  try {
+    const dataToStore = _.unionBy(data, "uri");
+    await supabase
+      .from("allow_list_data")
+      .upsert(dataToStore, { onConflict: "uri", ignoreDuplicates: false })
+      .throwOnError();
+  } catch (e: unknown) {
+    console.error(
+      "[storeAllowListData] Error while storing allow list data.",
+      e,
+    );
+    throw e;
+  }
 };

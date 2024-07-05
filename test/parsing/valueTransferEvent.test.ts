@@ -6,6 +6,8 @@ import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { client } from "@/clients/evmClient.js";
 import { alchemyUrl } from "../resources/alchemyUrl";
 import { getAddress } from "viem";
+import { Block } from "chainsauce";
+import { chainId } from "../../src/utils/constants";
 
 describe("valueTransferEvent", () => {
   const claimID = faker.number.bigInt();
@@ -13,13 +15,22 @@ describe("valueTransferEvent", () => {
   const toTokenID = faker.number.bigInt();
   const value = faker.number.bigInt();
   const address = getAddress(faker.finance.ethereumAddress());
-  const blockNumber = faker.number.bigInt();
   const timestamp = faker.number.bigInt();
+
+  const block: Block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    timestamp: faker.number.int(),
+  };
+
+  const context = {
+    block,
+  };
 
   const event = {
     address,
-    blockNumber,
-    args: {
+    params: {
       claimID,
       fromTokenID,
       toTokenID,
@@ -43,16 +54,15 @@ describe("valueTransferEvent", () => {
   });
 
   it("parses valueTransferEvent", async () => {
-    const parsed = await parseValueTransfer(event);
+    const [transfer] = await parseValueTransfer({ log: event, context });
 
-    if (!parsed) {
+    if (!transfer) {
       expect.fail("couldn't parse event");
     }
 
-    expect(parsed.from_token_id).toEqual(fromTokenID);
-    expect(parsed.to_token_id).toEqual(toTokenID);
-    expect(parsed.last_update_block_timestamp).toEqual(timestamp);
-    expect(parsed.units).toEqual(value);
+    expect(transfer.from_token_id).toEqual(fromTokenID);
+    expect(transfer.to_token_id).toEqual(toTokenID);
+    expect(transfer.units).toEqual(value);
   });
 
   it("fails if event is invalid", async () => {
@@ -60,13 +70,6 @@ describe("valueTransferEvent", () => {
       parseValueTransfer({
         ...event,
         address: "not an address",
-      }),
-    ).rejects.toThrow();
-
-    await expect(
-      parseValueTransfer({
-        ...event,
-        blockNumber: "not an int",
       }),
     ).rejects.toThrow();
   });
