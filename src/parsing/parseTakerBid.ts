@@ -72,10 +72,7 @@ const TakerBidEventSchema = z.object({
   transactionHash: z.string(),
 });
 
-export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
-  log,
-  context: { block },
-}) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
   const { addresses } = getDeployment();
 
   try {
@@ -100,8 +97,9 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
     }).find((log) => log.eventName === "BatchValueTransfer");
 
     // @ts-expect-error args is missing in the type
-    const hypercertId = `${chainId}-${getAddress(bid.args?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+    const hypercertId = `${chainId}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
+    console.log("[parseTakerBidEvent] Hypercert ID", hypercertId);
     return [
       TakerBid.parse({
         amounts: bid.params.amounts,
@@ -113,8 +111,6 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
         strategy_id: bid.params.strategyId,
         hypercert_id: hypercertId,
         transaction_hash: bid.transactionHash,
-        creation_block_number: bid.blockNumber,
-        creation_block_timestamp: block.timestamp,
       }),
     ];
   } catch (e) {

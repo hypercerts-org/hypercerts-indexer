@@ -51,129 +51,129 @@ const getContractEvent = async (eventName: string) => {
   return contractEvent;
 };
 
-// indexer.on("HypercertMinter:ClaimStored", async ({ event, getBlock }) => {
-//   const contractEvent = await getContractEvent(event.name);
-//
-//   if (!contractEvent) return;
-//
-//   const block = await getBlock();
-//   const { contracts_id, events_id } = contractEvent;
-//
-//   await processEvent({
-//     log: event,
-//     context: {
-//       event_name: event.name,
-//       chain_id,
-//       contracts_id,
-//       events_id,
-//       block,
-//     },
-//   });
-// });
-//
-// indexer.on("HypercertMinter:ValueTransfer", async ({ event, getBlock }) => {
-//   const contractEvent = await getContractEvent(event.name);
-//
-//   if (!contractEvent) return;
-//
-//   const block = await getBlock();
-//   const { contracts_id, events_id } = contractEvent;
-//
-//   await processEvent({
-//     log: event,
-//     context: {
-//       event_name: event.name,
-//       chain_id,
-//       contracts_id,
-//       events_id,
-//       block,
-//     },
-//   });
-// });
-//
-// indexer.on(
-//   "HypercertMinter:BatchValueTransfer",
-//   async ({ event, getBlock }) => {
-//     const contractEvent = await getContractEvent(event.name);
-//
-//     if (!contractEvent) return;
-//
-//     const block = await getBlock();
-//     const { contracts_id, events_id } = contractEvent;
-//
-//     await processEvent({
-//       log: event,
-//       context: {
-//         event_name: event.name,
-//         chain_id,
-//         contracts_id,
-//         events_id,
-//         block,
-//       },
-//     });
-//   },
-// );
-//
-// indexer.on("HypercertMinter:TransferBatch", async ({ event, getBlock }) => {
-//   const contractEvent = await getContractEvent(event.name);
-//
-//   if (!contractEvent) return;
-//
-//   const block = await getBlock();
-//   const { contracts_id, events_id } = contractEvent;
-//
-//   await processEvent({
-//     log: event,
-//     context: {
-//       event_name: event.name,
-//       chain_id,
-//       contracts_id,
-//       events_id,
-//       block,
-//     },
-//   });
-// });
-//
-// indexer.on("HypercertMinter:TransferSingle", async ({ event, getBlock }) => {
-//   const contractEvent = await getContractEvent(event.name);
-//
-//   if (!contractEvent) return;
-//
-//   const block = await getBlock();
-//   const { contracts_id, events_id } = contractEvent;
-//
-//   await processEvent({
-//     log: event,
-//     context: {
-//       event_name: event.name,
-//       chain_id,
-//       contracts_id,
-//       events_id,
-//       block,
-//     },
-//   });
-// });
-//
-// indexer.on("HypercertMinter:LeafClaimed", async ({ event, getBlock }) => {
-//   const contractEvent = await getContractEvent(event.name);
-//
-//   if (!contractEvent) return;
-//
-//   const block = await getBlock();
-//   const { contracts_id, events_id } = contractEvent;
-//
-//   await processEvent({
-//     log: event,
-//     context: {
-//       event_name: event.name,
-//       chain_id,
-//       contracts_id,
-//       events_id,
-//       block,
-//     },
-//   });
-// });
-//
+indexer.on("HypercertMinter:ClaimStored", async ({ event, getBlock }) => {
+  const contractEvent = await getContractEvent(event.name);
+
+  if (!contractEvent) return;
+
+  const block = await getBlock();
+  const { contracts_id, events_id } = contractEvent;
+
+  await processEvent({
+    log: event,
+    context: {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+    },
+  });
+});
+
+indexer.on("HypercertMinter:ValueTransfer", async ({ event, getBlock }) => {
+  const contractEvent = await getContractEvent(event.name);
+
+  if (!contractEvent) return;
+
+  const block = await getBlock();
+  const { contracts_id, events_id } = contractEvent;
+
+  await processEvent({
+    log: event,
+    context: {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+    },
+  });
+});
+
+indexer.on(
+  "HypercertMinter:BatchValueTransfer",
+  async ({ event, getBlock }) => {
+    const contractEvent = await getContractEvent(event.name);
+
+    if (!contractEvent) return;
+
+    const block = await getBlock();
+    const { contracts_id, events_id } = contractEvent;
+
+    await processEvent({
+      log: event,
+      context: {
+        event_name: event.name,
+        chain_id,
+        contracts_id,
+        events_id,
+        block,
+      },
+    });
+  },
+);
+
+indexer.on("HypercertMinter:TransferBatch", async ({ event, getBlock }) => {
+  const contractEvent = await getContractEvent(event.name);
+
+  if (!contractEvent) return;
+
+  const block = await getBlock();
+  const { contracts_id, events_id } = contractEvent;
+
+  await processEvent({
+    log: event,
+    context: {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+    },
+  });
+});
+
+indexer.on("HypercertMinter:TransferSingle", async ({ event, getBlock }) => {
+  const contractEvent = await getContractEvent(event.name);
+
+  if (!contractEvent) return;
+
+  const block = await getBlock();
+  const { contracts_id, events_id } = contractEvent;
+
+  await processEvent({
+    log: event,
+    context: {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+    },
+  });
+});
+
+indexer.on("HypercertMinter:LeafClaimed", async ({ event, getBlock }) => {
+  const contractEvent = await getContractEvent(event.name);
+
+  if (!contractEvent) return;
+
+  const block = await getBlock();
+  const { contracts_id, events_id } = contractEvent;
+
+  await processEvent({
+    log: event,
+    context: {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+    },
+  });
+});
+
 indexer.on("HypercertExchange:TakerBid", async ({ event, getBlock }) => {
   const contractEvent = await getContractEvent(event.name);
 
