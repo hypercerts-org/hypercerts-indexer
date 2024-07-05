@@ -46,3 +46,6 @@ dist
 .env.sentry-build-plugin
 
 .idea/
+
+caching/
+pr.txt

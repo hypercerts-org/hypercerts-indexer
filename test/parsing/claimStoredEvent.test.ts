@@ -4,10 +4,23 @@ import { faker } from "@faker-js/faker";
 import { client } from "@/clients/evmClient.js";
 import { getAddress, GetTransactionReturnType } from "viem";
 import { generateClaimStoredEvent } from "../helpers/factories.js";
+import { Block } from "chainsauce";
+import { chainId } from "../../src/utils/constants.js";
 
 vi.mock("../../src/utils/getBlockTimestamp.js");
 
 describe("claimStoredEvent", {}, () => {
+  const block: Block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    timestamp: faker.number.int(),
+  };
+
+  const context = {
+    block,
+  };
+
   it("parses a claim stored event", {}, async () => {
     const mockEvent = generateClaimStoredEvent();
 
@@ -20,22 +33,14 @@ describe("claimStoredEvent", {}, () => {
 
     vi.spyOn(client, "readContract").mockResolvedValue(owner);
 
-    const parsed = await parseClaimStoredEvent(mockEvent, {
-      block: {
-        blockNumber: 42n,
-      },
-    });
+    const parsed = await parseClaimStoredEvent({ log: mockEvent, context });
 
-    expect(parsed).toEqual({
-      creation_block_number: mockEvent.blockNumber,
-      creation_block_timestamp: 42n,
-      last_update_block_number: mockEvent.blockNumber,
-      last_update_block_timestamp: 42n,
+    expect(parsed[0]).toEqual({
       creator_address: from,
       owner_address: "0x0000000000000000000000000000000000000000",
-      uri: mockEvent.args.uri,
-      units: mockEvent.args.totalUnits,
-      token_id: mockEvent.args.claimID,
+      uri: mockEvent.params.uri,
+      units: mockEvent.params.totalUnits,
+      token_id: mockEvent.params.claimID,
     });
   });
 
@@ -53,7 +58,7 @@ describe("claimStoredEvent", {}, () => {
     const mockEvent = generateClaimStoredEvent({ address: "0xinvalid" });
 
     await expect(
-      async () => await parseClaimStoredEvent(mockEvent),
+      async () => await parseClaimStoredEvent({ log: mockEvent, context }),
     ).rejects.toThrowError();
   });
 });

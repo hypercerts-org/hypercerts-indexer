@@ -5,6 +5,8 @@
 import { createClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 
+export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
 const main = async () => {
   dotenv.config();
 
@@ -26,13 +28,19 @@ const main = async () => {
     process.env.SUPABASE_CACHING_SERVICE_API_KEY!,
   );
 
-  const minterContractSlug = "minter-contract";
+  const easContractSlug = "eas-contract";
   const marketplaceContractSlug = "marketplace-contract";
+  const minterContractSlug = "minter-contract";
 
   // Seed the database with default events
   console.log("🕊️ Seeding events...");
   await supabase.from("events").upsert(
     [
+      {
+        name: "Attested",
+        abi: "event Attested(address indexed recipient, address indexed attester, bytes32 uid, bytes32 indexed schema)",
+        contract_slug: easContractSlug,
+      },
       {
         name: "ClaimStored",
         abi: "event ClaimStored(uint256 indexed claimID, string uri, uint256 totalUnits)",
@@ -114,6 +122,12 @@ const main = async () => {
         start_block: 6053748,
         contract_slug: marketplaceContractSlug,
       },
+      {
+        chain_id: 11155111,
+        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        start_block: 6098991,
+        contract_slug: easContractSlug,
+      },
     ],
     {
       onConflict: "contract_address, chain_id",
@@ -125,14 +139,14 @@ const main = async () => {
   await supabase.from("supported_schemas").insert({
     chain_id: 11155111,
     uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+    schema:
+      "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+    resolver: ZERO_ADDRESS,
+    revocable: true,
     last_block_indexed: 6098991,
   });
 
-  const { data: schemas } = await supabase
-    .from("supported_schemas")
-    .select("*");
-
-  console.log(schemas);
+  await supabase.from("supported_schemas").select("*");
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");

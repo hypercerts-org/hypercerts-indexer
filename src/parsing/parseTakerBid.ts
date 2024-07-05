@@ -6,7 +6,7 @@ import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { chainId } from "@/utils/constants.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
-import { ParserMethod } from "@/indexer/processLogs.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.
@@ -42,10 +42,10 @@ import { ParserMethod } from "@/indexer/processLogs.js";
 
 const TakerBidEventSchema = z.object({
   address: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
-  args: z.object({
+  params: z.object({
     nonceInvalidationParameters: z.object({
       orderHash: z.string(),
-      orderNonce: z.bigint(),
+      orderNonce: z.coerce.bigint(),
       isNonceInvalidated: z.boolean(),
     }),
     bidUser: z
@@ -61,21 +61,18 @@ const TakerBidEventSchema = z.object({
     collection: z
       .string()
       .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-    itemIds: z.array(z.bigint()),
-    amounts: z.array(z.bigint()),
+    itemIds: z.array(z.coerce.bigint()),
+    amounts: z.array(z.coerce.bigint()),
     feeRecipients: z.array(
       z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
     ),
-    feeAmounts: z.array(z.bigint()),
+    feeAmounts: z.array(z.coerce.bigint()),
   }),
-  blockNumber: z.bigint(),
+  blockNumber: z.coerce.bigint(),
   transactionHash: z.string(),
 });
 
-export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
-  log,
-  context: { block },
-}) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ log }) => {
   const { addresses } = getDeployment();
 
   try {
@@ -100,21 +97,22 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
     }).find((log) => log.eventName === "BatchValueTransfer");
 
     // @ts-expect-error args is missing in the type
-    const hypercertId = `${chainId}-${getAddress(bid.args?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+    const hypercertId = `${chainId}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
-    return TakerBid.parse({
-      amounts: bid.args.amounts,
-      seller: getAddress(bid.args.bidRecipient),
-      buyer: getAddress(bid.args.bidUser),
-      currency: getAddress(bid.args.currency),
-      collection: getAddress(bid.args.collection),
-      item_ids: bid.args.itemIds,
-      strategy_id: bid.args.strategyId,
-      hypercert_id: hypercertId,
-      transaction_hash: bid.transactionHash,
-      creation_block_number: bid.blockNumber,
-      creation_block_timestamp: block.timestamp,
-    });
+    console.log("[parseTakerBidEvent] Hypercert ID", hypercertId);
+    return [
+      TakerBid.parse({
+        amounts: bid.params.amounts,
+        seller: getAddress(bid.params.bidRecipient),
+        buyer: getAddress(bid.params.bidUser),
+        currency: getAddress(bid.params.currency),
+        collection: getAddress(bid.params.collection),
+        item_ids: bid.params.itemIds,
+        strategy_id: bid.params.strategyId,
+        hypercert_id: hypercertId,
+        transaction_hash: bid.transactionHash,
+      }),
+    ];
   } catch (e) {
     console.error("[parseTakerBidEvent] Error parsing event", e);
     throw e;

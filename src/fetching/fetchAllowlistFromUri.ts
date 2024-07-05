@@ -26,14 +26,14 @@ export const fetchAllowListFromUri = async ({
   uri,
 }: FetchAllowListFromUriInput) => {
   if (!uri) {
-    console.debug("[FetchAllowListFromUri] No URI provided");
+    console.warn("[FetchAllowListFromUri] No URI provided");
     return;
   }
 
   const fetchResult = await fetchFromHttpsOrIpfs(uri);
 
   if (!fetchResult) {
-    console.debug(
+    console.warn(
       `[FetchAllowListFromUri] No metadata found on IPFS for URI ${uri}`,
     );
     return;

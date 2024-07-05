@@ -1,11 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { storeClaim } from "../../src/storage/storeClaimStored";
-import { server } from "../setup-env";
+import { storeClaimStored } from "../../src/storage/storeClaimStored.js";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { supabaseUrl } from "../../src/utils/constants";
-import { generateClaim } from "../helpers/factories";
+import { chainId, supabaseUrl } from "../../src/utils/constants.js";
+import { generateClaim } from "../helpers/factories.js";
+import { Block } from "chainsauce";
+import { faker } from "@faker-js/faker";
 
 describe("storeHypercert", {}, async () => {
+  const block: Block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    timestamp: faker.number.int(),
+  };
+
+  const context = {
+    block,
+  };
+
   const claim = generateClaim();
 
   it("store hypercert data  in DB", {}, async () => {
@@ -15,8 +28,9 @@ describe("storeHypercert", {}, async () => {
       }),
     );
 
-    const storedClaim = await storeClaim({
-      claims: [claim],
+    const storedClaim = await storeClaimStored({
+      data: [claim],
+      context,
     });
 
     expect(storedClaim).toBeUndefined();
@@ -30,8 +44,9 @@ describe("storeHypercert", {}, async () => {
 
     await expect(
       async () =>
-        await storeClaim({
-          claims: [wrongAddress],
+        await storeClaimStored({
+          data: [wrongAddress],
+          context,
         }),
     ).rejects.toThrowError();
   });

@@ -2,10 +2,8 @@ import { supabase } from "@/clients/supabaseClient.js";
 import { getHypercertTokenId } from "@/utils/tokenIds.js";
 import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
-import { getLowestValue } from "@/utils/getMostRecentOrDefined.js";
 import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
-import { StorageMethod } from "@/indexer/processLogs.js";
-import _ from "lodash";
+import { StorageMethod } from "@/indexer/LogParser.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -26,80 +24,76 @@ import _ from "lodash";
 
 export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
   data,
+  context: { block },
 }) => {
-  if (_.isArray(data)) return;
+  for (const transfer of data) {
+    const { token_id, contract_address, to_owner_address, value } = transfer;
+    const hypercertTokenId = getHypercertTokenId(token_id);
 
-  const hypercertTokenId = getHypercertTokenId(data.token_id);
+    if (hypercertTokenId.toString() === token_id.toString()) return;
 
-  if (hypercertTokenId.toString() === data.token_id.toString()) return;
+    let claims_id;
 
-  let claims_id;
-
-  try {
-    const { data: claim_id, error: claimError } = await supabase.rpc(
-      "get_or_create_claim",
-      {
-        p_chain_id: chainId,
-        p_contract_address: getAddress(data.contract_address),
-        p_token_id: hypercertTokenId.toString(),
-        p_creation_block_number: data.block_number,
-        p_creation_block_timestamp: data.block_timestamp,
-        p_last_update_block_timestamp: data.block_timestamp,
-        p_last_update_block_number: data.block_number,
-      },
-    );
-    if (claimError || !claim_id) {
-      console.error(
-        `[storeTransferSingle] Error while getting or creating claim for token ${data.token_id}.`,
-        claimError,
-        claim_id,
+    try {
+      const { data: claim_id, error: claimError } = await supabase.rpc(
+        "get_or_create_claim",
+        {
+          p_chain_id: chainId,
+          p_contract_address: getAddress(contract_address),
+          p_token_id: hypercertTokenId.toString(),
+          p_creation_block_number: block.blockNumber,
+          p_creation_block_timestamp: block.timestamp,
+          p_last_update_block_timestamp: block.blockNumber,
+          p_last_update_block_number: block.timestamp,
+        },
       );
+      if (claimError || !claim_id) {
+        console.error(
+          `[storeTransferSingle] Error while getting or creating claim for token ${token_id}.`,
+          claimError,
+          claim_id,
+        );
+        return;
+      }
+
+      claims_id = claim_id;
+    } catch (e: unknown) {
+      console.error(`[StoreUnitTransfer] Could net create or get claim_id.`, e);
       return;
     }
 
-    claims_id = claim_id;
-  } catch (e: unknown) {
-    console.error(`[StoreUnitTransfer] Could net create or get claim_id.`, e);
-    return;
+    const { data: token, error } = await supabase
+      .from("fractions")
+      .select("*, token_id::text")
+      .eq("token_id", token_id.toString())
+      .ilike("fraction_id", `${chainId}-${getAddress(contract_address)}-%`)
+      .maybeSingle();
+
+    if (error) {
+      console.error(`[storeTransferSingle] Error while getting token.`, error);
+      return;
+    }
+
+    const _token = {
+      ...token,
+      claims_id: token?.claims_id ?? claims_id,
+      fraction_id: `${chainId}-${getAddress(contract_address)}-${token_id}`,
+      token_id: token?.token_id.toString() ?? token_id.toString(),
+      creation_block_timestamp: block.timestamp.toString(),
+      creation_block_number: block.blockNumber,
+      last_update_block_timestamp: block.timestamp.toString(),
+      last_update_block_number: block.blockNumber,
+      owner_address: getAddress(to_owner_address),
+      value: value.toString(),
+    };
+
+    await supabase
+      .from("fractions")
+      .upsert(_token, {
+        onConflict: "claims_id, token_id",
+        ignoreDuplicates: false,
+        defaultToNull: true,
+      })
+      .throwOnError();
   }
-
-  const { data: token, error } = await supabase
-    .from("fractions")
-    .select("*, token_id::text")
-    .eq("token_id", data.token_id.toString())
-    .ilike("fraction_id", `${chainId}-${getAddress(data.contract_address)}-%`)
-    .maybeSingle();
-
-  if (error) {
-    console.error(`[storeTransferSingle] Error while getting token.`, error);
-    return;
-  }
-
-  const _token = {
-    ...token,
-    claims_id: token?.claims_id ?? claims_id,
-    fraction_id: `${chainId}-${getAddress(data.contract_address)}-${data.token_id}`,
-    token_id: token?.token_id.toString() ?? data.token_id.toString(),
-    creation_block_timestamp: getLowestValue(
-      token?.creation_block_timestamp,
-      data.block_timestamp,
-    ),
-    creation_block_number: getLowestValue(
-      token?.creation_block_number,
-      data.block_number,
-    ),
-    last_update_block_timestamp: data.block_timestamp,
-    last_update_block_number: data.block_number,
-    owner_address: getAddress(data.to_owner_address),
-    value: data.value.toString(),
-  };
-
-  await supabase
-    .from("fractions")
-    .upsert(_token, {
-      onConflict: "claims_id, token_id",
-      ignoreDuplicates: false,
-      defaultToNull: true,
-    })
-    .throwOnError();
 };

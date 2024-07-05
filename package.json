@@ -70,6 +70,7 @@
     "@supabase/supabase-js": "^2.44.2",
     "@types/lodash": "^4.17.6",
     "axios": "^1.7.2",
+    "chainsauce": "boudra/chainsauce#main",
     "ethers": "^6.13.1",
     "express": "^4.19.2",
     "lodash": "^4.17.21",

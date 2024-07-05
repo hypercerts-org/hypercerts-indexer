@@ -1,7 +1,7 @@
 import { getDeployment } from "@/utils/getDeployment.js";
 import { client } from "@/clients/evmClient.js";
-import easAbi from "@/abis/eas.json" assert { type: "json" };
-import { isAddress, isHex } from "viem";
+import easAbi from "@/abis/eas.js";
+import { getAddress, isAddress, isHex } from "viem";
 import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
@@ -46,10 +46,10 @@ export const fetchAttestationData = async ({
   );
 
   const _attestationData = await client.readContract({
-    address: easAddress as `0x${string}`,
+    address: getAddress(easAddress),
     abi: easAbi,
     functionName: "getAttestation",
-    args: [uid],
+    args: [uid as `0x${string}`],
   });
 
   return {

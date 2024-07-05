@@ -1,16 +1,16 @@
 import { expect, it, beforeEach, describe } from "vitest";
-import { decodeAttestationData } from "@/parsing/attestationData";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent";
-import { Tables } from "@/types/database.types";
-import { EasAttestation } from "@/fetching/fetchAttestationData";
+import { decodeAttestationData } from "@/parsing/attestationData.js";
+import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
+import { Tables } from "@/types/database.types.js";
+import { EasAttestation } from "@/fetching/fetchAttestationData.js";
 import { faker } from "@faker-js/faker";
 import { Address, getAddress } from "viem";
-import { chainId } from "@/utils/constants";
+import { chainId } from "@/utils/constants.js";
 import {
   generateEasAttestation,
   generateParsedAttestedEvent,
   generateSupportedSchema,
-} from "../helpers/factories";
+} from "../helpers/factories.js";
 
 describe("decodeAttestationData", () => {
   let attester: Address;
@@ -36,26 +36,28 @@ describe("decodeAttestationData", () => {
     schema = generateSupportedSchema();
   });
 
-  it("returns undefined when schema is incomplete", () => {
+  it("throws when schema is incomplete", () => {
     schema.schema = null;
-    expect(
+    expect(() =>
       decodeAttestationData({ attestation, event, schema }),
-    ).toBeUndefined();
+    ).toThrowError();
   });
 
-  it("returns undefined when attestation can't be parsed or is missing", () => {
-    const result = decodeAttestationData({
-      attestation: {} as EasAttestation,
-      event,
-      schema,
-    });
-    expect(result).toBeUndefined();
+  it("throws when attestation schema can't be parsed or is missing", () => {
+    expect(() =>
+      decodeAttestationData({
+        attestation: {} as EasAttestation,
+        event,
+        schema,
+      }),
+    ).toThrowError();
   });
 
-  it("returns undefined when attestation data cannot be parsed", () => {
+  it("throws when attestation data cannot be parsed", () => {
     attestation.data = "0xinvalid";
-    const result = decodeAttestationData({ attestation, event, schema });
-    expect(result).toBeUndefined();
+    expect(() =>
+      decodeAttestationData({ attestation, event, schema }),
+    ).toThrowError();
   });
 
   it("returns a new attestation object with decoded data when attestation data is valid", () => {
@@ -64,16 +66,38 @@ describe("decodeAttestationData", () => {
     expect(result).toMatchObject({
       attester,
       recipient,
-      creation_block_timestamp: event.creation_block_timestamp,
-      creation_block_number: event.creation_block_number,
       uid: attestation.uid,
       supported_schemas_id: schema.id,
-      attestation: JSON.parse(JSON.stringify(attestation)),
+      attestation,
       chain_id: BigInt(chainId),
       token_id: 146321417776003539289251081195660330926080n,
       contract_address: getAddress(
         "0xa16dfb32eb140a6f3f2ac68f41dad8c7e83c4941",
       ),
+      data: {
+        chain_id: 11155111,
+        comments: "Just evaluating.",
+        contract_address: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
+        evaluate_basic: 1,
+        evaluate_contributors: 1,
+        evaluate_properties: 1,
+        evaluate_work: 1,
+        tags: ["salad", "steak", "sauce", "ketchup"],
+        token_id: "146321417776003539289251081195660330926080",
+      },
     });
+
+    // expect(result).toMatchObject({
+    //   attester,
+    //   recipient,
+    //   uid: attestation.uid,
+    //   supported_schemas_id: schema.id,
+    //   attestation: JSON.parse(JSON.stringify(attestation)),
+    //   chain_id: BigInt(chainId),
+    //   token_id: 146321417776003539289251081195660330926080n,
+    //   contract_address: getAddress(
+    //     "0xa16dfb32eb140a6f3f2ac68f41dad8c7e83c4941",
+    //   ),
+    // });
   });
 });

@@ -1,6 +1,6 @@
 import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
 import { storeTransferSingle } from "@/storage/storeTransferSingle.js";
-import { StorageMethod } from "@/indexer/processLogs.js";
+import { StorageMethod } from "@/indexer/LogParser.js";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -23,9 +23,5 @@ export const storeTransferBatch: StorageMethod<ParsedTransferSingle> = async ({
   data,
   context,
 }) => {
-  if (!Array.isArray(data)) return;
-
-  await Promise.all(
-    data.map((record) => storeTransferSingle({ data: record, context })),
-  );
+  await storeTransferSingle({ data, context });
 };

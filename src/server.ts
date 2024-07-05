@@ -5,8 +5,8 @@ dotenv.config();
 import "./instrument.js";
 import express from "express";
 import * as Sentry from "@sentry/node";
-import { delay, port } from "./utils/constants.js";
-import { runIndexing } from "@/indexer/runIndexing.js";
+import { port } from "@/utils/constants.js";
+import Indexer from "@/indexer/indexer.js";
 
 // @ts-expect-error BigInt is not supported by JSON
 BigInt.prototype.toJSON = function () {
@@ -32,7 +32,9 @@ Sentry.setupExpressErrorHandler(app);
 app.listen(port, async () => {
   console.log(`Indexer listening on port ${port}`);
 
-  await runIndexing(delay);
+  const indexer = new Indexer();
+
+  await indexer.start();
 });
 
 export { app };

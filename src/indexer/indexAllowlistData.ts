@@ -4,7 +4,7 @@ import { storeAllowListData } from "@/storage/storeAllowListData.js";
 import { Tables } from "@/types/database.types.js";
 import { getUnparsedAllowLists } from "@/storage/getUnparsedAllowLists.js";
 import _ from "lodash";
-import { ParserContext } from "@/indexer/processLogs.js";
+import { ParserContext } from "@/indexer/LogParser.js";
 
 /*
  * This function indexes the logs of the ClaimStored event emitted by the HypercertMinter contract. Based on the last

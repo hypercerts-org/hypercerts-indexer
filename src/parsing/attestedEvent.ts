@@ -2,7 +2,12 @@ import { isAddress } from "viem";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
-import { getBlockTimestamp } from "@/utils/getBlockTimestamp.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
+import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
+import {
+  decodeAttestationData,
+  DecodedAttestation,
+} from "@/parsing/attestationData.js";
 
 export const AttestationSchema = z.object({
   uid: z.string(),
@@ -13,21 +18,9 @@ export const AttestationSchema = z.object({
   attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
 });
 
-export type Attestation = z.infer<typeof AttestationSchema>;
-
 export const AttestedEventSchema = z.object({
   address: z.string().refine(isAddress),
-  args: z.object({
-    recipient: z
-      .string()
-      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-    attester: z
-      .string()
-      .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-    uid: z.string(),
-    schema: z.string(),
-  }),
-  blockNumber: z.bigint(),
+  params: AttestationSchema,
 });
 
 const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
@@ -44,10 +37,6 @@ const ParsedAttestedEventSchema = z.object({
   recipient: z.string(),
   attester: z.string(),
   uid: z.string(),
-  creation_block_number: z.bigint(),
-  creation_block_timestamp: z.bigint(),
-  last_block_update_number: z.bigint(),
-  last_block_update_timestamp: z.bigint(),
 });
 
 export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
@@ -71,6 +60,7 @@ export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
  *     recipient: "0x5678",
  *     attester: "0x9abc",
  *     uid: "abcdef",
+ *     schema: "0x1234",
  *   },
  *   blockNumber: 1234n,
  * };
@@ -78,18 +68,36 @@ export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
  * console.log(parsedEvent); // { recipient: "0x5678", attester: "0x9abc", uid: "abcdef", block_timestamp: 1234567890n }
  * ```
  */
-export const parseAttestedEvent = async (log: unknown) => {
+export const parseAttestedEvent: ParserMethod<DecodedAttestation> = async ({
+  log,
+  context: { schema },
+}) => {
+  if (!schema) throw new Error("[parseAttestedEvent] Schema not found");
+
   const { easAddress } = getDeployment();
   const validator = createAttestedEventSchema({ easAddress });
-  const { args, blockNumber } = validator.parse(log);
 
-  return ParsedAttestedEventSchema.parse({
-    recipient: args.recipient,
-    attester: args.attester,
-    uid: args.uid,
-    creation_block_number: blockNumber,
-    creation_block_timestamp: await getBlockTimestamp(blockNumber),
-    last_block_update_number: blockNumber,
-    last_block_update_timestamp: await getBlockTimestamp(blockNumber),
-  });
+  try {
+    const { params } = validator.parse(log);
+
+    const attestedEvent = ParsedAttestedEventSchema.parse({
+      recipient: params.recipient,
+      attester: params.attester,
+      uid: params.uid,
+    });
+
+    const { attestation } = await fetchAttestationData({
+      attestedEvent,
+    });
+
+    return [
+      decodeAttestationData({
+        attestation,
+        schema,
+      }),
+    ];
+  } catch (error) {
+    console.error("[parseAttestedEvent] Error parsing attested event", error);
+    throw error;
+  }
 };

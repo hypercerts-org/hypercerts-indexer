@@ -1,6 +1,6 @@
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
 import { storeValueTransfer } from "@/storage/storeValueTransfer.js";
-import { StorageMethod } from "@/indexer/processLogs.js";
+import { StorageMethod } from "@/indexer/LogParser.js";
 import _ from "lodash";
 
 /* 
@@ -23,7 +23,5 @@ import _ from "lodash";
 export const storeBatchValueTransfer: StorageMethod<
   ParsedValueTransfer
 > = async ({ data, context }) => {
-  if (!_.isArray(data)) return;
-
-  await Promise.all(data.map((d) => storeValueTransfer({ data: d, context })));
+  await storeValueTransfer({ data, context });
 };

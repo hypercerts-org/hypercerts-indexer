@@ -1,17 +1,28 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { storeTransferSingle } from "../../src/storage/storeTransferSingle";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import { storeTransferSingle } from "../../src/storage/storeTransferSingle.js";
 import { faker } from "@faker-js/faker";
-import { server } from "../setup-env";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { supabaseUrl } from "../../src/utils/constants";
+import { chainId, supabaseUrl } from "../../src/utils/constants.js";
 import { getAddress } from "viem";
+import { Block } from "chainsauce";
+import { supabase } from "../../src/clients/supabaseClient";
 
 describe("storeTransferSingleFraction", () => {
+  const block: Block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64),
+    timestamp: faker.number.bigInt(),
+  };
+
+  const context = {
+    block,
+  };
+
   const transfer = {
-    block_number: faker.number.bigInt(),
     contract_address: faker.finance.ethereumAddress().toString(),
     value: faker.number.bigInt(),
-    block_timestamp: faker.number.bigInt(),
     from_owner_address: getAddress(faker.finance.ethereumAddress()),
     to_owner_address: getAddress(faker.finance.ethereumAddress()),
     token_id: 420n,
@@ -39,13 +50,14 @@ describe("storeTransferSingleFraction", () => {
   });
 
   it("should store the fraction tokens", async () => {
-    const response = await storeTransferSingle({
-      transfers: [transfer],
+    const spy = vi.spyOn(supabase, "from");
+    await storeTransferSingle({
+      data: [transfer],
+      context,
     });
 
-    if (!response) {
-      expect.fail("response undefined");
-    }
+    // 2 calls: get fraction and post new fraction
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 
   it.skip("should only store the entry for a token with newest timestamp", async () => {
@@ -66,7 +78,8 @@ describe("storeTransferSingleFraction", () => {
     };
 
     await storeTransferSingle({
-      transfers: [transferOld, transfer],
+      data: [transferOld, transfer],
+      context,
     });
 
     if (!theResult) {
@@ -77,7 +90,8 @@ describe("storeTransferSingleFraction", () => {
     expect(theResult[0].value).toBe(transfer.value.toString());
 
     await storeTransferSingle({
-      transfers: [transfer, transferOld],
+      data: [transfer, transferOld],
+      context,
     });
     if (!theResult) {
       expect.fail("resultReversed undefined");
