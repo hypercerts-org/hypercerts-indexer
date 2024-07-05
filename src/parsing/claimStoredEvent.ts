@@ -2,18 +2,17 @@ import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { Claim, ClaimSchema } from "@/storage/storeClaimStored.js";
-import { ParserMethod } from "@/indexer/processLogs.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {
     message: "[ClaimStoredEvent] Invalid contract address",
   }),
-  args: z.object({
-    claimID: z.bigint(),
+  params: z.object({
+    claimID: z.coerce.bigint(),
     uri: z.string(),
-    totalUnits: z.bigint(),
+    totalUnits: z.coerce.bigint(),
   }),
-  blockNumber: z.bigint(),
   transactionHash: z.string().refine(isHex),
 });
 
@@ -30,26 +29,23 @@ export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   log,
   context: { block, contracts_id },
 }) => {
-  const { args, address, transactionHash, blockNumber } =
-    ClaimStoredEventSchema.parse(log);
+  const { params, transactionHash } = ClaimStoredEventSchema.parse(log);
 
   try {
     const transaction = await client.getTransaction({
       hash: transactionHash,
     });
 
-    return ClaimSchema.parse({
-      contracts_id: contracts_id,
-      owner_address: "0x0000000000000000000000000000000000000000",
-      creator_address: transaction.from,
-      token_id: args.claimID,
-      uri: args.uri,
-      creation_block_number: blockNumber,
-      creation_block_timestamp: block.timestamp,
-      last_update_block_number: blockNumber,
-      last_update_block_timestamp: block.timestamp,
-      units: args.totalUnits,
-    });
+    return [
+      ClaimSchema.parse({
+        contracts_id: contracts_id,
+        owner_address: "0x0000000000000000000000000000000000000000",
+        creator_address: transaction.from,
+        token_id: params.claimID,
+        uri: params.uri,
+        units: params.totalUnits,
+      }),
+    ];
   } catch (error) {
     console.error(
       "[ParseClaimStoredEvent] Error parsing claim stored event",

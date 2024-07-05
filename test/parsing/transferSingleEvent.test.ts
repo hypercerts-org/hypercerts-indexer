@@ -7,8 +7,21 @@ import { client } from "@/clients/evmClient.js";
 
 import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
+import { Block } from "chainsauce";
+import { chainId } from "../../src/utils/constants.js";
 
 describe("transferSingleEvent", {}, () => {
+  const block: Block = {
+    chainId,
+    blockNumber: faker.number.bigInt(),
+    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    timestamp: faker.number.int(),
+  };
+
+  const context = {
+    block,
+  };
+
   const from = getAddress(faker.finance.ethereumAddress());
   const timestamp = 10n;
   const contractAddress = getAddress(faker.finance.ethereumAddress());
@@ -45,7 +58,7 @@ describe("transferSingleEvent", {}, () => {
       address: contractAddress,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
-      args: {
+      params: {
         id: claimID,
         operator: operatorAddress,
         from: fromAddress,
@@ -54,12 +67,10 @@ describe("transferSingleEvent", {}, () => {
       },
     };
 
-    const parsed = await parseTransferSingle(event);
+    const [transfer] = await parseTransferSingle({ log: event, context });
 
-    expect(parsed).toMatchObject({
+    expect(transfer).toMatchObject({
       contract_address: contractAddress,
-      block_number: blockNumber,
-      block_timestamp: timestamp,
       from_owner_address: fromAddress,
       to_owner_address: toAddress,
       token_id: claimID,

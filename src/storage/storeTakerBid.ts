@@ -9,7 +9,7 @@ import {
 import { ethers } from "ethers";
 import { alchemyUrl } from "@/clients/evmClient.js";
 import { chainId } from "@/utils/constants.js";
-import { StorageMethod } from "@/indexer/processLogs.js";
+import { StorageMethod } from "@/indexer/LogParser.js";
 import _ from "lodash";
 
 export const TakerBid = z.object({

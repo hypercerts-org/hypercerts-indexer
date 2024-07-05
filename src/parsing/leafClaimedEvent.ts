@@ -2,15 +2,14 @@ import { isAddress, isHex } from "viem";
 import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
-import { ParserMethod } from "@/indexer/processLogs.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
 
 const LeafClaimedSchema = z.object({
   address: z.string().refine(isAddress),
-  args: z.object({
-    tokenID: z.bigint(),
+  params: z.object({
+    tokenID: z.coerce.bigint(),
     leaf: z.string(),
   }),
-  blockNumber: z.bigint(),
   transactionHash: z.string().refine(isHex),
 });
 
@@ -18,8 +17,7 @@ const LeafClaimed = z.object({
   creator_address: z
     .string()
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-  token_id: z.bigint(),
-  creation_block_timestamp: z.bigint(),
+  token_id: z.coerce.bigint(),
   contract_address: z
     .string()
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
@@ -37,17 +35,18 @@ export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
   log,
   context: { block },
 }) => {
-  const { args, address, transactionHash } = LeafClaimedSchema.parse(log);
+  const { params, address, transactionHash } = LeafClaimedSchema.parse(log);
 
   const transaction = await client.getTransaction({
     hash: transactionHash,
   });
 
-  return LeafClaimed.parse({
-    creator_address: transaction.from,
-    token_id: args.tokenID,
-    creation_block_timestamp: block.timestamp,
-    contract_address: address,
-    leaf: args.leaf,
-  });
+  return [
+    LeafClaimed.parse({
+      creator_address: transaction.from,
+      token_id: params.tokenID,
+      contract_address: address,
+      leaf: params.leaf,
+    }),
+  ];
 };

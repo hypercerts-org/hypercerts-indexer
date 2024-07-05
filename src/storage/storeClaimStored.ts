@@ -1,11 +1,11 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
-import { StorageMethod } from "@/indexer/processLogs.js";
-import _ from "lodash";
+import { StorageMethod } from "@/indexer/LogParser.js";
 import { indexMetadata } from "@/indexer/indexMetadata.js";
 import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
+import { chainId } from "@/utils/constants.js";
 
 export const ClaimSchema = z.object({
   contracts_id: z.string().optional(),
@@ -15,12 +15,8 @@ export const ClaimSchema = z.object({
   owner_address: z
     .string()
     .refine(isAddress, { message: "Invalid owner address" }),
-  token_id: z.bigint(),
-  creation_block_number: z.bigint(),
-  creation_block_timestamp: z.bigint(),
-  last_update_block_number: z.bigint(),
-  last_update_block_timestamp: z.bigint(),
-  units: z.bigint(),
+  token_id: z.coerce.bigint(),
+  units: z.coerce.bigint(),
   uri: z.string(),
 });
 
@@ -60,33 +56,38 @@ export const storeClaimStored: StorageMethod<Claim> = async ({
   data,
   context,
 }) => {
-  // TODO toggle single/array parsing
-  if (_.isArray(data)) return;
-
-  const _claim = {
-    ...data,
+  const { block } = context;
+  const claims = data.map((token) => ({
+    ...token,
     value: 1,
-    token_id: data.token_id.toString(),
-    creation_block_number: data.creation_block_number.toString(),
-    creation_block_timestamp: data.creation_block_timestamp.toString(),
-    last_update_block_number: data.last_update_block_number.toString(),
-    last_update_block_timestamp: data.last_update_block_timestamp.toString(),
-    units: data.units.toString(),
-  };
+    token_id: token.token_id.toString(),
+    creation_block_number: block.blockNumber.toString(),
+    creation_block_timestamp: block.timestamp,
+    last_update_block_number: block.blockNumber.toString(),
+    last_update_block_timestamp: block.timestamp,
+    units: token.units.toString(),
+  }));
 
   try {
     await supabase
       .from("claims")
-      .upsert(_claim, {
+      .upsert(claims, {
         onConflict: "contracts_id, token_id",
         ignoreDuplicates: false,
       })
       .throwOnError();
 
     // TODO is this the best place for handling the additional data fetching?
-    await indexMetadata({ batchSize: 10n, context });
-    await indexAllowListData({ batchSize: 10n, context });
-    await indexAllowlistRecords({ batchSize: 10n, context });
+
+    const indexingConfig = {
+      batchSize: 10n,
+      chain_id: chainId,
+      context,
+      delay: 0,
+    };
+    await indexMetadata(indexingConfig);
+    await indexAllowListData(indexingConfig);
+    await indexAllowlistRecords(indexingConfig);
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
     throw error;

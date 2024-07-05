@@ -8,43 +8,43 @@ import { storeValueTransfer } from "@/storage/storeValueTransfer.js";
 import { storeTransferSingle } from "@/storage/storeTransferSingle.js";
 import { updateAllowlistRecordClaimed } from "@/storage/updateAllowlistRecordClaimed.js";
 import { parseTakerBidEvent } from "@/parsing/parseTakerBid.js";
-import {
-  ParserContext,
-  ParserMethod,
-  processLogs,
-  StorageMethod,
-} from "@/indexer/processLogs.js";
+import LogParser, { ParserContext } from "@/indexer/LogParser.js";
 import { updateLastBlockIndexedContractEvents } from "@/storage/updateLastBlockIndexedContractEvents.js";
 import { parseBatchValueTransfer } from "@/parsing/batchValueTransferEvent.js";
 import { storeTransferBatch } from "@/storage/storeTransferBatch.js";
 import { parseTransferBatch } from "@/parsing/transferBatchEvent.js";
 import { storeBatchValueTransfer } from "@/storage/storeBatchValueTransfer.js";
+import { parseAttestedEvent } from "@/parsing/attestedEvent.js";
+import { storeAttestations } from "@/storage/storeAttestations.js";
 
-const createHandler = <T>(
-  parsingMethod: ParserMethod<T | T[]>,
-  storageMethod: StorageMethod<T>,
-) => {
-  return {
-    parsingMethod,
-    storageMethod,
-  };
+class EventHandlerMissingError extends Error {
+  constructor(eventName: string) {
+    super(`No handler found for event ${eventName}`);
+  }
+}
+
+export const getEventHandler = (eventName: string) => {
+  switch (eventName) {
+    case "Attested":
+      return new LogParser(parseAttestedEvent, storeAttestations);
+    case "ClaimStored":
+      return new LogParser(parseClaimStoredEvent, storeClaimStored);
+    case "ValueTransfer":
+      return new LogParser(parseValueTransfer, storeValueTransfer);
+    case "BatchValueTransfer":
+      return new LogParser(parseBatchValueTransfer, storeBatchValueTransfer);
+    case "TransferBatch":
+      return new LogParser(parseTransferBatch, storeTransferBatch);
+    case "TransferSingle":
+      return new LogParser(parseTransferSingle, storeTransferSingle);
+    case "LeafClaimed":
+      return new LogParser(parseLeafClaimedEvent, updateAllowlistRecordClaimed);
+    case "TakerBid":
+      return new LogParser(parseTakerBidEvent, storeTakerBid);
+    default:
+      throw new EventHandlerMissingError(eventName);
+  }
 };
-
-export const eventHandlers = {
-  ClaimStored: createHandler(parseClaimStoredEvent, storeClaimStored),
-  ValueTransfer: createHandler(parseValueTransfer, storeValueTransfer),
-  BatchValueTransfer: createHandler(
-    parseBatchValueTransfer,
-    storeBatchValueTransfer,
-  ),
-  TransferBatch: createHandler(parseTransferBatch, storeTransferBatch),
-  TransferSingle: createHandler(parseTransferSingle, storeTransferSingle),
-  LeafClaimed: createHandler(
-    parseLeafClaimedEvent,
-    updateAllowlistRecordClaimed,
-  ),
-  TakerBid: createHandler(parseTakerBidEvent, storeTakerBid),
-} as const;
 
 export interface EventParser {
   log: unknown;
@@ -52,25 +52,22 @@ export interface EventParser {
 }
 
 export const processEvent = async ({ log, context }: EventParser) => {
-  if (!(log.eventName in eventHandlers)) {
-    console.error(`[runIndexing] No handler found for event ${log.eventName}`);
-    return;
-  }
-
-  const handler = eventHandlers[log.eventName];
-
-  const { parsingMethod, storageMethod } = handler;
-  await processLogs({
-    log,
-    parsingMethod,
-    storageMethod,
-    context,
-  }).then(() => {
-    const { contracts_id, events_id, block } = context;
-    updateLastBlockIndexedContractEvents({
-      contracts_id,
-      events_id,
-      last_block_indexed: block.number!,
+  try {
+    const handler = getEventHandler(log.name);
+    await handler.parse(log, context).then(() => {
+      const { contracts_id, events_id, block } = context;
+      updateLastBlockIndexedContractEvents({
+        contracts_id,
+        events_id,
+        last_block_indexed: block.blockNumber,
+      });
     });
-  });
+  } catch (e) {
+    if (e instanceof EventHandlerMissingError) {
+      console.warn(e.message);
+    } else {
+      console.error(`Error while processing event ${context.event_name}`);
+      throw e;
+    }
+  }
 };

@@ -1,17 +1,17 @@
 import { isAddress } from "viem";
 import { z } from "zod";
 import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
-import { ParserMethod } from "@/indexer/processLogs.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
 
 const ValueTransferEventSchema = z.object({
   address: z.string().refine(isAddress),
-  args: z.object({
-    claimIDs: z.array(z.bigint()),
-    fromTokenIDs: z.array(z.bigint()),
-    toTokenIDs: z.array(z.bigint()),
-    values: z.array(z.bigint()),
+  params: z.object({
+    claimIDs: z.array(z.coerce.bigint()),
+    fromTokenIDs: z.array(z.coerce.bigint()),
+    toTokenIDs: z.array(z.coerce.bigint()),
+    values: z.array(z.coerce.bigint()),
   }),
-  blockNumber: z.bigint(),
+  blockNumber: z.coerce.bigint(),
 });
 
 /*
@@ -21,23 +21,19 @@ const ValueTransferEventSchema = z.object({
  * @param event - The event object.
  * */
 export const parseBatchValueTransfer: ParserMethod<
-  ParsedValueTransfer[]
-> = async ({ log, context: { block } }) => {
-  const { args, blockNumber, address } = ValueTransferEventSchema.parse(log);
+  ParsedValueTransfer
+> = async ({ log }) => {
+  const { params, address } = ValueTransferEventSchema.parse(log);
 
-  return Promise.all(
-    args.claimIDs.map(async (claimID, index) => {
-      return ParsedValueTransfer.parse({
-        contract_address: address,
-        claim_id: claimID,
-        from_token_id: args.fromTokenIDs[index],
-        to_token_id: args.toTokenIDs[index],
-        units: args.values[index],
-        creation_block_number: blockNumber,
-        creation_block_timestamp: block.timestamp,
-        last_update_block_number: blockNumber,
-        last_update_block_timestamp: block.timestamp,
-      });
-    }),
-  );
+  const transfers = params.claimIDs.map((claimID, index) => {
+    return {
+      contract_address: address,
+      claim_id: claimID,
+      from_token_id: params.fromTokenIDs[index],
+      to_token_id: params.toTokenIDs[index],
+      units: params.values[index],
+    };
+  });
+
+  return transfers.map((transfer) => ParsedValueTransfer.parse(transfer));
 };

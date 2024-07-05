@@ -2,7 +2,6 @@ import { decodeAbiParameters, isAddress } from "viem";
 import { Tables } from "@/types/database.types.js";
 import { EasAttestation } from "@/fetching/fetchAttestationData.js";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi.js";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
 import { z } from "zod";
 
 const HypercertAttestationSchema = z.object(
@@ -16,6 +15,20 @@ const HypercertAttestationSchema = z.object(
   { message: `[decodeAttestationData] Invalid hypercert attestation data` },
 );
 
+const DecodedAttestationSchema = z.object({
+  attester: z.string(),
+  recipient: z.string(),
+  uid: z.string(),
+  supported_schemas_id: z.string(),
+  attestation: z.unknown(),
+  data: z.unknown(),
+  chain_id: z.coerce.bigint(),
+  contract_address: z.string(),
+  token_id: z.coerce.bigint(),
+});
+
+export type DecodedAttestation = z.infer<typeof DecodedAttestationSchema>;
+
 /**
  * Decodes attestation data from a given attestation and schema.
  *
@@ -27,9 +40,7 @@ const HypercertAttestationSchema = z.object(
  * @param {Object} params - The parameters for the function.
  * @param {ParsedAttestedEvent} params.event - The event data associated with the attestation.
  * @param {EasAttestation} params.attestation - The attestation data to decode.
- * @param {Object} params.schema - The schema to use for decoding. It should contain a `schema` and an `id`.
- * @param {string} params.schema.schema - The schema string.
- * @param {number} params.schema.id - The id of the schema.
+ * @param {Tables<"supported_schemas">} params.schema - The schema to use for decoding. It should contain a `schema` and an `id`.
  *
  * @returns {Object | undefined} A new attestation object with the decoded data, or undefined if the attestation data could not be decoded.
  *
@@ -52,13 +63,11 @@ const HypercertAttestationSchema = z.object(
  * console.log(decodedAttestation);
  * */
 export const decodeAttestationData = ({
-  event,
   attestation,
   schema,
 }: {
-  event: ParsedAttestedEvent;
   attestation: EasAttestation;
-  schema: Pick<Tables<"supported_schemas">, "schema" | "id">;
+  schema: Tables<"supported_schemas">;
 }) => {
   if (!schema.schema) {
     console.debug(
@@ -68,7 +77,9 @@ export const decodeAttestationData = ({
         uid: attestation.uid,
       },
     );
-    return;
+    throw new Error(
+      "[DecodeAttestationData] Schema is missing for ${schema.id}.",
+    );
   }
 
   const { attester, recipient, data, uid } = attestation;
@@ -90,28 +101,24 @@ export const decodeAttestationData = ({
       "[DecodeAttestationData] Error while decoding attestation data: ",
       error,
     );
-    return;
+    throw error;
   }
 
   try {
     const { chain_id, contract_address, token_id } =
       HypercertAttestationSchema.parse(_attestation);
 
-    return {
+    return DecodedAttestationSchema.parse({
       attester,
       recipient,
-      creation_block_timestamp: event.creation_block_timestamp,
-      creation_block_number: event.creation_block_number,
-      last_update_block_timestamp: event.creation_block_timestamp,
-      last_update_block_number: event.creation_block_number,
       uid,
       supported_schemas_id: schema.id,
-      attestation: JSON.parse(JSON.stringify(attestation)),
-      data: JSON.parse(JSON.stringify(_attestation)),
+      attestation: attestation,
+      data: _attestation,
       chain_id,
       contract_address,
       token_id,
-    };
+    });
   } catch (error) {
     console.error(
       "[DecodeAttestationData] Error while constructing attestation data: ",

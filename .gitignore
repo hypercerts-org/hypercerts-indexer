@@ -46,3 +46,5 @@ dist
 .env.sentry-build-plugin
 
 .idea/
+
+caching/

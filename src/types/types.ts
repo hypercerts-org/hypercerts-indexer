@@ -1,8 +1,10 @@
-import { LogParserContext } from "@/indexer/processLogs.js";
+import { ParserContext } from "@/indexer/LogParser.js";
 
 export type IndexerConfig = {
-  batchSize?: bigint;
-  context: LogParserContext;
+  chain_id: number;
+  delay: number;
+  batchSize: bigint;
+  context: ParserContext;
 };
 
 export type EventToFetch = {
