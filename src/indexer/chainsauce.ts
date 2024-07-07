@@ -1,15 +1,21 @@
-import { createIndexer, createHttpRpcClient } from "chainsauce";
 import { getRpcUrl } from "@/clients/evmClient.js";
 import SchemaRegistryAbi from "@/abis/schemaRegistry.js";
 import HypercertMinterAbi from "@/abis/hypercertMinter.js";
 import HypercertExchangeAbi from "@/abis/hypercertExchange.js";
 import { processEvent } from "@/indexer/eventHandlers.js";
-import { chainId as chain_id } from "@/utils/constants.js";
+import { chainId as chain_id, localCachingDbUrl } from "@/utils/constants.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import EasAbi from "@/abis/eas.js";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
 import { assertExists } from "@/utils/assertExists.js";
+import {
+  createHttpRpcClient,
+  createIndexer,
+  createPostgresCache,
+} from "@hypercerts-org/chainsauce";
+import pg from "pg";
 
+const { Pool } = pg;
 // -- Define contracts
 const MyContracts = {
   HypercertMinter: HypercertMinterAbi,
@@ -24,7 +30,17 @@ const contractEvents = await getContractEventsForChain();
 
 const rpcUrl = assertExists(getRpcUrl(), "rpcUrl");
 
+const pool = new Pool({
+  connectionString: localCachingDbUrl,
+});
+
+const cache = createPostgresCache({
+  connectionPool: pool,
+  schemaName: `cache_${chain_id}`,
+});
+
 const indexer = createIndexer({
+  cache,
   chain: {
     id: chain_id,
     maxBlockRange: 100000n,
