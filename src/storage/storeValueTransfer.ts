@@ -133,11 +133,16 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
         claims_id: token.claims_id.toString() ?? claimId,
         token_id: token.token_id.toString(),
         units: token?.units?.toString() ?? "0",
-        creation_block_number: token.creation_block_number.toString(),
-        creation_block_timestamp: token.creation_block_timestamp.toString(),
-        last_update_block_number: token.last_update_block_number.toString(),
+        creation_block_number:
+          token.creation_block_number.toString() ?? block.number.toString(),
+        creation_block_timestamp:
+          token.creation_block_timestamp.toString() ??
+          block.timestamp.toString(),
+        last_update_block_number:
+          token.last_update_block_number.toString() ?? block.number.toString(),
         last_update_block_timestamp:
-          token.last_update_block_timestamp.toString(),
+          token.last_update_block_timestamp.toString() ??
+          block.timestamp.toString(),
       };
     });
 

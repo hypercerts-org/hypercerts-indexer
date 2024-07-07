@@ -1,8 +1,13 @@
 import { fetchFromHTTPS, fetchFromIPFS } from "@/utils/fetching.js";
 
+const DO_NOT_PARSE = ["ipfs://null", "ipfs://", "ipfs://example"];
+
 export const fetchFromHttpsOrIpfs = async (uri?: string): Promise<unknown> => {
-  if (!uri || uri === "ipfs://null" || uri === "ipfs://") {
-    console.error("[fetchFromHttpsOrIpfs] URI is missing");
+  if (!uri || DO_NOT_PARSE.includes(uri)) {
+    console.warn(
+      "[fetchFromHttpsOrIpfs] URI is missing or not accepted: ",
+      uri,
+    );
     return;
   }
 

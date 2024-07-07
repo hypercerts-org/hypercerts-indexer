@@ -39,7 +39,7 @@ export const fetchFromHTTPS = async ({ uri }: { uri: string }) => {
 
 const getFromIPFSGateways = async (
   cidOrIpfsUri: string,
-  timeout: number = 10000,
+  timeout: number = 20000,
 ) => {
   const pointer = getPointer(cidOrIpfsUri);
 

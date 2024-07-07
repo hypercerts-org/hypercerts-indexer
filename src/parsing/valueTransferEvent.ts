@@ -34,7 +34,6 @@ export type ParsedValueTransfer = z.infer<typeof ParsedValueTransfer>;
  * */
 export const parseValueTransfer: ParserMethod<ParsedValueTransfer> = async ({
   log,
-  context: { block },
 }) => {
   const { params, address } = ValueTransferEventSchema.parse(log);
 

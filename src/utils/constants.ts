@@ -45,3 +45,8 @@ export const batchSize = BigInt(
 export const delay = Number(assertExists(process.env.DELAY, "Delay"));
 
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+
+export const localCachingDbUrl = assertExists(
+  process.env.LOCAL_CACHING_DB_URL,
+  "Local caching DB URL",
+);
