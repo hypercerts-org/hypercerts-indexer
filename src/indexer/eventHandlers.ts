@@ -47,14 +47,14 @@ export const getEventHandler = (eventName: string) => {
 };
 
 export interface EventParser {
-  log: unknown;
+  data: unknown;
   context: ParserContext;
 }
 
-export const processEvent = async ({ log, context }: EventParser) => {
+export const processEvent = async ({ data, context }: EventParser) => {
   try {
-    const handler = getEventHandler(log.name);
-    await handler.parse(log, context).then(() => {
+    const handler = getEventHandler(data.name);
+    await handler.parse(data, context).then(() => {
       const { contracts_id, events_id, block } = context;
       updateLastBlockIndexedContractEvents({
         contracts_id,

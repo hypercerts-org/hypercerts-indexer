@@ -22,8 +22,8 @@ const ValueTransferEventSchema = z.object({
  * */
 export const parseBatchValueTransfer: ParserMethod<
   ParsedValueTransfer
-> = async ({ log }) => {
-  const { params, address } = ValueTransferEventSchema.parse(log);
+> = async ({ data }) => {
+  const { params, address } = ValueTransferEventSchema.parse(data);
 
   const transfers = params.claimIDs.map((claimID, index) => {
     return {

@@ -2,10 +2,6 @@ import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { StorageMethod } from "@/indexer/LogParser.js";
-import { indexMetadata } from "@/indexer/indexMetadata.js";
-import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
-import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
-import { chainId } from "@/utils/constants.js";
 
 export const ClaimSchema = z.object({
   contracts_id: z.string().optional(),
@@ -76,18 +72,6 @@ export const storeClaimStored: StorageMethod<Claim> = async ({
         ignoreDuplicates: false,
       })
       .throwOnError();
-
-    // TODO is this the best place for handling the additional data fetching?
-
-    const indexingConfig = {
-      batchSize: 10n,
-      chain_id: chainId,
-      context,
-      delay: 0,
-    };
-    await indexMetadata(indexingConfig);
-    await indexAllowListData(indexingConfig);
-    await indexAllowlistRecords(indexingConfig);
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
     throw error;

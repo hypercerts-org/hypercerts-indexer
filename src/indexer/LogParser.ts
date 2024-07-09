@@ -8,10 +8,11 @@ export type ParserContext = {
   contracts_id: string;
   block: Block;
   schema?: Tables<"supported_schemas">;
+  dataFetcher?: (args: { uri: string }) => Promise<unknown>;
 };
 
 export interface ParserMethod<T> {
-  (params: { log: unknown; context: ParserContext }): Promise<T[]>;
+  (params: { data: unknown; context: ParserContext }): Promise<T[]>;
 }
 
 export interface StorageMethod<T> {
@@ -27,9 +28,9 @@ class LogParser<T> {
     this.storage = storage;
   }
 
-  async parse(log: unknown, context: ParserContext): Promise<void> {
+  async parse(data: unknown, context: ParserContext): Promise<void> {
     try {
-      const parsed = await this.parser({ log, context });
+      const parsed = await this.parser({ data, context });
       await this.storage({ data: parsed, context });
     } catch (error) {
       console.error(

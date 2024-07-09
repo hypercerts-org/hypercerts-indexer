@@ -29,13 +29,15 @@ export const storeMetadata = async ({
 }: {
   data: Database["public"]["Tables"]["metadata"]["Update"][];
 }) => {
-  if (!data || data.length === 0) {
-    console.error("[StoreMetadata] No data or contract provided");
+  if (data.length === 0) {
+    console.warn("[StoreMetadata] No data to store");
     return;
   }
 
   try {
     const dataToStore = _.unionBy(data, "uri");
+
+    console.log(dataToStore);
 
     await supabase
       .from("metadata")
