@@ -1,6 +1,7 @@
-import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
-import { HypercertMetadataValidator } from "@/utils/metadata.zod.js";
+import { HypercertMetadataValidator, Metadata } from "@/utils/metadata.zod.js";
 import { Database } from "@/types/database.types.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
+import { HypercertMetadata } from "@hypercerts-org/sdk";
 
 /*
  * This function fetches the metadata of a claim from the uri as stored in the claim on the contract.
@@ -25,48 +26,42 @@ import { Database } from "@/types/database.types.js";
  * ```
  */
 
-interface FetchMetadataFromUri {
-  uri?: string;
-}
-
-export const fetchMetadataFromUri = async ({ uri }: FetchMetadataFromUri) => {
-  const fetchResult = await fetchFromHttpsOrIpfs(uri);
-
-  if (!fetchResult) {
-    return;
-  }
-
-  const res = HypercertMetadataValidator.safeParse(fetchResult);
+export const parseMetadata: ParserMethod<HypercertMetadata> = async ({
+  data,
+}) => {
+  const res = HypercertMetadataValidator.safeParse(data);
 
   if (!res.success) {
     console.warn(
-      `[FetchMetadataFromUri] Invalid metadata for URI ${uri}`,
+      `[FetchMetadataFromUri] Metadata validation failed`,
       res.error.message,
     );
-    return;
+    return [];
   }
 
   const _metadata = res.data;
 
-  const row: Database["public"]["Tables"]["metadata"]["Insert"] = {
+  const row = {
     name: _metadata.name,
     description: _metadata.description,
     external_url: _metadata.external_url,
     image: _metadata.image,
-    // @ts-expect-error - json array typing error
     properties: _metadata.properties,
     contributors: _metadata.hypercert?.contributors.value,
     impact_scope: _metadata.hypercert?.impact_scope.value,
-    impact_timeframe_from: _metadata.hypercert?.impact_timeframe?.value?.[0],
-    impact_timeframe_to: _metadata.hypercert?.impact_timeframe?.value?.[1],
+    impact_timeframe_from:
+      _metadata.hypercert?.impact_timeframe?.value?.[0]?.toString(),
+    impact_timeframe_to:
+      _metadata.hypercert?.impact_timeframe?.value?.[1]?.toString(),
     work_scope: _metadata.hypercert?.work_scope.value,
-    work_timeframe_from: _metadata.hypercert?.work_timeframe?.value?.[0],
-    work_timeframe_to: _metadata.hypercert?.work_timeframe?.value?.[1],
+    work_timeframe_from:
+      _metadata.hypercert?.work_timeframe?.value?.[0]?.toString(),
+    work_timeframe_to:
+      _metadata.hypercert?.work_timeframe?.value?.[1]?.toString(),
     rights: _metadata.hypercert?.rights?.value,
     allow_list_uri: _metadata.allowList,
-    uri,
     parsed: true,
   };
 
-  return row;
+  return [row];
 };

@@ -38,9 +38,9 @@ export type ParsedTransferSingle = z.infer<typeof ParsedTransferSingle>;
  * @param event - The event object.
  * */
 export const parseTransferSingle: ParserMethod<ParsedTransferSingle> = async ({
-  log,
+  data,
 }) => {
-  const { params, address } = TransferSingleEventSchema.parse(log);
+  const { params, address } = TransferSingleEventSchema.parse(data);
 
   return [
     ParsedTransferSingle.parse({

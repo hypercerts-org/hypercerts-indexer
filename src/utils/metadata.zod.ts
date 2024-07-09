@@ -37,23 +37,24 @@ const claimData: z.ZodType<HypercertClaimdata> = z.object({
   }),
 });
 
-const HypercertMetadataValidator: z.ZodType<HypercertMetadata> = z.object({
-  name: z.string(),
-  description: z.string(),
-  external_url: z.string().optional(),
-  image: z.string(),
-  version: z.string().optional(),
-  ref: z.string().optional(),
-  allowList: z.string().optional(),
-  properties: z
-    .array(
-      z.object({
-        trait_type: z.string().optional(),
-        value: z.string().optional(),
-      }),
-    )
-    .optional(),
-  hypercert: claimData,
-});
+export const HypercertMetadataValidator: z.ZodType<HypercertMetadata> =
+  z.object({
+    name: z.string(),
+    description: z.string(),
+    external_url: z.string().optional(),
+    image: z.string(),
+    version: z.string().optional(),
+    ref: z.string().optional(),
+    allowList: z.string().optional(),
+    properties: z
+      .array(
+        z.object({
+          trait_type: z.string().optional(),
+          value: z.string().optional(),
+        }),
+      )
+      .optional(),
+    hypercert: claimData,
+  });
 
-export { HypercertMetadataValidator };
+export type Metadata = z.infer<typeof HypercertMetadataValidator>;

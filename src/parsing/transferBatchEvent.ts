@@ -21,9 +21,9 @@ const TransferBatchEventSchema = z.object({
  * @param event - The event object.
  * */
 export const parseTransferBatch: ParserMethod<ParsedTransferSingle> = async ({
-  log,
+  data,
 }) => {
-  const { params, address } = TransferBatchEventSchema.parse(log);
+  const { params, address } = TransferBatchEventSchema.parse(data);
 
   return params.ids.map((id, index) =>
     ParsedTransferSingle.parse({

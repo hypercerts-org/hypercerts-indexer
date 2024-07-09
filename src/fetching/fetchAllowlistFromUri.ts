@@ -2,6 +2,7 @@ import { fetchFromHttpsOrIpfs } from "@/utils/fetchFromHttpsOrIpfs.js";
 import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 
 export interface FetchAllowListFromUriInput {
+  fetchMethod: (args: { uri: string }) => Promise<unknown>;
   uri?: string;
 }
 

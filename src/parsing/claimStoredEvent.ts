@@ -26,10 +26,10 @@ export type ClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
 export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
-  log,
-  context: { block, contracts_id },
+  data,
+  context: { contracts_id },
 }) => {
-  const { params, transactionHash } = ClaimStoredEventSchema.parse(log);
+  const { params, transactionHash } = ClaimStoredEventSchema.parse(data);
 
   try {
     const transaction = await client.getTransaction({
