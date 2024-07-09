@@ -1,5 +1,4 @@
-import { HypercertMetadataValidator, Metadata } from "@/utils/metadata.zod.js";
-import { Database } from "@/types/database.types.js";
+import { HypercertMetadataValidator } from "@/utils/metadata.zod.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 import { HypercertMetadata } from "@hypercerts-org/sdk";
 
