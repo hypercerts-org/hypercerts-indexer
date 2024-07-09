@@ -37,8 +37,6 @@ export const storeMetadata = async ({
   try {
     const dataToStore = _.unionBy(data, "uri");
 
-    console.log(dataToStore);
-
     await supabase
       .from("metadata")
       .upsert(dataToStore, {
