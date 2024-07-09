@@ -1,7 +1,6 @@
 import { ParserContext } from "@/indexer/LogParser.js";
 
 export type IndexerConfig = {
-  chain_id: number;
   delay: number;
   batchSize: bigint;
   context: ParserContext;

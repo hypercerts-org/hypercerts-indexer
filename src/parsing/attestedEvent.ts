@@ -69,7 +69,7 @@ export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
  * ```
  */
 export const parseAttestedEvent: ParserMethod<DecodedAttestation> = async ({
-  log,
+  data,
   context: { schema },
 }) => {
   if (!schema) throw new Error("[parseAttestedEvent] Schema not found");
@@ -78,7 +78,7 @@ export const parseAttestedEvent: ParserMethod<DecodedAttestation> = async ({
   const validator = createAttestedEventSchema({ easAddress });
 
   try {
-    const { params } = validator.parse(log);
+    const { params } = validator.parse(data);
 
     const attestedEvent = ParsedAttestedEventSchema.parse({
       recipient: params.recipient,

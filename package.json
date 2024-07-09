@@ -1,7 +1,7 @@
 {
   "name": "hypercerts-indexer",
   "version": "1.0.0",
-  "description": "",
+  "description": "Indexing service for the hypercerts ecosystem",
   "main": "dist/server.js",
   "engines": {
     "node": "20.x"
@@ -36,6 +36,7 @@
     "@types/express": "^4.17.21",
     "@types/express-serve-static-core": "^4.17.43",
     "@types/node": "^20.11.19",
+    "@types/pg": "^8.11.6",
     "@types/sinon": "^17.0.3",
     "@types/supertest": "^6.0.2",
     "@viem/anvil": "^0.0.10",
@@ -61,6 +62,7 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
+    "@hypercerts-org/chainsauce": "1.0.23-alpha.3",
     "@hypercerts-org/contracts": "2.0.0-alpha.0",
     "@hypercerts-org/marketplace-sdk": "^0.3.13",
     "@hypercerts-org/sdk": "^1.4.3",
@@ -70,11 +72,11 @@
     "@supabase/supabase-js": "^2.44.2",
     "@types/lodash": "^4.17.6",
     "axios": "^1.7.2",
-    "chainsauce": "boudra/chainsauce#main",
     "ethers": "^6.13.1",
     "express": "^4.19.2",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
+    "pg": "^8.12.0",
     "type-fest": "^4.20.1",
     "viem": "^2.16.4",
     "zod": "^3.23.8"
