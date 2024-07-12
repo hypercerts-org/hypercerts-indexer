@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@hypercerts-org/chainsauce':
-        specifier: 1.0.23-alpha.3
-        version: 1.0.23-alpha.3(zod@3.23.8)
+        specifier: 1.0.24
+        version: 1.0.24(zod@3.23.8)
       '@hypercerts-org/contracts':
         specifier: 2.0.0-alpha.0
         version: 2.0.0-alpha.0(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)
@@ -726,8 +726,8 @@ packages:
   '@humanwhocodes/object-schema@2.0.2':
     resolution: {integrity: sha512-6EwiSjwWYP7pTckG6I5eyFANjPhmPjUX9JRLUSfNPC7FX7zK9gyZAfUEaECL6ALTpGX5AjnBq3C9XmVWPitNpw==}
 
-  '@hypercerts-org/chainsauce@1.0.23-alpha.3':
-    resolution: {integrity: sha512-r5Kqdz3etiyy7JT2MsdZKv57+JzvDv40vHgJgP+8b1QzLzpzwhZ4X7iErBMBUHLR6ymhJNamNpsu4u0mPZ/M5w==}
+  '@hypercerts-org/chainsauce@1.0.24':
+    resolution: {integrity: sha512-HKRUlVsWyEJhfPdewvZeBJu1J6e667B60csrQuzJ8e+9d6MJFw3z+zZcKAbIbzsN7dSf9neBmW2KgMiUW/s2fw==}
 
   '@hypercerts-org/contracts@1.1.2':
     resolution: {integrity: sha512-+Y7TD1LX1c2FyU7OYuQ/NUFfcKaW5fIZ9R/Xr+DhNUbi7KstHhhdVEl1hmSExuvySbAD3wNKFaQWdlBRxT520Q==}
@@ -5597,7 +5597,7 @@ snapshots:
 
   '@humanwhocodes/object-schema@2.0.2': {}
 
-  '@hypercerts-org/chainsauce@1.0.23-alpha.3(zod@3.23.8)':
+  '@hypercerts-org/chainsauce@1.0.24(zod@3.23.8)':
     dependencies:
       '@types/pg': 8.11.6
       '@types/uuid': 9.0.8
