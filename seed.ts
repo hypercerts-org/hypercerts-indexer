@@ -118,8 +118,8 @@ const main = async () => {
       },
       {
         chain_id: 11155111,
-        contract_address: "0x9819bbb6980AaA586A8e80dB963a766C6D5711c4",
-        start_block: 6053748,
+        contract_address: "0xB1991E985197d14669852Be8e53ee95A1f4621c0",
+        start_block: 6326571,
         contract_slug: marketplaceContractSlug,
       },
       {
