@@ -1,10 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { server } from "../setup-env";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
 import { faker } from "@faker-js/faker";
-import { supabaseUrl } from "../../src/utils/constants";
-import { Tables } from "../../src/types/database.types";
-import { getSupportedSchemas } from "../../src/storage/getSupportedSchemas";
+import { supabaseUrl } from "../../src/utils/constants.js";
+import { Tables } from "../../src/types/database.types.js";
+import { getSupportedSchemas } from "../../src/storage/getSupportedSchemas.js";
 import { getAddress } from "viem";
 
 describe("getSupportedSchemas", {}, async () => {

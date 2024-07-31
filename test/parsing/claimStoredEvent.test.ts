@@ -1,13 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseClaimStoredEvent } from "@/parsing/claimStoredEvent.js";
+import { parseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent.js";
 import { faker } from "@faker-js/faker";
 import { client } from "@/clients/evmClient.js";
 import { getAddress, GetTransactionReturnType } from "viem";
 import { generateClaimStoredEvent } from "../helpers/factories.js";
-import { Block } from "chainsauce";
+import { Block } from "@hypercerts-org/chainsauce";
 import { chainId } from "../../src/utils/constants.js";
-
-vi.mock("../../src/utils/getBlockTimestamp.js");
 
 describe("claimStoredEvent", {}, () => {
   const block: Block = {
@@ -19,10 +17,14 @@ describe("claimStoredEvent", {}, () => {
 
   const context = {
     block,
+    event_name: "ClaimStored",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
   };
 
   it("parses a claim stored event", {}, async () => {
-    const mockEvent = generateClaimStoredEvent();
+    const event = generateClaimStoredEvent();
 
     const from = getAddress(faker.finance.ethereumAddress());
     const owner = getAddress(faker.finance.ethereumAddress());
@@ -33,14 +35,15 @@ describe("claimStoredEvent", {}, () => {
 
     vi.spyOn(client, "readContract").mockResolvedValue(owner);
 
-    const parsed = await parseClaimStoredEvent({ log: mockEvent, context });
+    const parsed = await parseClaimStoredEvent({ event, context });
 
     expect(parsed[0]).toEqual({
+      contracts_id: context.contracts_id,
       creator_address: from,
       owner_address: "0x0000000000000000000000000000000000000000",
-      uri: mockEvent.params.uri,
-      units: mockEvent.params.totalUnits,
-      token_id: mockEvent.params.claimID,
+      uri: event.params.uri,
+      units: event.params.totalUnits,
+      token_id: event.params.claimID,
     });
   });
 

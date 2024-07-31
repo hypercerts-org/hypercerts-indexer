@@ -1,8 +1,8 @@
 import { decodeAbiParameters, isAddress } from "viem";
 import { Tables } from "@/types/database.types.js";
-import { EasAttestation } from "@/fetching/fetchAttestationData.js";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi.js";
 import { z } from "zod";
+import { EasAttestation } from "@/parsing/parseAttestedEvent.js";
 
 const HypercertAttestationSchema = z.object(
   {
@@ -20,8 +20,8 @@ const DecodedAttestationSchema = z.object({
   recipient: z.string(),
   uid: z.string(),
   supported_schemas_id: z.string(),
-  attestation: z.unknown(),
-  data: z.unknown(),
+  attestation: z.any(),
+  data: z.any(),
   chain_id: z.coerce.bigint(),
   contract_address: z.string(),
   token_id: z.coerce.bigint(),
@@ -38,11 +38,10 @@ export type DecodedAttestation = z.infer<typeof DecodedAttestationSchema>;
  * If an error occurs during the decoding process, it logs the error and returns.
  *
  * @param {Object} params - The parameters for the function.
- * @param {ParsedAttestedEvent} params.event - The event data associated with the attestation.
  * @param {EasAttestation} params.attestation - The attestation data to decode.
  * @param {Tables<"supported_schemas">} params.schema - The schema to use for decoding. It should contain a `schema` and an `id`.
  *
- * @returns {Object | undefined} A new attestation object with the decoded data, or undefined if the attestation data could not be decoded.
+ * @returns {DecodedAttestation | undefined} A new attestation object with the decoded data, or undefined if the attestation data could not be decoded.
  *
  * @example
  * ```typescript
@@ -62,7 +61,7 @@ export type DecodedAttestation = z.infer<typeof DecodedAttestationSchema>;
  * const decodedAttestation = decodeAttestationData({ event, attestation, schema });
  * console.log(decodedAttestation);
  * */
-export const decodeAttestationData = ({
+export const parseAttestationData = ({
   attestation,
   schema,
 }: {

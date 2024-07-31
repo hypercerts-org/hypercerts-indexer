@@ -37,24 +37,21 @@ export type Database = {
       allow_list_data: {
         Row: {
           data: Json | null
-          id: string
           parsed: boolean | null
           root: string | null
-          uri: string | null
+          uri: string
         }
         Insert: {
           data?: Json | null
-          id?: string
           parsed?: boolean | null
           root?: string | null
-          uri?: string | null
+          uri: string
         }
         Update: {
           data?: Json | null
-          id?: string
           parsed?: boolean | null
           root?: string | null
-          uri?: string | null
+          uri?: string
         }
         Relationships: []
       }
@@ -188,13 +185,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contracts"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_uri_fkey"
-            columns: ["uri"]
-            isOneToOne: false
-            referencedRelation: "metadata"
-            referencedColumns: ["uri"]
           },
         ]
       }
@@ -340,7 +330,7 @@ export type Database = {
           hypercert_allow_lists_id: string
           id: string
           leaf: string
-          proof: Json
+          proof: string[]
           units: number
           user_address: string
         }
@@ -349,8 +339,8 @@ export type Database = {
           entry: number
           hypercert_allow_lists_id: string
           id?: string
-          leaf?: string
-          proof?: Json
+          leaf: string
+          proof: string[]
           units: number
           user_address: string
         }
@@ -360,18 +350,11 @@ export type Database = {
           hypercert_allow_lists_id?: string
           id?: string
           leaf?: string
-          proof?: Json
+          proof?: string[]
           units?: number
           user_address?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
-            columns: ["hypercert_allow_lists_id"]
-            isOneToOne: false
-            referencedRelation: "claimable_fractions_with_proofs"
-            referencedColumns: ["hypercert_allow_lists_id"]
-          },
           {
             foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
             columns: ["hypercert_allow_lists_id"]
@@ -390,45 +373,35 @@ export type Database = {
       }
       hypercert_allow_lists: {
         Row: {
-          allow_list_data_id: string | null
+          allow_list_data_uri: string | null
           claims_id: string
           id: string
           parsed: boolean | null
-          root: string | null
         }
         Insert: {
-          allow_list_data_id?: string | null
+          allow_list_data_uri?: string | null
           claims_id: string
           id?: string
           parsed?: boolean | null
-          root?: string | null
         }
         Update: {
-          allow_list_data_id?: string | null
+          allow_list_data_uri?: string | null
           claims_id?: string
           id?: string
           parsed?: boolean | null
-          root?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "hypercert_allow_lists_allow_list_data_id_fkey"
-            columns: ["allow_list_data_id"]
-            isOneToOne: false
-            referencedRelation: "allow_list_data"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
             columns: ["claims_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "claims"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
             columns: ["claims_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "hypercert_allowlists_with_claim"
             referencedColumns: ["claim_id"]
           },
@@ -447,7 +420,7 @@ export type Database = {
           impact_timeframe_to: number | null
           name: string | null
           parsed: boolean | null
-          properties: Json | null
+          properties: string | null
           rights: string[] | null
           uri: string | null
           work_scope: string[] | null
@@ -466,7 +439,7 @@ export type Database = {
           impact_timeframe_to?: number | null
           name?: string | null
           parsed?: boolean | null
-          properties?: Json | null
+          properties?: string | null
           rights?: string[] | null
           uri?: string | null
           work_scope?: string[] | null
@@ -485,22 +458,14 @@ export type Database = {
           impact_timeframe_to?: number | null
           name?: string | null
           parsed?: boolean | null
-          properties?: Json | null
+          properties?: string | null
           rights?: string[] | null
           uri?: string | null
           work_scope?: string[] | null
           work_timeframe_from?: number | null
           work_timeframe_to?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "metadata_allow_list_uri_fkey"
-            columns: ["allow_list_uri"]
-            isOneToOne: false
-            referencedRelation: "allow_list_data"
-            referencedColumns: ["uri"]
-          },
-        ]
+        Relationships: []
       }
       sales: {
         Row: {
@@ -551,7 +516,6 @@ export type Database = {
         Row: {
           chain_id: number
           id: string
-          last_block_indexed: number | null
           resolver: string | null
           revocable: boolean | null
           schema: string | null
@@ -560,7 +524,6 @@ export type Database = {
         Insert: {
           chain_id: number
           id?: string
-          last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
@@ -569,7 +532,6 @@ export type Database = {
         Update: {
           chain_id?: number
           id?: string
-          last_block_indexed?: number | null
           resolver?: string | null
           revocable?: boolean | null
           schema?: string | null
@@ -587,14 +549,29 @@ export type Database = {
           hypercert_id: string | null
           id: string | null
           leaf: string | null
-          proof: Json | null
+          proof: string[] | null
           root: string | null
           token_id: number | null
           total_units: number | null
           units: number | null
           user_address: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allow_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
+            columns: ["hypercert_allow_lists_id"]
+            isOneToOne: false
+            referencedRelation: "hypercert_allowlists_with_claim"
+            referencedColumns: ["hypercert_allow_list_id"]
+          },
+        ]
       }
       fractions_view: {
         Row: {
@@ -645,46 +622,25 @@ export type Database = {
         }
         Returns: number
       }
-      get_missing_metadata_uris: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          missing_uri: string
-        }[]
+      get_or_create_claim: {
+        Args: {
+          p_chain_id: number
+          p_contract_address: string
+          p_token_id: number
+          p_creation_block_number: number
+          p_creation_block_timestamp: number
+          p_last_update_block_number: number
+          p_last_update_block_timestamp: number
+        }
+        Returns: string
       }
-      get_or_create_claim:
-        | {
-            Args: {
-              p_chain_id: number
-              p_contract_address: string
-              p_token_id: number
-              p_creation_block_number: number
-              p_creation_block_timestamp: number
-              p_last_update_block_number: number
-              p_last_update_block_timestamp: number
-            }
-            Returns: string
-          }
-        | {
-            Args: {
-              p_contracts_id: string
-              p_token_id: number
-            }
-            Returns: {
-              contracts_id: string
-              creation_block_number: number
-              creation_block_timestamp: number
-              creator_address: string | null
-              hypercert_id: string | null
-              id: string
-              last_update_block_number: number
-              last_update_block_timestamp: number
-              owner_address: string | null
-              token_id: number
-              units: number | null
-              uri: string | null
-              value: number | null
-            }
-          }
+      get_or_create_hypercert_allow_list: {
+        Args: {
+          p_claim_id: string
+          p_allow_list_data_uri: string
+        }
+        Returns: string
+      }
       get_unparsed_hypercert_allow_lists: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -698,26 +654,7 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      fraction_type: {
-        claims_id: string | null
-        token_id: number | null
-        creation_block_timestamp: number | null
-        last_block_update_timestamp: number | null
-        owner_address: string | null
-        value: number | null
-      }
-      hc_allow_list_root_type: {
-        contract_id: string | null
-        token_id: number | null
-        root: string | null
-      }
-      transfer_units_type: {
-        claim_id: string | null
-        from_token_id: number | null
-        to_token_id: number | null
-        block_timestamp: number | null
-        units_transferred: number | null
-      }
+      [_ in never]: never
     }
   }
   storage: {

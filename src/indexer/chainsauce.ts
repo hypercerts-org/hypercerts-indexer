@@ -14,9 +14,8 @@ import {
   createPostgresCache,
 } from "@hypercerts-org/chainsauce";
 import pg from "pg";
-import { indexMetadata } from "@/indexer/indexMetadata.js";
-import { indexAllowListData } from "@/indexer/indexAllowlistData.js";
 import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
+import RequestQueue from "@/indexer/requestQueue.js";
 
 const { Pool } = pg;
 // -- Define contracts
@@ -56,13 +55,14 @@ const indexer = createIndexer({
   },
 });
 
+const requestQueue = new RequestQueue();
+
 const getContractEvent = async (eventName: string) => {
   const contractEvent = contractEvents?.find(
     (ce) => ce.event_name === eventName,
   );
 
   if (!contractEvent) {
-    console.log(contractEvents);
     console.warn(`Contract event not found for ${eventName}`);
     return;
   }
@@ -72,165 +72,241 @@ const getContractEvent = async (eventName: string) => {
 
 indexer.on(
   "HypercertMinter:ClaimStored",
-  async ({ event, getBlock, getData }) => {
+  async ({ event, getBlock, getData, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
-
     if (!contractEvent) return;
 
-    const block = await getBlock();
     const { contracts_id, events_id } = contractEvent;
-
     const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
+      block: await getBlock(),
       dataFetcher: getData,
+      readContract,
     };
 
-    await processEvent({
-      data: event,
+    const requests = await processEvent({
+      event,
       context,
     });
 
-    const indexingConfig = {
-      batchSize: 10n,
-      delay: 0,
-      context,
-    };
-    await indexMetadata(indexingConfig);
-    await indexAllowListData(indexingConfig);
-    await indexAllowlistRecords(indexingConfig);
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
+    });
   },
 );
 
-indexer.on("HypercertMinter:ValueTransfer", async ({ event, getBlock }) => {
-  const contractEvent = await getContractEvent(event.name);
+indexer.on(
+  "HypercertMinter:URI",
+  async ({ event, getBlock, getData, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
 
-  if (!contractEvent) return;
-
-  const block = await getBlock();
-  const { contracts_id, events_id } = contractEvent;
-
-  await processEvent({
-    data: event,
-    context: {
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
-    },
-  });
-});
+      block: await getBlock(),
+      dataFetcher: getData,
+      readContract,
+    };
+
+    const requests = await processEvent({
+      event,
+      context,
+    });
+
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
+
+indexer.on(
+  "HypercertMinter:ValueTransfer",
+  async ({ event, getBlock, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
+
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block: await getBlock(),
+      readContract,
+    };
+
+    const requests = await processEvent({
+      event,
+      context,
+    });
+
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
 
 indexer.on(
   "HypercertMinter:BatchValueTransfer",
-  async ({ event, getBlock }) => {
+  async ({ event, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
-
     if (!contractEvent) return;
 
-    const block = await getBlock();
     const { contracts_id, events_id } = contractEvent;
+    const context = {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block: await getBlock(),
+      readContract,
+    };
 
-    await processEvent({
-      data: event,
-      context: {
-        event_name: event.name,
-        chain_id,
-        contracts_id,
-        events_id,
-        block,
-      },
+    const requests = await processEvent({
+      event,
+      context,
+    });
+
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
     });
   },
 );
 
-indexer.on("HypercertMinter:TransferBatch", async ({ event, getBlock }) => {
-  const contractEvent = await getContractEvent(event.name);
+indexer.on(
+  "HypercertMinter:TransferSingle",
+  async ({ event, getBlock, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
 
-  if (!contractEvent) return;
-
-  const block = await getBlock();
-  const { contracts_id, events_id } = contractEvent;
-
-  await processEvent({
-    data: event,
-    context: {
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
-    },
-  });
-});
+      block: await getBlock(),
+      readContract,
+    };
 
-indexer.on("HypercertMinter:TransferSingle", async ({ event, getBlock }) => {
-  const contractEvent = await getContractEvent(event.name);
+    const requests = await processEvent({
+      event,
+      context,
+    });
 
-  if (!contractEvent) return;
+    if (!requests || requests?.length === 0) return;
 
-  const block = await getBlock();
-  const { contracts_id, events_id } = contractEvent;
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
 
-  await processEvent({
-    data: event,
-    context: {
+indexer.on(
+  "HypercertMinter:TransferBatch",
+  async ({ event, getBlock, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
+
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
-    },
-  });
-});
+      block: await getBlock(),
+      readContract,
+    };
 
-indexer.on("HypercertMinter:LeafClaimed", async ({ event, getBlock }) => {
-  const contractEvent = await getContractEvent(event.name);
+    const requests = await processEvent({
+      event,
+      context,
+    });
 
-  if (!contractEvent) return;
+    if (!requests || requests?.length === 0) return;
 
-  const block = await getBlock();
-  const { contracts_id, events_id } = contractEvent;
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
 
-  await processEvent({
-    data: event,
-    context: {
+indexer.on(
+  "HypercertMinter:LeafClaimed",
+  async ({ event, getBlock, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
+
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
-    },
-  });
-});
+      block: await getBlock(),
+      readContract,
+    };
 
-indexer.on("HypercertExchange:TakerBid", async ({ event, getBlock }) => {
-  const contractEvent = await getContractEvent(event.name);
+    const requests = await processEvent({
+      event,
+      context,
+    });
 
-  if (!contractEvent) return;
+    if (!requests || requests?.length === 0) return;
 
-  const block = await getBlock();
-  const { contracts_id, events_id } = contractEvent;
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
 
-  await processEvent({
-    data: event,
-    context: {
+indexer.on(
+  "HypercertExchange:TakerBid",
+  async ({ event, getBlock, readContract }) => {
+    const contractEvent = await getContractEvent(event.name);
+    if (!contractEvent) return;
+
+    const { contracts_id, events_id } = contractEvent;
+    const context = {
       event_name: event.name,
       chain_id,
       contracts_id,
       events_id,
-      block,
-    },
-  });
-});
+      block: await getBlock(),
+      readContract,
+    };
+
+    const requests = await processEvent({
+      event,
+      context,
+    });
+
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
+    });
+  },
+);
 
 indexer.on(
   "EAS:Attested",
-  async ({ event, getBlock, context: { supportedSchemas } }) => {
+  async ({ event, getBlock, context: { supportedSchemas }, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
 
     if (!contractEvent || !supportedSchemas) {
@@ -249,16 +325,25 @@ indexer.on(
     const block = await getBlock();
     const { contracts_id, events_id } = contractEvent;
 
-    await processEvent({
-      data: event,
-      context: {
-        event_name: event.name,
-        chain_id,
-        contracts_id,
-        events_id,
-        block,
-        schema,
-      },
+    const context = {
+      event_name: event.name,
+      chain_id,
+      contracts_id,
+      events_id,
+      block,
+      schema,
+      readContract,
+    };
+
+    const requests = await processEvent({
+      event,
+      context,
+    });
+
+    if (!requests || requests?.length === 0) return;
+
+    requestQueue.addRequests({
+      requests,
     });
   },
 );
@@ -302,6 +387,13 @@ indexer.on("error", (error) => {
 
 indexer.on("progress", async (progress) => {
   //     pendingEventsCount: 23
+  await requestQueue.submitQueue();
+
+  const indexingConfig = {
+    batchSize: 20n,
+  };
+  // await indexAllowlistRecords(indexingConfig);
+
   const percentage = (progress.currentBlock * 100n) / progress.targetBlock;
   console.info(
     `Indexed ${progress.currentBlock}/${progress.targetBlock} blocks | ${percentage}% | ${progress.pendingEventsCount} pending events`,

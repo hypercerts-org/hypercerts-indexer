@@ -1,6 +1,6 @@
 import { isAddress } from "viem";
 import { z } from "zod";
-import { ParsedTransferSingle } from "@/parsing/transferSingleEvent.js";
+import { ParsedTransferSingle } from "@/parsing/parseTransferSingleEvent.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 
 const TransferBatchEventSchema = z.object({
@@ -20,10 +20,10 @@ const TransferBatchEventSchema = z.object({
  *
  * @param event - The event object.
  * */
-export const parseTransferBatch: ParserMethod<ParsedTransferSingle> = async ({
-  data,
-}) => {
-  const { params, address } = TransferBatchEventSchema.parse(data);
+export const parseTransferBatchEvent: ParserMethod<
+  ParsedTransferSingle
+> = async ({ event }) => {
+  const { params, address } = TransferBatchEventSchema.parse(event);
 
   return params.ids.map((id, index) =>
     ParsedTransferSingle.parse({

@@ -1,8 +1,6 @@
 import { expect, it, beforeEach, describe } from "vitest";
-import { decodeAttestationData } from "@/parsing/attestationData.js";
-import { ParsedAttestedEvent } from "@/parsing/attestedEvent.js";
+import { parseAttestationData } from "../../src/parsing/parseAttestationData.js";
 import { Tables } from "@/types/database.types.js";
-import { EasAttestation } from "@/fetching/fetchAttestationData.js";
 import { faker } from "@faker-js/faker";
 import { Address, getAddress } from "viem";
 import { chainId } from "@/utils/constants.js";
@@ -11,11 +9,12 @@ import {
   generateParsedAttestedEvent,
   generateSupportedSchema,
 } from "../helpers/factories.js";
+import { EasAttestation } from "../../src/parsing/parseAttestedEvent.js";
 
 describe("decodeAttestationData", () => {
   let attester: Address;
   let recipient: Address;
-  let event = {} as ParsedAttestedEvent;
+  let event;
   let attestation: EasAttestation;
   let schema: Pick<Tables<"supported_schemas">, "schema" | "id">;
 
@@ -39,14 +38,14 @@ describe("decodeAttestationData", () => {
   it("throws when schema is incomplete", () => {
     schema.schema = null;
     expect(() =>
-      decodeAttestationData({ attestation, event, schema }),
+      parseAttestationData({ attestation, event, schema }),
     ).toThrowError();
   });
 
   it("throws when attestation schema can't be parsed or is missing", () => {
     expect(() =>
-      decodeAttestationData({
-        attestation: {} as EasAttestation,
+      parseAttestationData({
+        attestation: {},
         event,
         schema,
       }),
@@ -56,12 +55,12 @@ describe("decodeAttestationData", () => {
   it("throws when attestation data cannot be parsed", () => {
     attestation.data = "0xinvalid";
     expect(() =>
-      decodeAttestationData({ attestation, event, schema }),
+      parseAttestationData({ attestation, event, schema }),
     ).toThrowError();
   });
 
   it("returns a new attestation object with decoded data when attestation data is valid", () => {
-    const result = decodeAttestationData({ attestation, event, schema });
+    const result = parseAttestationData({ attestation, event, schema });
     expect(result).toBeDefined();
     expect(result).toMatchObject({
       attester,

@@ -72,11 +72,11 @@ const TakerBidEventSchema = z.object({
   transactionHash: z.string(),
 });
 
-export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ data }) => {
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ event }) => {
   const { addresses } = getDeployment();
 
   try {
-    const bid = TakerBidEventSchema.parse(data);
+    const bid = TakerBidEventSchema.parse(event);
 
     // parse logs to get claimID, contractAddress and cid
     const transactionLogs = await client

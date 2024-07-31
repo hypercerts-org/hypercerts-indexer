@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { parseTransferSingle } from "@/parsing";
+import { parseTransferSingleEvent } from "@/parsing/parseTransferSingleEvent.js";
 import { faker } from "@faker-js/faker";
-import { server } from "../setup-env";
 import { http, HttpResponse } from "msw";
 import { client } from "@/clients/evmClient.js";
+import { server } from "../setup-env.js";
 
 import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
-import { Block } from "chainsauce";
+import { Block } from "@hypercerts-org/chainsauce";
 import { chainId } from "../../src/utils/constants.js";
 
 describe("transferSingleEvent", {}, () => {
@@ -20,6 +20,10 @@ describe("transferSingleEvent", {}, () => {
 
   const context = {
     block,
+    event_name: "TransferSingle",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
   };
 
   const from = getAddress(faker.finance.ethereumAddress());
@@ -67,7 +71,7 @@ describe("transferSingleEvent", {}, () => {
       },
     };
 
-    const [transfer] = await parseTransferSingle({ log: event, context });
+    const [transfer] = await parseTransferSingleEvent({ event, context });
 
     expect(transfer).toMatchObject({
       contract_address: contractAddress,
@@ -96,7 +100,7 @@ describe("transferSingleEvent", {}, () => {
 
     await expect(
       async () =>
-        await parseTransferSingle({
+        await parseTransferSingleEvent({
           ...event,
           args: {
             ...args,
@@ -106,7 +110,7 @@ describe("transferSingleEvent", {}, () => {
     ).rejects.toThrowError();
 
     await expect(
-      parseTransferSingle({
+      parseTransferSingleEvent({
         ...event,
         args: {
           ...args,
@@ -116,7 +120,7 @@ describe("transferSingleEvent", {}, () => {
     ).rejects.toThrowError();
 
     await expect(
-      parseTransferSingle({
+      parseTransferSingleEvent({
         ...event,
         args: {
           ...args,
@@ -126,7 +130,7 @@ describe("transferSingleEvent", {}, () => {
     ).rejects.toThrowError();
 
     await expect(
-      parseTransferSingle({
+      parseTransferSingleEvent({
         ...event,
         args: {
           ...args,
@@ -136,7 +140,7 @@ describe("transferSingleEvent", {}, () => {
     ).rejects.toThrowError();
 
     await expect(
-      parseTransferSingle({
+      parseTransferSingleEvent({
         ...event,
         args: {
           ...args,
@@ -145,7 +149,7 @@ describe("transferSingleEvent", {}, () => {
       }),
     ).rejects.toThrowError();
     await expect(
-      parseTransferSingle({
+      parseTransferSingleEvent({
         ...event,
         args: {},
       }),

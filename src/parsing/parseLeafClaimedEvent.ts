@@ -32,10 +32,9 @@ export type LeafClaimed = z.infer<typeof LeafClaimed>;
  * @param event - The event object.
  * */
 export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
-  data,
-  context: { block },
+  event,
 }) => {
-  const { params, address, transactionHash } = LeafClaimedSchema.parse(data);
+  const { params, address, transactionHash } = LeafClaimedSchema.parse(event);
 
   const transaction = await client.getTransaction({
     hash: transactionHash,

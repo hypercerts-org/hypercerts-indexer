@@ -1,62 +1,44 @@
-import { supabase } from "@/clients/supabaseClient.js";
-import { LeafClaimed } from "@/parsing/leafClaimedEvent.js";
+import { LeafClaimed } from "@/parsing/parseLeafClaimedEvent.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
+import { dbClient } from "@/clients/dbClient.js";
 
 export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
   data,
 }) => {
+  const requests = [];
   for (const record of data) {
     const { leaf, token_id, creator_address } = record;
-    try {
-      // Get an allowlist record for corresponding tokenId and leaf that has not been claimed
-      const { data } = await supabase
-        .from("claimable_fractions_with_proofs")
-        .select("*, token_id::text")
-        .eq("leaf", leaf)
-        .ilike("user_address", creator_address)
-        .eq("claimed", false)
-        .eq("token_id", token_id.toString())
-        .maybeSingle()
-        .throwOnError();
 
-      if (!data) {
-        const alreadyClaimedRecord = await supabase
-          .from("claimable_fractions_with_proofs")
-          .select("*, token_id::text")
-          .eq("leaf", leaf)
-          .ilike("user_address", creator_address)
-          .eq("claimed", true)
-          .eq("token_id", token_id.toString())
-          .maybeSingle()
-          .throwOnError();
+    const fractionWithProof = await dbClient
+      .selectFrom("claimable_fractions_with_proofs")
+      .selectAll()
+      .where((eb) =>
+        eb.and([
+          eb("leaf", "=", leaf),
+          eb("user_address", "~*", creator_address),
+          eb("claimed", "=", false),
+          eb("token_id", "=", token_id),
+        ]),
+      )
+      .limit(1)
+      .execute();
 
-        if (alreadyClaimedRecord.data) {
-          console.error(
-            "[UpdateAllowlistRecordClaimed] Allowlist record already claimed",
-            alreadyClaimedRecord.data,
-          );
-
-          return;
-        }
-
-        console.error(
-          "[UpdateAllowlistRecordClaimed] Allowlist record not found",
-          { leaf, token_id, creator_address },
-        );
-
-        return;
-      }
-
-      await supabase
-        .from("hypercert_allow_list_records")
-        .update({ claimed: true })
-        .eq("id", data.id)
-        .throwOnError();
-    } catch (e) {
-      console.error(
-        "[UpdateAllowlistRecordClaimed] Error while updating allow list record as claimed",
-        e,
-      );
+    if (fractionWithProof.length === 0) {
+      throw new Error("Allowlist record not found");
     }
+
+    if (fractionWithProof[0].claimed === true) {
+      throw new Error("Allowlist record already claimed");
+    }
+
+    requests.push(
+      dbClient
+        .updateTable("hypercert_allow_list_records")
+        .set({ claimed: true })
+        .where("id", "=", fractionWithProof[0].id)
+        .compile(),
+    );
   }
+
+  return requests;
 };
