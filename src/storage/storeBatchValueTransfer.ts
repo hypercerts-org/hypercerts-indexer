@@ -1,7 +1,6 @@
-import { ParsedValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { ParsedValueTransfer } from "@/parsing/parseValueTransferEvent.js";
 import { storeValueTransfer } from "@/storage/storeValueTransfer.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
-import _ from "lodash";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.
@@ -10,7 +9,7 @@ import _ from "lodash";
     @returns The stored data.
 
     @example
-    ```js
+    ```j
     
     const token = {
 
@@ -23,5 +22,5 @@ import _ from "lodash";
 export const storeBatchValueTransfer: StorageMethod<
   ParsedValueTransfer
 > = async ({ data, context }) => {
-  await storeValueTransfer({ data, context });
+  return await storeValueTransfer({ data, context });
 };

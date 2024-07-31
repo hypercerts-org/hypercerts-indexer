@@ -1,13 +1,12 @@
-import { isAddress } from "viem";
+import { getAddress, isAddress, isHex } from "viem";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
-import { fetchAttestationData } from "@/fetching/fetchAttestationData.js";
 import {
-  decodeAttestationData,
+  parseAttestationData,
   DecodedAttestation,
-} from "@/parsing/attestationData.js";
+} from "@/parsing/parseAttestationData.js";
 
 export const AttestationSchema = z.object({
   uid: z.string(),
@@ -19,7 +18,7 @@ export const AttestationSchema = z.object({
 });
 
 export const AttestedEventSchema = z.object({
-  address: z.string().refine(isAddress),
+  address: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
   params: AttestationSchema,
 });
 
@@ -33,13 +32,24 @@ const createAttestedEventSchema = ({ easAddress }: { easAddress: string }) => {
   });
 };
 
-const ParsedAttestedEventSchema = z.object({
-  recipient: z.string(),
-  attester: z.string(),
-  uid: z.string(),
+//https://github.com/ethereum-attestation-service/eas-sdk/blob/master/src/eas.ts#L87
+// Zod validation of Attestation
+export const EasAttestationSchema = z.object({
+  uid: z.string().refine(isHex),
+  schema: z.string().refine(isHex),
+  refUID: z.string().refine(isHex),
+  time: z.bigint(),
+  expirationTime: z.bigint(),
+  revocationTime: z.bigint(),
+  recipient: z
+    .string()
+    .refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  revocable: z.boolean(),
+  attester: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
+  data: z.string().refine(isHex),
 });
 
-export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
+export type EasAttestation = z.infer<typeof EasAttestationSchema>;
 
 /**
  * Parses an attested event to extract the recipient, attester, attestation UID and block timestamp.
@@ -69,30 +79,28 @@ export type ParsedAttestedEvent = z.infer<typeof ParsedAttestedEventSchema>;
  * ```
  */
 export const parseAttestedEvent: ParserMethod<DecodedAttestation> = async ({
-  data,
-  context: { schema },
+  event,
+  context: { schema, readContract },
 }) => {
   if (!schema) throw new Error("[parseAttestedEvent] Schema not found");
+  if (!readContract) throw new Error("readContract is not defined");
 
   const { easAddress } = getDeployment();
   const validator = createAttestedEventSchema({ easAddress });
 
   try {
-    const { params } = validator.parse(data);
+    const { params } = validator.parse(event);
 
-    const attestedEvent = ParsedAttestedEventSchema.parse({
-      recipient: params.recipient,
-      attester: params.attester,
-      uid: params.uid,
-    });
-
-    const { attestation } = await fetchAttestationData({
-      attestedEvent,
+    const _attestationData = await readContract({
+      address: getAddress(easAddress),
+      contract: "EAS",
+      functionName: "getAttestation",
+      args: [params.uid],
     });
 
     return [
-      decodeAttestationData({
-        attestation,
+      parseAttestationData({
+        attestation: EasAttestationSchema.parse(_attestationData),
         schema,
       }),
     ];

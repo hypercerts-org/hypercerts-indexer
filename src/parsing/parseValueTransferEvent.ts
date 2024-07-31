@@ -6,21 +6,21 @@ import { ParserMethod } from "@/indexer/LogParser.js";
 const ValueTransferEventSchema = z.object({
   address: z.string().refine(isAddress),
   params: z.object({
-    claimID: z.coerce.bigint(),
-    fromTokenID: z.coerce.bigint(),
-    toTokenID: z.coerce.bigint(),
-    value: z.coerce.bigint(),
+    claimID: z.bigint(),
+    fromTokenID: z.bigint(),
+    toTokenID: z.bigint(),
+    value: z.bigint(),
   }),
 });
 
 export const ParsedValueTransfer = z.object({
-  claim_id: z.coerce.bigint(),
+  claim_id: z.bigint(),
   contract_address: z
     .string()
     .refine(isAddress, { message: messages.INVALID_ADDRESS }),
-  from_token_id: z.coerce.bigint(),
-  to_token_id: z.coerce.bigint(),
-  units: z.coerce.bigint(),
+  from_token_id: z.bigint(),
+  to_token_id: z.bigint(),
+  units: z.bigint(),
   contracts_id: z.string().optional(),
 });
 
@@ -32,10 +32,11 @@ export type ParsedValueTransfer = z.infer<typeof ParsedValueTransfer>;
  *
  * @param event - The event object.
  * */
-export const parseValueTransfer: ParserMethod<ParsedValueTransfer> = async ({
-  data,
-}) => {
-  const { params, address } = ValueTransferEventSchema.parse(data);
+export const parseValueTransferEvent: ParserMethod<
+  ParsedValueTransfer
+> = async ({ event }) => {
+  console.log(event);
+  const { params, address } = ValueTransferEventSchema.parse(event);
 
   return [
     ParsedValueTransfer.parse({

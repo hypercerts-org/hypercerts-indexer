@@ -1,10 +1,10 @@
 import { faker } from "@faker-js/faker";
-import { ClaimStoredEvent } from "../../src/parsing/claimStoredEvent.js";
+import { ParseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent";
 import { getAddress, Hex } from "viem";
 import { EasAttestation } from "../../src/fetching/fetchAttestationData.js";
 import { SchemaRecord } from "../../src/fetching/fetchSchemaData.js";
 import { Tables } from "../../src/types/database.types.js";
-import { ParsedAttestedEvent } from "../../src/parsing/attestedEvent.js";
+import { ParsedAttestedEvent } from "../../src/parsing/parseAttestedEvent";
 import { easAttestation } from "./data.js";
 import { Claim } from "../../src/storage/storeClaimStored.js";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
@@ -23,8 +23,8 @@ export const generateClaim = (overrides?: Partial<Claim>): Claim => {
 };
 
 export const generateClaimStoredEvent = (
-  overrides?: Partial<ClaimStoredEvent>,
-): ClaimStoredEvent => {
+  overrides?: Partial<ParseClaimStoredEvent>,
+): ParseClaimStoredEvent => {
   return {
     address: getAddress(faker.finance.ethereumAddress()),
     transactionHash: faker.string.hexadecimal({ length: 64 }) as Hex,

@@ -1,6 +1,6 @@
 import { isAddress } from "viem";
 import { z } from "zod";
-import { supabase, supabaseData } from "@/clients/supabaseClient.js";
+import { supabaseData } from "@/clients/supabaseClient.js";
 import {
   HypercertExchangeClient,
   Maker,
@@ -10,6 +10,7 @@ import { ethers } from "ethers";
 import { getRpcUrl } from "@/clients/evmClient.js";
 import { chainId } from "@/utils/constants.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
+import { dbClient } from "@/clients/dbClient.js";
 
 export const TakerBid = z.object({
   buyer: z.string().refine(isAddress, { message: "Invalid buyer address" }),
@@ -64,99 +65,89 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
   data,
   context: { block },
 }) => {
-  for (const takerBid of data) {
-    // Update taker bids in database
-    try {
-      const _takerBidForStorage = {
-        ...takerBid,
-        creation_block_timestamp: block.timestamp,
-        creation_block_number: block.blockNumber.toString(),
-        item_ids: takerBid.item_ids.map((id) => id.toString()),
-        amounts: takerBid.amounts.map((amount) => amount.toString()),
-      };
+  const takerBids = [];
 
-      await supabase
-        .from("sales")
-        .upsert(_takerBidForStorage, {
-          ignoreDuplicates: true,
-          onConflict: "transaction_hash",
-        })
-        .throwOnError();
-    } catch (error) {
-      console.error("[StoreTakerBid] Error storing taker bid", error);
-      throw error;
-    }
+  for (const takerBid of data) {
+    const _takerBid = {
+      ...takerBid,
+      creation_block_timestamp: block.timestamp,
+      creation_block_number: block.blockNumber.toString(),
+      item_ids: takerBid.item_ids.map((id) => id.toString()),
+      amounts: takerBid.amounts.map((amount) => amount.toString()),
+      strategy_id: takerBid.strategy_id.toString(),
+    };
+
+    takerBids.push(_takerBid);
   }
 
   // Check and update validity of related bids
+  // TODO refactor to separate step after block updates
   for (const takerBid of data) {
-    try {
-      // Check validity of existing orders for tokenIds
-      const { data: matchingOrders, error } = await supabaseData
-        .from("marketplace_orders")
-        .select("*")
-        .overlaps(
-          "itemIds",
-          takerBid.item_ids.map((id) => id.toString()),
-        );
+    // Check validity of existing orders for tokenIds
+    const { data: matchingOrders } = await supabaseData
+      .from("marketplace_orders")
+      .select("*")
+      .overlaps(
+        "itemIds",
+        takerBid.item_ids.map((id) => id.toString()),
+      )
+      .throwOnError();
 
-      if (error) {
-        console.error(
-          "[IndexTakerBid] Error while fetching existing orders for tokenIds",
-          error,
-        );
-        return;
-      }
-
-      const hypercertsExchange = new HypercertExchangeClient(
-        chainId,
-        new ethers.JsonRpcProvider(getRpcUrl()),
+    if (!matchingOrders)
+      throw new Error(
+        "[StoreTakerBid] Could not read matching orders from database",
       );
 
-      const signatures: string[] = [];
-      const orders: Maker[] = [];
+    const hypercertsExchange = new HypercertExchangeClient(
+      chainId,
+      // @ts-expect-error - No types available
+      new ethers.JsonRpcProvider(getRpcUrl()),
+    );
 
-      matchingOrders.forEach((order) => {
-        const {
-          signature,
-          chainId: _,
-          id: __,
-          ...orderWithoutSignature
-        } = order;
-        signatures.push(signature);
-        orders.push(orderWithoutSignature);
-      });
+    const signatures: string[] = [];
+    const orders: Maker[] = [];
 
-      const validationResults = await hypercertsExchange.verifyMakerOrders(
-        orders,
-        signatures,
-      );
+    matchingOrders.forEach((order) => {
+      const {
+        signature,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        chainId: _,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        id: __,
+        ...orderWithoutSignature
+      } = order;
+      signatures.push(signature);
+      orders.push(orderWithoutSignature);
+    });
 
-      const ordersToUpdate = validationResults
-        .map((result, index) => {
-          const isValid = !result.some((code) =>
-            FAULTY_ORDER_VALIDATOR_CODES.includes(code),
-          );
+    const validationResults = await hypercertsExchange.verifyMakerOrders(
+      orders,
+      signatures,
+    );
 
-          if (!isValid) {
-            const order = matchingOrders[index];
-            return {
-              ...order,
-              invalidated: true,
-              validator_codes: result,
-            };
-          }
-          return null;
-        })
-        .filter((x) => x !== null);
+    const ordersToUpdate = validationResults
+      .map((result, index) => {
+        const isValid = !result.some((code) =>
+          FAULTY_ORDER_VALIDATOR_CODES.includes(code),
+        );
 
-      console.log("[IndexTakerBid] Deleting invalid orders", ordersToUpdate);
-      await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
-    } catch (error) {
-      console.error("[IndexTakerBid] Error processing taker bid", error);
-      throw error;
-    }
+        if (!isValid) {
+          const order = matchingOrders[index];
+          return {
+            ...order,
+            invalidated: true,
+            validator_codes: result,
+          };
+        }
+        return null;
+      })
+      .filter((x) => x !== null);
+
+    console.log("[IndexTakerBid] Deleting invalid orders", ordersToUpdate);
+    await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
   }
+
+  return [dbClient.insertInto("sales").values(takerBids).compile()];
 };
 
 // TODO: Determine all error codes that result in the order being deleted

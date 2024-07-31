@@ -72,6 +72,11 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
+        name: "URI",
+        abi: "event URI(string value, uint256 id)",
+        contract_slug: minterContractSlug,
+      },
+      {
         name: "TakerBid",
         abi: "event TakerBid((bytes32 orderHash, uint256 orderNonce, bool isNonceInvalidated) nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
         contract_slug: marketplaceContractSlug,

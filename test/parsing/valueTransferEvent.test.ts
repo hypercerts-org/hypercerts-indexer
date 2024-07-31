@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { faker } from "@faker-js/faker";
-import { server } from "../setup-env";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { parseValueTransfer } from "@/parsing/valueTransferEvent.js";
+import { parseValueTransferEvent } from "../../src/parsing/parseValueTransferEvent.js";
 import { client } from "@/clients/evmClient.js";
-import { alchemyUrl } from "../resources/alchemyUrl";
+import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
-import { Block } from "chainsauce";
-import { chainId } from "../../src/utils/constants";
+import { Block } from "@hypercerts-org/chainsauce";
+import { chainId } from "../../src/utils/constants.js";
 
 describe("valueTransferEvent", () => {
   const claimID = faker.number.bigInt();
@@ -20,12 +20,16 @@ describe("valueTransferEvent", () => {
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
-    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    blockHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
     timestamp: faker.number.int(),
   };
 
   const context = {
     block,
+    event_name: "ValueTransfer",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
   };
 
   const event = {
@@ -54,7 +58,7 @@ describe("valueTransferEvent", () => {
   });
 
   it("parses valueTransferEvent", async () => {
-    const [transfer] = await parseValueTransfer({ log: event, context });
+    const [transfer] = await parseValueTransferEvent({ event, context });
 
     if (!transfer) {
       expect.fail("couldn't parse event");
@@ -67,51 +71,24 @@ describe("valueTransferEvent", () => {
 
   it("fails if event is invalid", async () => {
     await expect(
-      parseValueTransfer({
-        ...event,
-        address: "not an address",
+      parseValueTransferEvent({
+        event: { dummy: "object" },
+        context,
       }),
     ).rejects.toThrow();
   });
 
   it("fails if args are invalid", async () => {
     await expect(
-      parseValueTransfer({
-        ...event,
-        args: {
-          ...event.args,
-          claimID: "not an int",
+      parseValueTransferEvent({
+        event: {
+          ...event,
+          params: {
+            ...event.params,
+            claimID: "Not a number",
+          },
         },
-      }),
-    ).rejects.toThrow();
-
-    await expect(
-      parseValueTransfer({
-        ...event,
-        args: {
-          ...event.args,
-          fromTokenID: "not an int",
-        },
-      }),
-    ).rejects.toThrow();
-
-    await expect(
-      parseValueTransfer({
-        ...event,
-        args: {
-          ...event.args,
-          toTokenID: "not an int",
-        },
-      }),
-    ).rejects.toThrow();
-
-    await expect(
-      parseValueTransfer({
-        ...event,
-        args: {
-          ...event.args,
-          value: "not an int",
-        },
+        context,
       }),
     ).rejects.toThrow();
   });

@@ -50,3 +50,5 @@ export const localCachingDbUrl = assertExists(
   process.env.LOCAL_CACHING_DB_URL,
   "Local caching DB URL",
 );
+
+export const dbUrl = assertExists(process.env.DB_URL, "DB URL");

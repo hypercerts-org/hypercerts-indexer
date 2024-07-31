@@ -25,7 +25,7 @@ export const mockMetadata = {
       name: "Work Scope",
       value: ["art design", "metadata standards"],
       excludes: [],
-      display_value: "Art Design & Metadata Standards",
+      display_value: "Art Design & ParseMetadata Standards",
     },
     work_timeframe: {
       name: "Work Timeframe",
