@@ -133,8 +133,8 @@ create table hypercert_allow_lists
 
 create table hypercert_allow_list_records
 (
-    id                       uuid primary key        default gen_random_uuid(),
-    hypercert_allow_lists_id uuid           not null references hypercert_allow_lists (id),
+    id                       uuid primary key default gen_random_uuid(),
+    hypercert_allow_lists_id uuid           not null,
     user_address             text           not null,
     units                    numeric(78, 0) not null,
     entry                    numeric(78, 0) not null,

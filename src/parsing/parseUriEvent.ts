@@ -119,15 +119,8 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
           })
           .throwOnError();
 
-        const { data: hypercert_allow_list_id } = await supabase
-          .rpc("get_or_create_hypercert_allow_list", {
-            p_claim_id: claim_id,
-            p_allow_list_data_uri: metadata.allow_list_uri,
-          })
-          .throwOnError();
-
         hypercert_allow_list = {
-          id: hypercert_allow_list_id,
+          id: crypto.randomUUID(),
           claims_id: claim_id,
           allow_list_data_uri: metadata.allow_list_uri,
           parsed: true,
