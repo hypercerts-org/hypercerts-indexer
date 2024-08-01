@@ -8,9 +8,9 @@ export type ParserContext = {
   events_id: string;
   contracts_id: string;
   block: Block;
+  getData: (args: { uri: string }) => Promise<unknown>;
+  readContract: (args: never) => Promise<unknown>;
   schema?: Tables<"supported_schemas">;
-  dataFetcher?: (args: { uri: string }) => Promise<unknown>;
-  readContract?: (args: never) => Promise<unknown>;
 };
 
 export interface ParserMethod<T> {

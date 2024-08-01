@@ -126,7 +126,7 @@ create table hypercert_allow_lists
 (
     id                  uuid primary key default gen_random_uuid(),
     claims_id           uuid not null references claims (id),
-    allow_list_data_uri text,
+    allow_list_data_uri text not null,
     parsed              bool,
     UNIQUE (claims_id, allow_list_data_uri)
 );
@@ -138,7 +138,7 @@ create table hypercert_allow_list_records
     user_address             text           not null,
     units                    numeric(78, 0) not null,
     entry                    numeric(78, 0) not null,
-    claimed                  boolean        not null default false,
+    claimed                  boolean        not null,
     leaf                     text           not null,
     proof                    text[]         not null,
     UNIQUE (hypercert_allow_lists_id, user_address, units, entry)
@@ -167,5 +167,5 @@ create index idx_metadata_uri ON metadata (uri);
 create index idx_supported_schemas_eas_schema_id ON supported_schemas (uid);
 create index idx_supported_schemas_chain_id ON supported_schemas (chain_id);
 create index idx_attestations_attestation_uid ON attestations (uid);
-create index idx_hypercert_allow_list_records ON hypercert_allow_list_records (hypercert_allow_lists_id, user_address, units, entry)
+create index idx_hypercert_allow_list_records ON hypercert_allow_list_records (hypercert_allow_lists_id, user_address, units, entry);
 

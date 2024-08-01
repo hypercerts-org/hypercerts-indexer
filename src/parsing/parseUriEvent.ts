@@ -40,7 +40,7 @@ export type MetadataResult = {
 
 export const parseUriEvent: ParserMethod<MetadataResult> = async ({
   event,
-  context: { dataFetcher, block },
+  context: { getData, block },
 }) => {
   const {
     address,
@@ -55,10 +55,8 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
     return [{ metadata: { uri, parsed: false } }];
   }
 
-  if (!dataFetcher) throw new Error("Data fetcher not available");
-
   // Get and validate metadata
-  const data = await dataFetcher({ uri });
+  const data = await getData({ uri });
   if (!data) {
     console.warn(`[parseUriEvent] Metadata fetching failed. [uri: ${uri}]`);
     return [{ metadata: { uri, parsed: false } }];
@@ -94,7 +92,7 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
 
   // If allowlist is present, fetch and parse it
   if (metadata.allow_list_uri) {
-    const res = await dataFetcher({
+    const res = await getData({
       uri: metadata.allow_list_uri,
     });
 
@@ -130,8 +128,8 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
 
         hypercert_allow_list = {
           id: hypercert_allow_list_id,
-          claim_id,
-          allow_list_uri: metadata.allow_list_uri,
+          claims_id: claim_id,
+          allow_list_data_uri: metadata.allow_list_uri,
           parsed: true,
         };
       }
