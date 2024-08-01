@@ -141,7 +141,7 @@ create table hypercert_allow_list_records
     claimed                  boolean        not null,
     leaf                     text           not null,
     proof                    text[]         not null,
-    UNIQUE (hypercert_allow_lists_id, user_address, units, entry)
+    UNIQUE (hypercert_allow_lists_id, entry)
 );
 
 alter table attestations
