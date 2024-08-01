@@ -10,8 +10,10 @@ SELECT halr.id,
        ald.root,
        halr.units,
        claims.hypercert_id,
-       claims.units AS total_units
+       claims.units AS total_units,
+       c.chain_id
 from claims
          join public.hypercert_allow_lists hal on claims.id = hal.claims_id
          join public.hypercert_allow_list_records halr on hal.id = halr.hypercert_allow_lists_id
-         join public.allow_list_data ald on ald.uri = hal.allow_list_data_uri;
+         join public.allow_list_data ald on ald.uri = hal.allow_list_data_uri
+         join public.contracts c on c.id = claims.contracts_id;

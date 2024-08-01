@@ -2,6 +2,7 @@ import { dbClient } from "@/clients/dbClient.js";
 import { MetadataResult } from "@/parsing/parseUriEvent.js";
 import { StandardMerkleTree } from "@openzeppelin/merkle-tree";
 import { getAddress } from "viem";
+import { StorageMethod } from "@/indexer/LogParser.js";
 
 /**
  * Stores metadata and allow list data in the database.
@@ -38,7 +39,10 @@ import { getAddress } from "viem";
  * ];
  * const storedData = await storeMetadata({ data: metadataResults });
  */
-export const storeMetadata = async ({ data }: { data: MetadataResult[] }) => {
+export const storeMetadata: StorageMethod<MetadataResult> = async ({
+  data,
+  context: { block, contracts_id, events_id },
+}) => {
   if (data.length === 0) return [];
 
   const requests = [];
@@ -98,6 +102,15 @@ export const storeMetadata = async ({ data }: { data: MetadataResult[] }) => {
         dbClient
           .insertInto("hypercert_allow_lists")
           .values(metadata.hypercert_allow_list)
+          .compile(),
+      );
+
+      requests.push(
+        dbClient
+          .updateTable("contract_events")
+          .set({ last_block_indexed: block.blockNumber })
+          .where("contracts_id", "=", contracts_id)
+          .where("events_id", "=", events_id)
           .compile(),
       );
     }

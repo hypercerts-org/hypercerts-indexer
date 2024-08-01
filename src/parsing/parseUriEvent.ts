@@ -5,7 +5,6 @@ import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 import { StandardMerkleTreeData } from "@openzeppelin/merkle-tree/dist/standard.js";
 import { Tables } from "@/types/database.types.js";
 import { supabase } from "@/clients/supabaseClient.js";
-import { chainId } from "@/utils/constants.js";
 import { getAddress, isAddress } from "viem";
 import { messages } from "@/utils/validation.js";
 
@@ -40,7 +39,7 @@ export type MetadataResult = {
 
 export const parseUriEvent: ParserMethod<MetadataResult> = async ({
   event,
-  context: { getData, block },
+  context: { getData, block, chain_id },
 }) => {
   const {
     address,
@@ -68,6 +67,7 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
       `[parseUriEvent] Metadata validation failed`,
       res.error.message,
     );
+    console.debug(data);
     return [{ metadata: { uri, parsed: false } }];
   }
 
@@ -109,7 +109,7 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
 
         const { data: claim_id } = await supabase
           .rpc("get_or_create_claim", {
-            p_chain_id: chainId,
+            p_chain_id: chain_id,
             p_contract_address: getAddress(address),
             p_token_id: tokenId.toString(),
             p_last_update_block_timestamp: block.timestamp.toString(),

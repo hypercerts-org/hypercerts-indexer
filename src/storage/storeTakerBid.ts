@@ -8,7 +8,6 @@ import {
 } from "@hypercerts-org/marketplace-sdk";
 import { ethers } from "ethers";
 import { getRpcUrl } from "@/clients/evmClient.js";
-import { chainId } from "@/utils/constants.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
 import { dbClient } from "@/clients/dbClient.js";
 
@@ -63,7 +62,7 @@ export type TakerBid = z.infer<typeof TakerBid>;
  **/
 export const storeTakerBid: StorageMethod<TakerBid> = async ({
   data,
-  context: { block },
+  context: { block, chain_id, contracts_id, events_id },
 }) => {
   const takerBids = [];
 
@@ -99,7 +98,7 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
       );
 
     const hypercertsExchange = new HypercertExchangeClient(
-      chainId,
+      Number(chain_id),
       // @ts-expect-error - No types available
       new ethers.JsonRpcProvider(getRpcUrl()),
     );
@@ -147,7 +146,15 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
     await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
   }
 
-  return [dbClient.insertInto("sales").values(takerBids).compile()];
+  return [
+    dbClient.insertInto("sales").values(takerBids).compile(),
+    dbClient
+      .updateTable("contract_events")
+      .set({ last_block_indexed: block.blockNumber })
+      .where("contracts_id", "=", contracts_id)
+      .where("events_id", "=", events_id)
+      .compile(),
+  ];
 };
 
 // TODO: Determine all error codes that result in the order being deleted

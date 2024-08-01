@@ -1,5 +1,4 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { chainId } from "@/utils/constants.js";
 import { Tables } from "@/types/database.types.js";
 
 /**
@@ -10,7 +9,7 @@ import { Tables } from "@/types/database.types.js";
  *
  * @throws {Error} - Throws an error if there is an error in the fetch operation.
  */
-export const getSupportedSchemas = async () => {
+export const getSupportedSchemas = async ({ chainId }: { chainId: number }) => {
   try {
     const { data } = await supabase
       .from("supported_schemas")

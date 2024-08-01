@@ -528,6 +528,7 @@ export type Database = {
     Views: {
       claimable_fractions_with_proofs: {
         Row: {
+          chain_id: number | null
           claimed: boolean | null
           entry: number | null
           hypercert_allow_lists_id: string | null

@@ -1,4 +1,3 @@
-import { chainId } from "@/utils/constants.js";
 import { Deployment, CONSTANTS } from "@hypercerts-org/sdk";
 
 /**
@@ -18,7 +17,9 @@ import { Deployment, CONSTANTS } from "@hypercerts-org/sdk";
 
 const { DEPLOYMENTS } = CONSTANTS;
 
-export const getDeployment = (): Partial<Deployment> & {
+export const getDeployment = (
+  chainId: number,
+): Partial<Deployment> & {
   startBlock: bigint;
   easAddress: string;
   schemaRegistryAddress: string;
