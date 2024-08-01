@@ -1,10 +1,9 @@
 import { getAddress, isAddress, parseEventLogs } from "viem";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
-import { client } from "@/clients/evmClient.js";
+import { getEvmClient } from "@/clients/evmClient.js";
 import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { getDeployment } from "@/utils/getDeployment.js";
-import { chainId } from "@/utils/constants.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 
@@ -72,8 +71,12 @@ const TakerBidEventSchema = z.object({
   transactionHash: z.string(),
 });
 
-export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ event }) => {
-  const { addresses } = getDeployment();
+export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
+  event,
+  context: { chain_id },
+}) => {
+  const { addresses } = getDeployment(Number(chain_id));
+  const client = getEvmClient(Number(chain_id));
 
   try {
     const bid = TakerBidEventSchema.parse(event);
@@ -97,7 +100,7 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({ event }) => {
     }).find((log) => log.eventName === "BatchValueTransfer");
 
     // @ts-expect-error args is missing in the type
-    const hypercertId = `${chainId}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+    const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
     console.log("[parseTakerBidEvent] Hypercert ID", hypercertId);
     return [

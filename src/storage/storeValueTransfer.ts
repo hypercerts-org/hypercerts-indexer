@@ -1,5 +1,4 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
 import { ParsedValueTransfer } from "@/parsing/parseValueTransferEvent.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
@@ -43,7 +42,7 @@ import { dbClient } from "@/clients/dbClient.js";
  */
 export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
   data,
-  context: { block, readContract },
+  context: { block, chain_id, readContract, contracts_id, events_id },
 }) => {
   const requests = [];
 
@@ -60,7 +59,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
     try {
       const { data: claim_id } = await supabase
         .rpc("get_or_create_claim", {
-          p_chain_id: chainId,
+          p_chain_id: chain_id,
           p_contract_address: getAddress(contract_address),
           p_token_id: hypercert_token_id.toString(),
           p_last_update_block_timestamp: block.timestamp.toString(),
@@ -85,7 +84,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
       fromToken = {
         claims_id,
         token_id: from_token_id.toString(),
-        fraction_id: `${chainId}-${getAddress(contract_address)}-${from_token_id}`,
+        fraction_id: `${chain_id}-${getAddress(contract_address)}-${from_token_id}`,
         units: (await readContract({
           address: contract_address,
           contract: "HypercertMinter",
@@ -103,7 +102,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
       toToken = {
         claims_id,
         token_id: to_token_id.toString(),
-        fraction_id: `${chainId}-${getAddress(contract_address)}-${to_token_id}`,
+        fraction_id: `${chain_id}-${getAddress(contract_address)}-${to_token_id}`,
         units: (await readContract({
           address: contract_address,
           contract: "HypercertMinter",
@@ -149,6 +148,12 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
               ),
             })),
           )
+          .compile(),
+        dbClient
+          .updateTable("contract_events")
+          .set({ last_block_indexed: block.blockNumber })
+          .where("contracts_id", "=", contracts_id)
+          .where("events_id", "=", events_id)
           .compile(),
       );
     }

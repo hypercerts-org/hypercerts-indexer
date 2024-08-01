@@ -48,9 +48,9 @@ export type Claim = z.infer<typeof ClaimSchema>;
  * await storeClaim({ claims });
  * ```
  * */
-export const storeClaimStored: StorageMethod<Claim> = ({
+export const storeClaimStored: StorageMethod<Claim> = async ({
   data,
-  context: { block },
+  context: { block, contracts_id, events_id },
 }) => {
   const _claims = data.map((claim) => ({
     ...ClaimSchema.parse(claim),
@@ -87,6 +87,12 @@ export const storeClaimStored: StorageMethod<Claim> = ({
             units: eb.ref("excluded.units"),
           })),
         )
+        .compile(),
+      dbClient
+        .updateTable("contract_events")
+        .set({ last_block_indexed: block.blockNumber })
+        .where("contracts_id", "=", contracts_id)
+        .where("events_id", "=", events_id)
         .compile(),
     ];
   } catch (error) {

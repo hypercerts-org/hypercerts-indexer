@@ -1,9 +1,9 @@
 import { isAddress, isHex } from "viem";
-import { client } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { Claim, ClaimSchema } from "@/storage/storeClaimStored.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 import { ZERO_ADDRESS } from "@/utils/constants.js";
+import { getEvmClient } from "@/clients/evmClient.js";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {
@@ -28,9 +28,10 @@ export type ParseClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  */
 export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   event,
-  context: { contracts_id },
+  context: { chain_id, contracts_id },
 }) => {
   const { params, transactionHash } = ClaimStoredEventSchema.parse(event);
+  const client = getEvmClient(chain_id);
 
   try {
     const transaction = await client.getTransaction({

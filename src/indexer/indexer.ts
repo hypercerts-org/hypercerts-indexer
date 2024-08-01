@@ -1,25 +1,32 @@
-import chainsauce from "@/indexer/chainsauce.js";
+import { getIndexer } from "@/indexer/chainsauce.js";
+import RequestQueue from "@/indexer/requestQueue.js";
+import { getSupportedChains } from "@/clients/evmClient.js";
 
 class Indexer {
   running = false;
-  indexer;
 
-  constructor() {
-    this.indexer = chainsauce;
-  }
+  constructor() {}
 
   async start() {
     this.toggleRunning(true);
 
-    this.indexer.watch();
+    const supportedChains = getSupportedChains();
+
+    if (!supportedChains || supportedChains.length === 0) {
+      throw new Error("No supported chains found.");
+    }
+
+    const requestQueue = new RequestQueue();
+
+    const chainsToIndex = supportedChains.map((chainId) =>
+      getIndexer({ chainId, requestQueue }),
+    );
+
+    await Promise.all(chainsToIndex);
   }
 
   toggleRunning(running: boolean) {
     this.running = running;
-  }
-
-  async stop() {
-    await this.indexer.stop();
   }
 }
 

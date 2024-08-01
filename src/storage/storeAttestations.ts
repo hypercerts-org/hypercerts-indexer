@@ -12,7 +12,7 @@ import { dbClient } from "@/clients/dbClient.js";
  */
 export const storeAttestations: StorageMethod<DecodedAttestation> = async ({
   data,
-  context: { block },
+  context: { block, contracts_id, events_id },
 }) => {
   const attestations = [];
 
@@ -27,5 +27,13 @@ export const storeAttestations: StorageMethod<DecodedAttestation> = async ({
     });
   }
 
-  return [dbClient.insertInto("attestations").values(attestations).compile()];
+  return [
+    dbClient.insertInto("attestations").values(attestations).compile(),
+    dbClient
+      .updateTable("contract_events")
+      .set({ last_block_indexed: block.blockNumber })
+      .where("contracts_id", "=", contracts_id)
+      .where("events_id", "=", events_id)
+      .compile(),
+  ];
 };

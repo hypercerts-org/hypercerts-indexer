@@ -3,29 +3,47 @@ import { CompiledQuery } from "kysely";
 
 export default class RequestQueue {
   private requestsCache: CompiledQuery<unknown>[] = [];
+  private running = false;
 
-  constructor() {}
+  constructor() {
+    this.startWorker();
+  }
 
   addRequests({ requests }: { requests: CompiledQuery<unknown>[] }) {
     this.requestsCache.push(...requests);
   }
 
-  // Submits the queue
-  async submitQueue() {
+  private async startWorker() {
+    this.running = true;
+    while (this.running) {
+      await this.processQueue();
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Adjust the interval as needed
+    }
+  }
+
+  private async processQueue() {
     if (this.requestsCache.length === 0) return;
 
-    // Example submission logic, replace with actual database submission
+    const processedRequests: CompiledQuery<unknown>[] = [];
+
     try {
       await dbClient.transaction().execute(async (trx) => {
         for (const request of this.requestsCache) {
           await trx.executeQuery(request);
+          processedRequests.push(request);
         }
       });
     } catch (error) {
       console.error("Failed to submit request queue", error);
     }
 
-    // Clear the queue after submission
-    this.requestsCache = [];
+    // Remove only the successfully processed requests from the cache
+    this.requestsCache = this.requestsCache.filter(
+      (request) => !processedRequests.includes(request),
+    );
+  }
+
+  stopWorker() {
+    this.running = false;
   }
 }

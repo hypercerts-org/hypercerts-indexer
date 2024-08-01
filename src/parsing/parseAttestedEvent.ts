@@ -80,12 +80,12 @@ export type EasAttestation = z.infer<typeof EasAttestationSchema>;
  */
 export const parseAttestedEvent: ParserMethod<DecodedAttestation> = async ({
   event,
-  context: { schema, readContract },
+  context: { chain_id, schema, readContract },
 }) => {
   if (!schema) throw new Error("[parseAttestedEvent] Schema not found");
   if (!readContract) throw new Error("readContract is not defined");
 
-  const { easAddress } = getDeployment();
+  const { easAddress } = getDeployment(chain_id);
   const validator = createAttestedEventSchema({ easAddress });
 
   try {

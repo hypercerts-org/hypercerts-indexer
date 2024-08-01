@@ -1,6 +1,5 @@
 import { supabase } from "@/clients/supabaseClient.js";
 import { getHypercertTokenId } from "@/utils/tokenIds.js";
-import { chainId } from "@/utils/constants.js";
 import { getAddress } from "viem";
 import { ParsedTransferSingle } from "@/parsing/parseTransferSingleEvent.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
@@ -25,7 +24,7 @@ import { dbClient } from "@/clients/dbClient.js";
 
 export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
   data,
-  context: { block },
+  context: { chain_id, block, contracts_id, events_id },
 }) => {
   const tokens = [];
 
@@ -34,14 +33,14 @@ export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
     const hypercertTokenId = getHypercertTokenId(token_id);
 
     // Skip hypercert claim token transfers
-    if (hypercertTokenId.toString() === token_id.toString()) return;
+    if (hypercertTokenId.toString() === token_id.toString()) continue;
 
     let claims_id;
 
     try {
       const { data: claim_id } = await supabase
         .rpc("get_or_create_claim", {
-          p_chain_id: chainId,
+          p_chain_id: chain_id,
           p_contract_address: getAddress(contract_address),
           p_token_id: hypercertTokenId.toString(),
           p_creation_block_number: block.blockNumber,
@@ -59,7 +58,7 @@ export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
 
     tokens.push({
       claims_id,
-      fraction_id: `${chainId}-${getAddress(contract_address)}-${token_id}`,
+      fraction_id: `${chain_id}-${getAddress(contract_address)}-${token_id}`,
       token_id: token_id.toString(),
       creation_block_timestamp: block.timestamp.toString(),
       creation_block_number: block.blockNumber,
@@ -89,6 +88,12 @@ export const storeTransferSingle: StorageMethod<ParsedTransferSingle> = async ({
           ),
         })),
       )
+      .compile(),
+    dbClient
+      .updateTable("contract_events")
+      .set({ last_block_indexed: block.blockNumber })
+      .where("contracts_id", "=", contracts_id)
+      .where("events_id", "=", events_id)
       .compile(),
   ];
 };
