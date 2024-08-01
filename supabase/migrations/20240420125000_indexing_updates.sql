@@ -14,28 +14,3 @@ CREATE TRIGGER set_claim_id
     ON attestations
     FOR EACH ROW
 EXECUTE FUNCTION set_claim_id_on_insert();
-
-CREATE OR REPLACE FUNCTION get_unparsed_hypercert_allow_lists()
-    RETURNS TABLE
-            (
-                claim_id   uuid,
-                al_data_id uuid,
-                data       jsonb
-            )
-    LANGUAGE plpgsql
-AS
-$$
-BEGIN
-    RETURN QUERY
-        SELECT c.id AS claim_id, ad.id AS al_data_id, ad.data AS data
-        FROM claims c
-                 INNER JOIN metadata m ON c.uri = m.uri
-                 INNER JOIN allow_list_data ad ON ad.uri = m.allow_list_uri
-        WHERE m.allow_list_uri IS NOT NULL
-          AND ad.parsed = true
-          AND NOT EXISTS (SELECT 1
-                          FROM hypercert_allow_lists
-                          WHERE claims_id = c.id
-                            AND allow_list_data_id = ad.id);
-END;
-$$;

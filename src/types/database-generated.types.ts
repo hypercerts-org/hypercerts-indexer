@@ -641,14 +641,6 @@ export type Database = {
         }
         Returns: string
       }
-      get_unparsed_hypercert_allow_lists: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          claim_id: string
-          al_data_id: string
-          data: Json
-        }[]
-      }
     }
     Enums: {
       [_ in never]: never
