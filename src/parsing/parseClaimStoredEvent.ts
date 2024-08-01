@@ -28,7 +28,7 @@ export type ParseClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
  */
 export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   event,
-  context: { contracts_id, readContract },
+  context: { contracts_id },
 }) => {
   const { params, transactionHash } = ClaimStoredEventSchema.parse(event);
 

@@ -14,7 +14,6 @@ import {
   createPostgresCache,
 } from "@hypercerts-org/chainsauce";
 import pg from "pg";
-import { indexAllowlistRecords } from "@/indexer/indexAllowlistRecords.js";
 import RequestQueue from "@/indexer/requestQueue.js";
 
 const { Pool } = pg;
@@ -83,7 +82,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
-      dataFetcher: getData,
+      getData,
       readContract,
     };
 
@@ -113,7 +112,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
-      dataFetcher: getData,
+      getData,
       readContract,
     };
 
@@ -132,7 +131,7 @@ indexer.on(
 
 indexer.on(
   "HypercertMinter:ValueTransfer",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -143,6 +142,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -161,7 +161,7 @@ indexer.on(
 
 indexer.on(
   "HypercertMinter:BatchValueTransfer",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -172,6 +172,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -190,7 +191,7 @@ indexer.on(
 
 indexer.on(
   "HypercertMinter:TransferSingle",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -201,6 +202,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -219,7 +221,7 @@ indexer.on(
 
 indexer.on(
   "HypercertMinter:TransferBatch",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -230,6 +232,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -248,7 +251,7 @@ indexer.on(
 
 indexer.on(
   "HypercertMinter:LeafClaimed",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -259,6 +262,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -277,7 +281,7 @@ indexer.on(
 
 indexer.on(
   "HypercertExchange:TakerBid",
-  async ({ event, getBlock, readContract }) => {
+  async ({ event, getData, getBlock, readContract }) => {
     const contractEvent = await getContractEvent(event.name);
     if (!contractEvent) return;
 
@@ -288,6 +292,7 @@ indexer.on(
       contracts_id,
       events_id,
       block: await getBlock(),
+      getData,
       readContract,
     };
 
@@ -306,7 +311,13 @@ indexer.on(
 
 indexer.on(
   "EAS:Attested",
-  async ({ event, getBlock, context: { supportedSchemas }, readContract }) => {
+  async ({
+    event,
+    getData,
+    getBlock,
+    context: { supportedSchemas },
+    readContract,
+  }) => {
     const contractEvent = await getContractEvent(event.name);
 
     if (!contractEvent || !supportedSchemas) {
@@ -332,6 +343,7 @@ indexer.on(
       events_id,
       block,
       schema,
+      getData,
       readContract,
     };
 
@@ -386,13 +398,7 @@ indexer.on("error", (error) => {
 });
 
 indexer.on("progress", async (progress) => {
-  //     pendingEventsCount: 23
   await requestQueue.submitQueue();
-
-  const indexingConfig = {
-    batchSize: 20n,
-  };
-  // await indexAllowlistRecords(indexingConfig);
 
   const percentage = (progress.currentBlock * 100n) / progress.targetBlock;
   console.info(

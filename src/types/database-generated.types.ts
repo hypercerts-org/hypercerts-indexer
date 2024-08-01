@@ -335,7 +335,7 @@ export type Database = {
           user_address: string
         }
         Insert: {
-          claimed?: boolean
+          claimed: boolean
           entry: number
           hypercert_allow_lists_id: string
           id?: string
@@ -373,19 +373,19 @@ export type Database = {
       }
       hypercert_allow_lists: {
         Row: {
-          allow_list_data_uri: string | null
+          allow_list_data_uri: string
           claims_id: string
           id: string
           parsed: boolean | null
         }
         Insert: {
-          allow_list_data_uri?: string | null
+          allow_list_data_uri: string
           claims_id: string
           id?: string
           parsed?: boolean | null
         }
         Update: {
-          allow_list_data_uri?: string | null
+          allow_list_data_uri?: string
           claims_id?: string
           id?: string
           parsed?: boolean | null
