@@ -24,6 +24,7 @@ export const updateAllowlistRecordClaimed: StorageMethod<LeafClaimed> = async ({
       .execute();
 
     if (fractionWithProof.length === 0) {
+      console.debug(record);
       throw new Error("Allowlist record not found");
     }
 

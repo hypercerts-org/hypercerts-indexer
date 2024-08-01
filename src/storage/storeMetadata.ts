@@ -79,7 +79,7 @@ export const storeMetadata = async ({ data }: { data: MetadataResult[] }) => {
           hypercert_allow_lists_id,
           user_address: getAddress(v[0]),
           entry: i,
-          units: v[1],
+          units: v[1].toString(),
           leaf,
           proof,
           claimed: false,
@@ -96,9 +96,8 @@ export const storeMetadata = async ({ data }: { data: MetadataResult[] }) => {
       // Store hypercert_allow_lists as parsed
       requests.push(
         dbClient
-          .updateTable("hypercert_allow_lists")
-          .set({ parsed: true })
-          .where("id", "=", hypercert_allow_lists_id)
+          .insertInto("hypercert_allow_lists")
+          .values(metadata.hypercert_allow_list)
           .compile(),
       );
     }

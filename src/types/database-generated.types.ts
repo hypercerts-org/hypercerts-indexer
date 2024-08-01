@@ -354,22 +354,7 @@ export type Database = {
           units?: number
           user_address?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
-            columns: ["hypercert_allow_lists_id"]
-            isOneToOne: false
-            referencedRelation: "hypercert_allow_lists"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
-            columns: ["hypercert_allow_lists_id"]
-            isOneToOne: false
-            referencedRelation: "hypercert_allowlists_with_claim"
-            referencedColumns: ["hypercert_allow_list_id"]
-          },
-        ]
+        Relationships: []
       }
       hypercert_allow_lists: {
         Row: {
@@ -556,22 +541,7 @@ export type Database = {
           units: number | null
           user_address: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
-            columns: ["hypercert_allow_lists_id"]
-            isOneToOne: false
-            referencedRelation: "hypercert_allow_lists"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "hypercert_allow_list_records_hypercert_allow_lists_id_fkey"
-            columns: ["hypercert_allow_lists_id"]
-            isOneToOne: false
-            referencedRelation: "hypercert_allowlists_with_claim"
-            referencedColumns: ["hypercert_allow_list_id"]
-          },
-        ]
+        Relationships: []
       }
       fractions_view: {
         Row: {
