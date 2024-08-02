@@ -1,6 +1,11 @@
 import { assertExists } from "./assertExists.js";
 
-export const chainId = Number(assertExists(process.env.CHAIN_ID, "Chain ID"));
+export enum Environment {
+  TEST = "test",
+  PRODUCTION = "production",
+}
+
+export const environment = assertExists(process.env.ENVIRONMENT, "Environment");
 
 export const alchemyApiKey = assertExists(
   process.env.ALCHEMY_API_KEY,
@@ -42,11 +47,11 @@ export const batchSize = BigInt(
   assertExists(process.env.BATCH_SIZE, "Batch size"),
 );
 
-export const delay = Number(assertExists(process.env.DELAY, "Delay"));
-
 export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export const localCachingDbUrl = assertExists(
   process.env.LOCAL_CACHING_DB_URL,
   "Local caching DB URL",
 );
+
+export const dbUrl = assertExists(process.env.DB_URL, "DB URL");

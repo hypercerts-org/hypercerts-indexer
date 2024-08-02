@@ -39,19 +39,21 @@ const claimData: z.ZodType<HypercertClaimdata> = z.object({
 
 export const HypercertMetadataValidator: z.ZodType<HypercertMetadata> =
   z.object({
-    name: z.string(),
-    description: z.string(),
+    name: z.string({ message: "Name is required" }),
+    description: z.string({ message: "Description is required" }),
     external_url: z.string().optional(),
-    image: z.string(),
+    image: z.string({ message: "Image is required" }),
     version: z.string().optional(),
     ref: z.string().optional(),
     allowList: z.string().optional(),
     properties: z
       .array(
-        z.object({
-          trait_type: z.string().optional(),
-          value: z.string().optional(),
-        }),
+        z
+          .object({
+            trait_type: z.string().optional(),
+            value: z.string().optional(),
+          })
+          .and(z.record(z.string())),
       )
       .optional(),
     hypercert: claimData,

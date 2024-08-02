@@ -1,18 +1,3 @@
-alter table fractions
-    rename column hypercert_id to fraction_id;
-
-CREATE OR REPLACE FUNCTION generate_hypercert_id_fraction()
-    RETURNS TRIGGER AS
-$$
-BEGIN
-    NEW.fraction_id := (SELECT CONCAT(chain_id::text, '-', contract_address, '-', NEW.token_id::text)
-                        FROM claims
-                                 JOIN contracts ON contracts.id = claims.contracts_id
-                        WHERE claims.id = NEW.claims_id);
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 create or replace view fractions_view as
 select f.id,
        f.claims_id,

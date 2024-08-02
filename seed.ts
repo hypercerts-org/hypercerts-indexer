@@ -72,6 +72,11 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
+        name: "URI",
+        abi: "event URI(string value, uint256 id)",
+        contract_slug: minterContractSlug,
+      },
+      {
         name: "TakerBid",
         abi: "event TakerBid((bytes32 orderHash, uint256 orderNonce, bool isNonceInvalidated) nonceInvalidationParameters, address bidUser, address bidRecipient, uint256 strategyId, address currency, address collection, uint256[] itemIds, uint256[] amounts, address[2] feeRecipients, uint256[3] feeAmounts)",
         contract_slug: marketplaceContractSlug,
@@ -118,8 +123,8 @@ const main = async () => {
       },
       {
         chain_id: 11155111,
-        contract_address: "0x9819bbb6980AaA586A8e80dB963a766C6D5711c4",
-        start_block: 6053748,
+        contract_address: "0xB1991E985197d14669852Be8e53ee95A1f4621c0",
+        start_block: 6326571,
         contract_slug: marketplaceContractSlug,
       },
       {

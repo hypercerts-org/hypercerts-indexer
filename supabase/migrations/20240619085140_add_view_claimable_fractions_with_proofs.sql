@@ -1,16 +1,19 @@
-create view claimable_fractions_with_proofs as
-select halr.id,
-       token_id,
-       leaf,
-       entry,
-       user_address,
-       claimed,
-       proof,
+create or replace view "public"."claimable_fractions_with_proofs" as
+SELECT halr.id,
+       halr.hypercert_allow_lists_id,
+       claims.token_id,
+       halr.leaf,
+       halr.entry,
+       halr.user_address,
+       halr.claimed,
+       halr.proof,
        ald.root,
        halr.units,
        claims.hypercert_id,
-       claims.units as total_units
+       claims.units AS total_units,
+       c.chain_id
 from claims
          join public.hypercert_allow_lists hal on claims.id = hal.claims_id
          join public.hypercert_allow_list_records halr on hal.id = halr.hypercert_allow_lists_id
-         join public.allow_list_data ald on ald.id = hal.allow_list_data_id;
+         join public.allow_list_data ald on ald.uri = hal.allow_list_data_uri
+         join public.contracts c on c.id = claims.contracts_id;

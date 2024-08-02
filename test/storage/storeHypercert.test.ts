@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { storeClaimStored } from "../../src/storage/storeClaimStored.js";
-import { server } from "../setup-env.js";
-import { http, HttpResponse } from "msw";
-import { chainId, supabaseUrl } from "../../src/utils/constants.js";
+import { chainId } from "../../src/utils/constants.js";
 import { generateClaim } from "../helpers/factories.js";
-import { Block } from "chainsauce";
+import { Block } from "@hypercerts-org/chainsauce";
 import { faker } from "@faker-js/faker";
 
 describe("storeHypercert", {}, async () => {
@@ -17,23 +15,21 @@ describe("storeHypercert", {}, async () => {
 
   const context = {
     block,
+    event_name: "ClaimStored",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
   };
 
   const claim = generateClaim();
 
   it("store hypercert data  in DB", {}, async () => {
-    server.use(
-      http.post(`${supabaseUrl}/*`, () => {
-        return HttpResponse.json();
-      }),
-    );
-
     const storedClaim = await storeClaimStored({
       data: [claim],
       context,
     });
 
-    expect(storedClaim).toBeUndefined();
+    expect(storedClaim.length).toBe(1);
   });
 
   it("should throw an error if creator address is invalid", async () => {

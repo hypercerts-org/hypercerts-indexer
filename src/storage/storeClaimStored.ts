@@ -1,10 +1,10 @@
-import { supabase } from "@/clients/supabaseClient.js";
 import { isAddress } from "viem";
 import { z } from "zod";
 import { StorageMethod } from "@/indexer/LogParser.js";
+import { dbClient } from "@/clients/dbClient.js";
 
 export const ClaimSchema = z.object({
-  contracts_id: z.string().optional(),
+  contracts_id: z.string(),
   creator_address: z
     .string()
     .refine(isAddress, { message: "Invalid creator address" }),
@@ -50,28 +50,51 @@ export type Claim = z.infer<typeof ClaimSchema>;
  * */
 export const storeClaimStored: StorageMethod<Claim> = async ({
   data,
-  context,
+  context: { block, contracts_id, events_id },
 }) => {
-  const { block } = context;
-  const claims = data.map((token) => ({
-    ...token,
+  const _claims = data.map((claim) => ({
+    ...ClaimSchema.parse(claim),
     value: 1,
-    token_id: token.token_id.toString(),
+    token_id: claim.token_id.toString(),
     creation_block_number: block.blockNumber.toString(),
     creation_block_timestamp: block.timestamp,
     last_update_block_number: block.blockNumber.toString(),
     last_update_block_timestamp: block.timestamp,
-    units: token.units.toString(),
+    units: claim.units.toString(),
   }));
 
   try {
-    await supabase
-      .from("claims")
-      .upsert(claims, {
-        onConflict: "contracts_id, token_id",
-        ignoreDuplicates: false,
-      })
-      .throwOnError();
+    return [
+      dbClient
+        .insertInto("claims")
+        .values(_claims)
+        .onConflict((oc) =>
+          oc.columns(["contracts_id", "token_id"]).doUpdateSet((eb) => ({
+            creator_address: eb.ref("excluded.creator_address"),
+            owner_address: eb.ref("excluded.owner_address"),
+            value: 1,
+            token_id: eb.ref("excluded.token_id"),
+            creation_block_number: eb.ref("excluded.creation_block_number"),
+            creation_block_timestamp: eb.ref(
+              "excluded.creation_block_timestamp",
+            ),
+            last_update_block_number: eb.ref(
+              "excluded.last_update_block_number",
+            ),
+            last_update_block_timestamp: eb.ref(
+              "excluded.last_update_block_timestamp",
+            ),
+            units: eb.ref("excluded.units"),
+          })),
+        )
+        .compile(),
+      dbClient
+        .updateTable("contract_events")
+        .set({ last_block_indexed: block.blockNumber })
+        .where("contracts_id", "=", contracts_id)
+        .where("events_id", "=", events_id)
+        .compile(),
+    ];
   } catch (error) {
     console.error("[StoreClaim] Error storing claims", error);
     throw error;

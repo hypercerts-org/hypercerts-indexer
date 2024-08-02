@@ -1,13 +1,14 @@
-import { parseAttestedEvent } from "../../src/parsing/attestedEvent.js";
+import { parseAttestedEvent } from "../../src/parsing/parseAttestedEvent.js";
 import { describe, vi, beforeEach, it, expect } from "vitest";
 import { getAddress } from "viem";
 import { faker } from "@faker-js/faker";
-import { Block } from "chainsauce";
+import { Block } from "@hypercerts-org/chainsauce";
 import { chainId } from "../../src/utils/constants.js";
 
 const mocks = vi.hoisted(() => {
   return {
     fetchAttestationData: vi.fn(),
+    readContract: vi.fn(),
   };
 });
 
@@ -30,9 +31,14 @@ describe("parseAttestedEvent", () => {
       schema:
         "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
     },
+    event_name: "TransferSingle",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
+    readContract: mocks.readContract,
   };
 
-  let log = {};
+  let event = {};
 
   // EAS on Sepolia
   const easContractAddress = getAddress(
@@ -42,12 +48,12 @@ describe("parseAttestedEvent", () => {
   const attester = getAddress(faker.finance.ethereumAddress());
 
   const mockAttestation = {
-    uid: faker.string.hexadecimal(64),
+    uid: faker.string.hexadecimal({ length: 64 }),
     schema: "0xdef0",
     time: 1234567890n,
     expirationTime: 1234567890n,
     revocationTime: 1234567890n,
-    refUID: faker.string.hexadecimal(64),
+    refUID: faker.string.hexadecimal({ length: 64 }),
     recipient,
     attester,
     revocable: true,
@@ -55,7 +61,7 @@ describe("parseAttestedEvent", () => {
   };
 
   beforeEach(() => {
-    log = {
+    event = {
       address: easContractAddress,
       params: {
         recipient,
@@ -68,27 +74,25 @@ describe("parseAttestedEvent", () => {
   });
 
   it("returns undefined when contract address is invalid", async () => {
-    log = { ...log, address: "0xinvalid" };
+    event = { ...event, address: "0xinvalid" };
     await expect(() =>
-      parseAttestedEvent({ log, context }),
+      parseAttestedEvent({ event, context }),
     ).rejects.toThrowError();
   });
 
   it("returns undefined when contract address does not match easAddress", async () => {
-    log = { ...log, address: "0x0000000000000000000000000000000000000000" };
+    event = { ...event, address: "0x0000000000000000000000000000000000000000" };
     await expect(() =>
-      parseAttestedEvent({ log, context }),
+      parseAttestedEvent({ event, context }),
     ).rejects.toThrowError();
   });
 
   it("returns a parsed event object when log is valid", async () => {
-    mocks.fetchAttestationData.mockResolvedValue({
-      attestation: mockAttestation,
-    });
+    mocks.readContract.mockResolvedValue(mockAttestation);
 
-    const [attesation] = await parseAttestedEvent({ log, context });
-    expect(attesation).toBeDefined();
-    expect(attesation.attester).toEqual(attester);
-    expect(attesation.uid).toEqual(mockAttestation.uid);
+    const [attestation] = await parseAttestedEvent({ event, context });
+    expect(attestation).toBeDefined();
+    expect(attestation.attester).toEqual(attester);
+    expect(attestation.uid).toEqual(mockAttestation.uid);
   });
 });

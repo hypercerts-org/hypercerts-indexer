@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import { parseLeafClaimedEvent } from "../../src/parsing";
+import { parseLeafClaimedEvent } from "../../src/parsing/parseLeafClaimedEvent.js";
 import { faker } from "@faker-js/faker";
-import { server } from "../setup-env";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { client } from "../../src/clients/evmClient";
+import { client } from "../../src/clients/evmClient.js";
 
-import { alchemyUrl } from "../resources/alchemyUrl";
+import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
-import { chainId } from "../../src/utils/constants";
+import { chainId } from "../../src/utils/constants.js";
 
 describe("leafClaimedEvent", {}, () => {
   const block = {
@@ -19,6 +19,10 @@ describe("leafClaimedEvent", {}, () => {
 
   const context = {
     block,
+    event_name: "LeafClaimed",
+    chain_id: chainId,
+    events_id: faker.string.uuid(),
+    contracts_id: faker.string.uuid(),
   };
 
   it("parses a leaf claimed event", {}, async () => {
@@ -52,7 +56,7 @@ describe("leafClaimedEvent", {}, () => {
 
     const timestamp = 10n;
 
-    const [claim] = await parseLeafClaimedEvent({ log: event, context });
+    const [claim] = await parseLeafClaimedEvent({ event, context });
 
     expect(claim).toEqual({
       contract_address: address,

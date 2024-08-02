@@ -1,7 +1,10 @@
 import { supabase } from "@/clients/supabaseClient.js";
-import { chainId } from "@/utils/constants.js";
 
-export const getContractEventsForChain = async () => {
+export const getContractEventsForChain = async ({
+  chainId,
+}: {
+  chainId: number;
+}) => {
   try {
     const res = await supabase
       .from("contract_events")

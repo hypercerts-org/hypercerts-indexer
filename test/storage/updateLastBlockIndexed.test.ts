@@ -1,7 +1,7 @@
 import { describe, it } from "vitest";
-import { server } from "../setup-env";
+import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { supabaseUrl } from "../../src/utils/constants";
+import { supabaseUrl } from "../../src/utils/constants.js";
 
 // TODO: Fix or update this test
 describe("updateLastBlockIndexed", {}, async () => {

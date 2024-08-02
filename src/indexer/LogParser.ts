@@ -1,5 +1,6 @@
-import { Block } from "chainsauce";
+import { Block } from "@hypercerts-org/chainsauce";
 import { Tables } from "@/types/database.types.js";
+import { CompiledQuery } from "kysely";
 
 export type ParserContext = {
   event_name: string;
@@ -7,16 +8,17 @@ export type ParserContext = {
   events_id: string;
   contracts_id: string;
   block: Block;
+  getData: (args: { uri: string }) => Promise<unknown>;
+  readContract: (args: never) => Promise<unknown>;
   schema?: Tables<"supported_schemas">;
-  dataFetcher?: (args: { uri: string }) => Promise<unknown>;
 };
 
 export interface ParserMethod<T> {
-  (params: { data: unknown; context: ParserContext }): Promise<T[]>;
+  (params: { event: unknown; context: ParserContext }): Promise<T[]>;
 }
 
 export interface StorageMethod<T> {
-  (params: { data: T[]; context: ParserContext }): Promise<void>;
+  (params: { data: T[]; context: ParserContext }): Promise<CompiledQuery[]>;
 }
 
 class LogParser<T> {
@@ -28,13 +30,13 @@ class LogParser<T> {
     this.storage = storage;
   }
 
-  async parse(data: unknown, context: ParserContext): Promise<void> {
+  async parse(event: unknown, context: ParserContext) {
     try {
-      const parsed = await this.parser({ data, context });
-      await this.storage({ data: parsed, context });
+      const parsed = await this.parser({ event, context });
+      return this.storage({ data: parsed, context });
     } catch (error) {
       console.error(
-        `[processLogs] Error processing log of ${context.event_name}: ${error}`,
+        `[processLogs] Error processing ${context.event_name}: ${error}`,
       );
     }
   }

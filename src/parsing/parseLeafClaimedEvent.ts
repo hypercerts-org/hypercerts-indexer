@@ -1,5 +1,5 @@
 import { isAddress, isHex } from "viem";
-import { client } from "@/clients/evmClient.js";
+import { getEvmClient } from "@/clients/evmClient.js";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
@@ -32,10 +32,11 @@ export type LeafClaimed = z.infer<typeof LeafClaimed>;
  * @param event - The event object.
  * */
 export const parseLeafClaimedEvent: ParserMethod<LeafClaimed> = async ({
-  data,
-  context: { block },
+  event,
+  context: { chain_id },
 }) => {
-  const { params, address, transactionHash } = LeafClaimedSchema.parse(data);
+  const { params, address, transactionHash } = LeafClaimedSchema.parse(event);
+  const client = getEvmClient(Number(chain_id));
 
   const transaction = await client.getTransaction({
     hash: transactionHash,

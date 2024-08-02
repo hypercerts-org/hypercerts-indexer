@@ -1,7 +1,6 @@
-import { supabase } from "@/clients/supabaseClient.js";
 import { StorageMethod } from "@/indexer/LogParser.js";
-import { DecodedAttestation } from "@/parsing/attestationData.js";
-import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
+import { DecodedAttestation } from "@/parsing/parseAttestationData.js";
+import { dbClient } from "@/clients/dbClient.js";
 
 /*
  *  Stores the provided attestation data in the database.
@@ -13,41 +12,28 @@ import { storeSupportedSchemas } from "@/storage/storeSupportedSchemas.js";
  */
 export const storeAttestations: StorageMethod<DecodedAttestation> = async ({
   data,
-  context: { schema, block },
+  context: { block, contracts_id, events_id },
 }) => {
-  const parsedAttestations = data.map((attestation) => {
-    return {
+  const attestations = [];
+
+  for (const attestation of data) {
+    attestations.push({
       ...attestation,
       token_id: attestation.token_id.toString(),
       creation_block_number: block.blockNumber,
       creation_block_timestamp: block.timestamp.toString(),
       last_update_block_number: block.blockNumber,
       last_update_block_timestamp: block.timestamp.toString(),
-    };
-  });
-
-  try {
-    await supabase
-      .from("attestations")
-      .upsert(parsedAttestations, {
-        onConflict: "supported_schemas_id, uid",
-      })
-      .throwOnError();
-
-    await storeSupportedSchemas({
-      supportedSchemas: [
-        {
-          ...schema,
-          last_block_indexed: block.blockNumber,
-        },
-      ],
     });
-  } catch (error) {
-    console.error(
-      "[StoreAttestations] Error while storing attestations",
-      error,
-    );
-
-    throw error;
   }
+
+  return [
+    dbClient.insertInto("attestations").values(attestations).compile(),
+    dbClient
+      .updateTable("contract_events")
+      .set({ last_block_indexed: block.blockNumber })
+      .where("contracts_id", "=", contracts_id)
+      .where("events_id", "=", events_id)
+      .compile(),
+  ];
 };

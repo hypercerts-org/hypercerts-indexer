@@ -2,12 +2,18 @@ import { createPublicClient, fallback, http } from "viem";
 import { base, baseSepolia, celo, optimism, sepolia } from "viem/chains";
 import {
   alchemyApiKey,
-  chainId,
   drpcApiPkey,
+  environment,
+  Environment,
   infuraApiKey,
 } from "@/utils/constants.js";
 
-const selectedNetwork = () => {
+export const getSupportedChains = () => {
+  if (environment === Environment.TEST) return [11155111, 84532];
+  if (environment === Environment.PRODUCTION) return [10, 8453, 42220];
+};
+
+const selectedNetwork = (chainId: number) => {
   switch (chainId) {
     case 10:
       return optimism;
@@ -24,7 +30,7 @@ const selectedNetwork = () => {
   }
 };
 
-export const alchemyUrl = () => {
+export const alchemyUrl = (chainId: number) => {
   switch (chainId) {
     case 10:
       return `https://opt-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
@@ -41,7 +47,7 @@ export const alchemyUrl = () => {
   }
 };
 
-const infuraUrl = () => {
+const infuraUrl = (chainId: number) => {
   switch (chainId) {
     case 10:
       return `https://optimism-mainnet.infura.io/v3/${infuraApiKey}`;
@@ -58,7 +64,7 @@ const infuraUrl = () => {
   }
 };
 
-const drpcUrl = () => {
+const drpcUrl = (chainId: number) => {
   switch (chainId) {
     case 10:
       return `https://lb.drpc.org/ogrpc?network=optimism&dkey=${drpcApiPkey}`;
@@ -77,21 +83,23 @@ const drpcUrl = () => {
 
 const rpc_timeout = 20_000;
 
-export const getRpcUrl = () => {
-  const alchemy = alchemyUrl();
-  const infura = infuraUrl();
-  const drpc = drpcUrl();
+export const getRpcUrl = (chainId: number) => {
+  const alchemy = alchemyUrl(chainId);
+  const infura = infuraUrl(chainId);
+  const drpc = drpcUrl(chainId);
   return [alchemy, infura, drpc].filter((url) => url)[0];
 };
 
-const fallBackProvider = () => {
-  const alchemy = alchemyUrl()
-    ? [http(alchemyUrl(), { timeout: rpc_timeout })]
+const fallBackProvider = (chainId: number) => {
+  const alchemy = alchemyUrl(chainId)
+    ? [http(alchemyUrl(chainId), { timeout: rpc_timeout })]
     : [];
-  const infura = infuraUrl()
-    ? [http(infuraUrl(), { timeout: rpc_timeout })]
+  const infura = infuraUrl(chainId)
+    ? [http(infuraUrl(chainId), { timeout: rpc_timeout })]
     : [];
-  const drpc = drpcUrl() ? [http(drpcUrl(), { timeout: rpc_timeout })] : [];
+  const drpc = drpcUrl(chainId)
+    ? [http(drpcUrl(chainId), { timeout: rpc_timeout })]
+    : [];
   return fallback([...alchemy, ...drpc, ...infura], {
     retryCount: 5,
   });
@@ -99,7 +107,8 @@ const fallBackProvider = () => {
 
 /* Returns a PublicClient instance for the configured network. */
 // @ts-expect-error viem typings
-export const client = createPublicClient({
-  chain: selectedNetwork(),
-  transport: fallBackProvider(),
-});
+export const getEvmClient = (chainId: number) =>
+  createPublicClient({
+    chain: selectedNetwork(chainId),
+    transport: fallBackProvider(chainId),
+  });
