@@ -34,6 +34,7 @@ export default class RequestQueue {
         });
       } catch (error) {
         console.error("Failed to submit request", error);
+        console.debug(requests);
       }
     }
   }
