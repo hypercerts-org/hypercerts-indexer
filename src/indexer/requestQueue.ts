@@ -2,7 +2,7 @@ import { dbClient } from "../clients/dbClient.js";
 import { CompiledQuery } from "kysely";
 
 export default class RequestQueue {
-  private requestsCache: CompiledQuery<unknown>[] = [];
+  private requestsCache: CompiledQuery<unknown>[][] = [];
   private running = false;
 
   constructor() {
@@ -10,7 +10,7 @@ export default class RequestQueue {
   }
 
   addRequests({ requests }: { requests: CompiledQuery<unknown>[] }) {
-    this.requestsCache.push(...requests);
+    this.requestsCache.push(requests);
   }
 
   private async startWorker() {
@@ -22,25 +22,20 @@ export default class RequestQueue {
   }
 
   private async processQueue() {
-    if (this.requestsCache.length === 0) return;
+    while (this.requestsCache.length > 0) {
+      const requests = this.requestsCache.shift();
+      if (!requests || requests.length === 0) continue;
 
-    const processedRequests: CompiledQuery<unknown>[] = [];
-
-    try {
-      await dbClient.transaction().execute(async (trx) => {
-        for (const request of this.requestsCache) {
-          await trx.executeQuery(request);
-          processedRequests.push(request);
-        }
-      });
-    } catch (error) {
-      console.error("Failed to submit request queue", error);
+      try {
+        await dbClient.transaction().execute(async (trx) => {
+          for (const request of requests) {
+            await trx.executeQuery(request);
+          }
+        });
+      } catch (error) {
+        console.error("Failed to submit request", error);
+      }
     }
-
-    // Remove only the successfully processed requests from the cache
-    this.requestsCache = this.requestsCache.filter(
-      (request) => !processedRequests.includes(request),
-    );
   }
 
   stopWorker() {

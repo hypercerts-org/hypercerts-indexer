@@ -85,6 +85,7 @@ export const storeClaimStored: StorageMethod<Claim> = async ({
               "excluded.last_update_block_timestamp",
             ),
             units: eb.ref("excluded.units"),
+            uri: eb.ref("excluded.uri"),
           })),
         )
         .compile(),
