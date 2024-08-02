@@ -1,5 +1,6 @@
 import { dbClient } from "../clients/dbClient.js";
 import { CompiledQuery } from "kysely";
+import fs from "fs";
 
 export default class RequestQueue {
   private requestsCache: CompiledQuery<unknown>[][] = [];
@@ -36,6 +37,18 @@ export default class RequestQueue {
         console.error("Failed to submit request", error);
       }
     }
+  }
+
+  private logErrorToFile(
+    error: unknown,
+    request: CompiledQuery<unknown> | undefined,
+  ) {
+    const errorMessage = `Error: ${error}\nRequest: ${JSON.stringify(request)}\n\n`;
+    fs.appendFile("error_log.txt", errorMessage, (err) => {
+      if (err) {
+        console.error("Failed to write error to file", err);
+      }
+    });
   }
 
   stopWorker() {
