@@ -22,9 +22,10 @@ export type ParseClaimStoredEvent = z.infer<typeof ClaimStoredEventSchema>;
 /**
  * Parses a ParseClaimStoredEvent and retrieves additional information about the transaction.
  *
- * @param {unknown} event - The event to parse.
- * @returns {Promise<Claim>} A promise that resolves to an object containing the parsed event data.
- * @throws {z.ZodError} If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
+ * @param event - The event to parse.
+ * @param context - The context to use for parsing.
+ * @returns  A promise that resolves to an object containing the parsed event data.
+ * @throws If the event does not match the ClaimStoredEventSchema, a Zod validation error is thrown.
  */
 export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   event,
