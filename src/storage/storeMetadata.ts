@@ -90,12 +90,16 @@ export const storeMetadata: StorageMethod<MetadataResult> = async ({
         });
       }
 
-      requests.push(
-        dbClient
-          .insertInto("hypercert_allow_list_records")
-          .values(records)
-          .compile(),
-      );
+      const chunkSize = 250;
+      for (let i = 0; i < records.length; i += chunkSize) {
+        const chunk = records.slice(i, i + chunkSize);
+        requests.push(
+          dbClient
+            .insertInto("hypercert_allow_list_records")
+            .values(chunk)
+            .compile(),
+        );
+      }
 
       // Store hypercert_allow_lists as parsed
       requests.push(
