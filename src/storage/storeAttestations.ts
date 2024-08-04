@@ -28,7 +28,11 @@ export const storeAttestations: StorageMethod<DecodedAttestation> = async ({
   }
 
   return [
-    dbClient.insertInto("attestations").values(attestations).compile(),
+    dbClient
+      .insertInto("attestations")
+      .values(attestations)
+      .onConflict((oc) => oc.column("uid").doNothing())
+      .compile(),
     dbClient
       .updateTable("contract_events")
       .set({ last_block_indexed: block.blockNumber })
