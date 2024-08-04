@@ -31,7 +31,9 @@ export const storeAttestations: StorageMethod<DecodedAttestation> = async ({
     dbClient
       .insertInto("attestations")
       .values(attestations)
-      .onConflict((oc) => oc.column("uid").doNothing())
+      .onConflict((oc) =>
+        oc.columns(["supported_schemas_id", "uid"]).doNothing(),
+      )
       .compile(),
     dbClient
       .updateTable("contract_events")
