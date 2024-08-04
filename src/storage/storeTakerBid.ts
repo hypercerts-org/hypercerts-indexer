@@ -97,10 +97,11 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
         "[StoreTakerBid] Could not read matching orders from database",
       );
 
+    const rpcUrl = getRpcUrl(Number(chain_id));
     const hypercertsExchange = new HypercertExchangeClient(
       Number(chain_id),
       // @ts-expect-error - No types available
-      new ethers.JsonRpcProvider(getRpcUrl()),
+      new ethers.JsonRpcProvider(rpcUrl),
     );
 
     const signatures: string[] = [];
