@@ -128,6 +128,12 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
+        chain_id: 10,
+        contract_address: "0x2F7Ab1844594112E00708e18835ba2e731880Db1",
+        start_block: 124234816,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
         chain_id: 11155111,
         contract_address: "0xB1991E985197d14669852Be8e53ee95A1f4621c0",
         start_block: 6326571,
