@@ -160,7 +160,6 @@ const main = async () => {
       "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
     resolver: ZERO_ADDRESS,
     revocable: true,
-    last_block_indexed: 6098991,
   });
 
   await supabase.from("supported_schemas").select("*");
