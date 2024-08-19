@@ -411,11 +411,9 @@ export const getIndexer = async ({
   });
 
   indexer.on("progress", async (progress) => {
-    // await requestQueue.submitQueue();
-
     const percentage = (progress.currentBlock * 100n) / progress.targetBlock;
     console.info(
-      `Indexed ${progress.currentBlock}/${progress.targetBlock} blocks for ${chainId} | ${percentage}% | ${progress.pendingEventsCount} pending events`,
+      `${chainId} | ${progress.currentBlock}/${progress.targetBlock} | ${percentage}% | ${progress.pendingEventsCount} pending events`,
     );
   });
 

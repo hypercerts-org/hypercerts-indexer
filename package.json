@@ -66,9 +66,9 @@
   },
   "dependencies": {
     "@hypercerts-org/chainsauce": "1.0.24",
-    "@hypercerts-org/contracts": "2.0.0-alpha.1",
-    "@hypercerts-org/marketplace-sdk": "^0.3.22",
-    "@hypercerts-org/sdk": "^2.0.0-alpha.30",
+    "@hypercerts-org/contracts": "2.0.0-alpha.5",
+    "@hypercerts-org/marketplace-sdk": "^0.3.32",
+    "@hypercerts-org/sdk": "^2.0.0-alpha.37",
     "@opentelemetry/instrumentation": "^0.52.1",
     "@openzeppelin/merkle-tree": "^1.0.7",
     "@supabase/postgrest-js": "^1.15.7",
@@ -82,7 +82,7 @@
     "luxon": "^3.4.4",
     "pg": "^8.12.0",
     "type-fest": "^4.20.1",
-    "viem": "^2.16.4",
+    "viem": "^2.19.7",
     "zod": "^3.23.8"
   },
   "packageManager": "pnpm@9.2.0+sha256.94fab213df221c55b6956b14a2264c21c6203cca9f0b3b95ff2fe9b84b120390"

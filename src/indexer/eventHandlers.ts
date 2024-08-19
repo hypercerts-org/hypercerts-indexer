@@ -61,16 +61,6 @@ export const processEvent = async ({ event, context }: EventParser) => {
   try {
     const handler = getEventHandler(event.name);
 
-    // TODO restore updating last block indexer per subscription
-    // await handler.parse(data, context).then(() => {
-    //   const { contracts_id, events_id, block } = context;
-    //   updateLastBlockIndexedContractEvents({
-    //     contracts_id,
-    //     events_id,
-    //     last_block_indexed: block.blockNumber,
-    //   });
-    // });
-
     return await handler.parse(event, context);
   } catch (e) {
     if (e instanceof EventHandlerMissingError) {

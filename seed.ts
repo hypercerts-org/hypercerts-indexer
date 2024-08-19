@@ -110,6 +110,12 @@ const main = async () => {
         contract_slug: minterContractSlug,
       },
       {
+        chain_id: 84532,
+        contract_address: "0x5DD43eff9FCC6F70564794e997A47722fE315847",
+        start_block: 14121595,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
         chain_id: 11155111,
         contract_address: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
         start_block: 4421945,
@@ -120,6 +126,12 @@ const main = async () => {
         contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
         start_block: 76066993,
         contract_slug: minterContractSlug,
+      },
+      {
+        chain_id: 10,
+        contract_address: "0x2F7Ab1844594112E00708e18835ba2e731880Db1",
+        start_block: 124234816,
+        contract_slug: marketplaceContractSlug,
       },
       {
         chain_id: 11155111,
@@ -148,7 +160,6 @@ const main = async () => {
       "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
     resolver: ZERO_ADDRESS,
     revocable: true,
-    last_block_indexed: 6098991,
   });
 
   await supabase.from("supported_schemas").select("*");
