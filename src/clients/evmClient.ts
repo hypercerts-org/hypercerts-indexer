@@ -1,5 +1,12 @@
 import { createPublicClient, fallback, http } from "viem";
-import { base, baseSepolia, celo, optimism, sepolia } from "viem/chains";
+import {
+  arbitrumSepolia,
+  base,
+  baseSepolia,
+  celo,
+  optimism,
+  sepolia,
+} from "viem/chains";
 import {
   alchemyApiKey,
   drpcApiPkey,
@@ -9,7 +16,7 @@ import {
 } from "@/utils/constants.js";
 
 export const getSupportedChains = () => {
-  if (environment === Environment.TEST) return [11155111, 84532];
+  if (environment === Environment.TEST) return [11155111, 84532, 421614];
   if (environment === Environment.PRODUCTION) return [10, 8453, 42220];
 };
 
@@ -21,6 +28,8 @@ const selectedNetwork = (chainId: number) => {
       return base;
     case 42220:
       return celo;
+    case 421614:
+      return arbitrumSepolia;
     case 84532:
       return baseSepolia;
     case 11155111:
@@ -38,6 +47,8 @@ export const alchemyUrl = (chainId: number) => {
       return `https://base-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 42220:
       return;
+    case 421614:
+      return `https://arb-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 84532:
       return `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 11155111:
@@ -55,6 +66,8 @@ const infuraUrl = (chainId: number) => {
       return;
     case 42220:
       return `https://celo-mainnet.infura.io/v3/${infuraApiKey}`;
+    case 421614:
+      return `https://arbitrum-sepolia.infura.io/v3/${infuraApiKey}`;
     case 84532:
       return;
     case 11155111:
@@ -72,6 +85,8 @@ const drpcUrl = (chainId: number) => {
       return `https://lb.drpc.org/ogrpc?network=base&dkey=${drpcApiPkey}`;
     case 42220:
       return `https://lb.drpc.org/ogrpc?network=celo&dkey=${drpcApiPkey}`;
+    case 421614:
+      return `https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=${drpcApiPkey}`;
     case 84532:
       return;
     case 11155111:
