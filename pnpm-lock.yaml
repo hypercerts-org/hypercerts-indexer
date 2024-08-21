@@ -12,14 +12,14 @@ importers:
         specifier: 1.0.24
         version: 1.0.24(zod@3.23.8)
       '@hypercerts-org/contracts':
-        specifier: 2.0.0-alpha.5
-        version: 2.0.0-alpha.5(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.5.25)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)
+        specifier: 2.0.0-alpha.7
+        version: 2.0.0-alpha.7(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.5.25)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)
       '@hypercerts-org/marketplace-sdk':
-        specifier: ^0.3.32
-        version: 0.3.32(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(svelte@4.2.18)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
+        specifier: ^0.3.33
+        version: 0.3.33(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(svelte@4.2.18)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
       '@hypercerts-org/sdk':
-        specifier: ^2.0.0-alpha.37
-        version: 2.0.0-alpha.37(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
+        specifier: ^2.1.1
+        version: 2.1.1(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
       '@opentelemetry/instrumentation':
         specifier: ^0.52.1
         version: 0.52.1(@opentelemetry/api@1.9.0)
@@ -732,17 +732,17 @@ packages:
   '@hypercerts-org/chainsauce@1.0.24':
     resolution: {integrity: sha512-HKRUlVsWyEJhfPdewvZeBJu1J6e667B60csrQuzJ8e+9d6MJFw3z+zZcKAbIbzsN7dSf9neBmW2KgMiUW/s2fw==}
 
-  '@hypercerts-org/contracts@2.0.0-alpha.5':
-    resolution: {integrity: sha512-yMYlI2YWQpb9eIBK/dopzekuj/QS6ynzu/sG8sFzBASdu4Jk8s4m8FGlNotj5lXpLi8hx+kHfk/1tTN7NX9UaA==}
+  '@hypercerts-org/contracts@2.0.0-alpha.7':
+    resolution: {integrity: sha512-rnITsv1vcRsVtJxYCaHWXT9xk+5xjRRub1hJ9XqOrs0+HAvZTwBzTsoNWjjUlrW37loYHGxm5pRD+omFfeBbsw==}
 
-  '@hypercerts-org/marketplace-sdk@0.3.32':
-    resolution: {integrity: sha512-kAYbrDeCwbsC2sT5I7a8ePRmY+aFSjfhURLivUi47fVB5yjsePs14tLEk3rO4P8eFvWsDMOyaYGHB3LS2sp2eA==}
+  '@hypercerts-org/marketplace-sdk@0.3.33':
+    resolution: {integrity: sha512-xbsG8fHUjDyTBRQ3FzDZbTnD/CnKU8iqPEJJn9lKwsHIXyf4q5iQSBwBi519Euh0Evi7e7jM5LGkydYmojCcJw==}
     engines: {node: '>= 16.15.1 <= 20.x'}
     peerDependencies:
       ethers: ^6.6.2
 
-  '@hypercerts-org/sdk@2.0.0-alpha.37':
-    resolution: {integrity: sha512-kEpZOKaiHzCr70yAYhO1z+of0xG+2Y8etwX2eZ+RV0RUjLs9qOYsh1lrIclXQ5+ayKZiVDkjBY8t7zMqJKnpZw==}
+  '@hypercerts-org/sdk@2.1.1':
+    resolution: {integrity: sha512-Wf/wZOvZfsj0Y/gVGHS8hWnLKlbN/AphLzDusX7KnhtygLC9KUnP8RnTPAAwVkd6ma4gFsVyzpKbCx2Ph7rKmw==}
 
   '@inquirer/confirm@3.0.0':
     resolution: {integrity: sha512-LHeuYP1D8NmQra1eR4UqvZMXwxEdDXyElJmmZfU44xdNLL6+GcQBS0uE16vyfZVjH8c22p9e+DStROfE/hyHrg==}
@@ -5950,7 +5950,7 @@ snapshots:
       - webdriverio
       - zod
 
-  '@hypercerts-org/contracts@2.0.0-alpha.5(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.5.25)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)':
+  '@hypercerts-org/contracts@2.0.0-alpha.7(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.5.25)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)':
     dependencies:
       '@tenderly/hardhat-tenderly': 2.3.0(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.5.25)(@types/node@20.11.19)(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2))
       hardhat: 2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)
@@ -5969,7 +5969,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@hypercerts-org/contracts@2.0.0-alpha.5(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.6.5)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
+  '@hypercerts-org/contracts@2.0.0-alpha.7(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.6.5)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
     dependencies:
       '@tenderly/hardhat-tenderly': 2.3.0(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.6.5)(@types/node@20.11.19)(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2))
       hardhat: 2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)
@@ -5988,9 +5988,9 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@hypercerts-org/marketplace-sdk@0.3.32(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(svelte@4.2.18)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
+  '@hypercerts-org/marketplace-sdk@0.3.33(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(svelte@4.2.18)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
     dependencies:
-      '@hypercerts-org/sdk': 2.0.0-alpha.37(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
+      '@hypercerts-org/sdk': 2.1.1(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
       '@supabase/supabase-js': 2.44.2
       '@urql/core': 5.0.4(graphql@16.8.1)
       ethers: 6.13.1
@@ -6013,10 +6013,10 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@hypercerts-org/sdk@2.0.0-alpha.37(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
+  '@hypercerts-org/sdk@2.1.1(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@types/node@20.11.19)(ethers@6.13.1)(graphql@16.8.1)(rollup@4.12.0)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)':
     dependencies:
       '@graphql-typed-document-node/core': 3.2.0(graphql@16.8.1)
-      '@hypercerts-org/contracts': 2.0.0-alpha.5(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.6.5)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
+      '@hypercerts-org/contracts': 2.0.0-alpha.7(@nomicfoundation/hardhat-ethers@3.0.6(ethers@6.13.1)(hardhat@2.22.8(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.2))(typescript@5.5.2)))(@swc/core@1.6.5)(@types/node@20.11.19)(ethers@6.13.1)(ts-node@10.9.2(@swc/core@1.5.25)(@types/node@20.11.19)(typescript@5.5.4))(typescript@5.5.2)
       '@openzeppelin/merkle-tree': 1.0.7
       '@swc/core': 1.6.5
       ajv: 8.16.0
