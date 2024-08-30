@@ -1,4 +1,4 @@
-name: roll out supabase migration
+name: roll out supabase migration to production
 on:
   push:
     branches:

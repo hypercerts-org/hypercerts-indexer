@@ -128,7 +128,7 @@ importers:
         version: 2.0.0(kysely@0.27.4)(postgres@3.4.4)
       kysely-supabase:
         specifier: ^0.2.0
-        version: 0.2.0(@supabase/supabase-js@2.44.2)(kysely@0.27.4)(supabase@1.187.3)
+        version: 0.2.0(@supabase/supabase-js@2.44.2)(kysely@0.27.4)(supabase@1.191.3)
       msw:
         specifier: ^2.2.2
         version: 2.2.2(typescript@5.5.2)
@@ -151,8 +151,8 @@ importers:
         specifier: ^17.0.1
         version: 17.0.1
       supabase:
-        specifier: ^1.187.3
-        version: 1.187.3
+        specifier: ^1.191.3
+        version: 1.191.3
       supertest:
         specifier: ^6.3.4
         version: 6.3.4
@@ -4663,8 +4663,8 @@ packages:
     resolution: {integrity: sha512-pQ+V+nYQdC5H3Q7qBZAz/MO6lwGhoC2gOAjuouGf/VO0m7vQRh8QNMl2Uf6SwAtzZ9bOw3UIeBukEGNJl5dtXQ==}
     engines: {node: '>=14.16'}
 
-  supabase@1.187.3:
-    resolution: {integrity: sha512-44yzHpxMrd88cUKWw3GVPPIUx6oCqgfqmN4Mlxp7a7GeNNZSTe433vmKBcj+ue3E7K08XcIyEX6G1TjhVyto+g==}
+  supabase@1.191.3:
+    resolution: {integrity: sha512-5tIG7mPc5lZ9QRbkZssyHiOsx42qGFaVqclauXv+1fJAkZnfA28d0pzEDvfs33+w8YTReO5nNaWAgyzkWQQwfA==}
     engines: {npm: '>=8'}
     hasBin: true
 
@@ -4717,8 +4717,8 @@ packages:
     resolution: {integrity: sha512-hctwP0Nb4AB60bj8WQgRYaMOuJYRAPMGiQUAotms5igN8ppfQM+IvjQ5HcKu1MaZh2Wy2KWVTe563Yj8dfc14w==}
     engines: {node: '>=18'}
 
-  tar@7.4.0:
-    resolution: {integrity: sha512-XQs0S8fuAkQWuqhDeCdMlJXDX80D7EOVLDPVFkna9yQfzS+PHKgfxcei0jf6/+QAWcjqrnC8uM3fSAnrQl+XYg==}
+  tar@7.4.3:
+    resolution: {integrity: sha512-5S7Va8hKfV7W5U6g3aYxXmlPoZVAwUMy9AOKyF2fVuZa2UD3qZjg578OrLRt8PcNN1PleVaL/5/yYATNL0ICUw==}
     engines: {node: '>=18'}
 
   tenderly@0.9.1:
@@ -7394,7 +7394,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/typescript-estree': 7.0.2(typescript@5.5.2)
       '@typescript-eslint/utils': 7.0.2(eslint@8.56.0)(typescript@5.5.2)
-      debug: 4.3.4(supports-color@5.5.0)
+      debug: 4.3.5
       eslint: 8.56.0
       ts-api-utils: 1.2.1(typescript@5.5.2)
     optionalDependencies:
@@ -7408,7 +7408,7 @@ snapshots:
     dependencies:
       '@typescript-eslint/types': 7.0.2
       '@typescript-eslint/visitor-keys': 7.0.2
-      debug: 4.3.4(supports-color@5.5.0)
+      debug: 4.3.5
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
@@ -9521,11 +9521,11 @@ snapshots:
       kysely: 0.27.4
       postgres: 3.4.4
 
-  kysely-supabase@0.2.0(@supabase/supabase-js@2.44.2)(kysely@0.27.4)(supabase@1.187.3):
+  kysely-supabase@0.2.0(@supabase/supabase-js@2.44.2)(kysely@0.27.4)(supabase@1.191.3):
     dependencies:
       '@supabase/supabase-js': 2.44.2
       kysely: 0.27.4
-      supabase: 1.187.3
+      supabase: 1.191.3
 
   kysely@0.27.4: {}
 
@@ -10007,7 +10007,7 @@ snapshots:
   path-scurry@1.10.1:
     dependencies:
       lru-cache: 10.2.0
-      minipass: 7.0.4
+      minipass: 7.1.2
 
   path-to-regexp@0.1.7: {}
 
@@ -10644,12 +10644,12 @@ snapshots:
       '@tokenizer/token': 0.3.0
       peek-readable: 5.0.0
 
-  supabase@1.187.3:
+  supabase@1.191.3:
     dependencies:
       bin-links: 4.0.4
       https-proxy-agent: 7.0.5
       node-fetch: 3.3.2
-      tar: 7.4.0
+      tar: 7.4.3
     transitivePeerDependencies:
       - supports-color
 
@@ -10745,7 +10745,7 @@ snapshots:
       mkdirp: 3.0.1
       yallist: 5.0.0
 
-  tar@7.4.0:
+  tar@7.4.3:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0
