@@ -133,6 +133,7 @@ export type Database = {
       }
       claims: {
         Row: {
+          attestations_count: number | null
           contracts_id: string
           creation_block_number: number
           creation_block_timestamp: number
@@ -142,6 +143,7 @@ export type Database = {
           last_update_block_number: number
           last_update_block_timestamp: number
           owner_address: string | null
+          sales_count: number | null
           token_id: number
           units: number | null
           uri: string | null
@@ -149,6 +151,7 @@ export type Database = {
           claim_attestation_count: number | null
         }
         Insert: {
+          attestations_count?: number | null
           contracts_id: string
           creation_block_number: number
           creation_block_timestamp: number
@@ -158,12 +161,14 @@ export type Database = {
           last_update_block_number: number
           last_update_block_timestamp: number
           owner_address?: string | null
+          sales_count?: number | null
           token_id: number
           units?: number | null
           uri?: string | null
           value?: number | null
         }
         Update: {
+          attestations_count?: number | null
           contracts_id?: string
           creation_block_number?: number
           creation_block_timestamp?: number
@@ -173,6 +178,7 @@ export type Database = {
           last_update_block_number?: number
           last_update_block_timestamp?: number
           owner_address?: string | null
+          sales_count?: number | null
           token_id?: number
           units?: number | null
           uri?: string | null
