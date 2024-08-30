@@ -1,8 +1,6 @@
-name: roll out supabase migration to staging
+name: verify supabase types
 on:
-  push:
-    branches:
-      - develop
+  pull_request:
 
 env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -30,12 +28,3 @@ jobs:
             git diff
             exit 1
           fi
-
-  deploy-migrations:
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
-      - run: supabase link --project-ref $PROJECT_ID
-      - run: supabase db push
