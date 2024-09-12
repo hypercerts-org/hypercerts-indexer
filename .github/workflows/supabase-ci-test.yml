@@ -1,6 +1,9 @@
 name: verify supabase types
 on:
   pull_request:
+    branches-ignore:
+      - main
+      - develop
 
 env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
