@@ -41,6 +41,7 @@ jobs:
       - run: supabase db push
 
   run-seed-script:
+    needs: deploy-migrations
     runs-on: ubuntu-latest
     environment: staging
 
