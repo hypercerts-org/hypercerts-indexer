@@ -39,3 +39,31 @@ jobs:
       - uses: supabase/setup-cli@v1
       - run: supabase link --project-ref $PROJECT_ID
       - run: supabase db push
+
+  run-seed-script:
+    needs: deploy-migrations
+    runs-on: ubuntu-latest
+    environment: staging
+
+    env:
+      SUPABASE_CACHING_DB_URL: ${{ vars.SUPABASE_CACHING_DB_URL }}
+      SUPABASE_CACHING_SERVICE_API_KEY: ${{ secrets.SUPABASE_CACHING_SERVICE_API_KEY }}
+      OVERRIDE_LOCAL_DB_PROTECTION: "true"
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Install Node'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run seed script
+        run: npx tsx ./seed.ts

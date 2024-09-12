@@ -102,12 +102,11 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
     // @ts-expect-error args is missing in the type
     const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
 
-    console.log("[parseTakerBidEvent] Hypercert ID", hypercertId);
     return [
       TakerBid.parse({
         amounts: bid.params.amounts,
-        seller: getAddress(bid.params.bidRecipient),
-        buyer: getAddress(bid.params.bidUser),
+        seller: getAddress(bid.params.feeRecipients[0]),
+        buyer: getAddress(bid.params.bidRecipient),
         currency: getAddress(bid.params.currency),
         collection: getAddress(bid.params.collection),
         item_ids: bid.params.itemIds,

@@ -51,6 +51,14 @@ export const getDeployment = (
         schemaRegistryAddress: "",
         chainId,
       };
+    case 42161:
+      return {
+        ...DEPLOYMENTS["42161"],
+        startBlock: 251729365n,
+        easAddress: "0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458",
+        schemaRegistryAddress: "0xA310da9c5B885E7fb3fbA9D66E9Ba6Df512b78eB",
+        chainId,
+      };
     // Testnets
     case 11155111:
       return {
@@ -66,6 +74,14 @@ export const getDeployment = (
         startBlock: 6771210n,
         easAddress: "0x4200000000000000000000000000000000000021",
         schemaRegistryAddress: "0x4200000000000000000000000000000000000020",
+        chainId,
+      };
+    case 421614:
+      return {
+        ...DEPLOYMENTS["421614"],
+        startBlock: 69066523n,
+        easAddress: "",
+        schemaRegistryAddress: "",
         chainId,
       };
     default:
