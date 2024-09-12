@@ -1,5 +1,6 @@
 import { createPublicClient, fallback, http } from "viem";
 import {
+  arbitrum,
   arbitrumSepolia,
   base,
   baseSepolia,
@@ -17,7 +18,7 @@ import {
 
 export const getSupportedChains = () => {
   if (environment === Environment.TEST) return [11155111, 84532, 421614];
-  if (environment === Environment.PRODUCTION) return [10, 8453, 42220];
+  if (environment === Environment.PRODUCTION) return [10, 8453, 42220, 42161];
 };
 
 const selectedNetwork = (chainId: number) => {
@@ -28,6 +29,8 @@ const selectedNetwork = (chainId: number) => {
       return base;
     case 42220:
       return celo;
+    case 42161:
+      return arbitrum;
     case 421614:
       return arbitrumSepolia;
     case 84532:
@@ -47,6 +50,8 @@ export const alchemyUrl = (chainId: number) => {
       return `https://base-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 42220:
       return;
+    case 42161:
+      return `https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`;
     case 421614:
       return `https://arb-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 84532:
@@ -66,6 +71,8 @@ const infuraUrl = (chainId: number) => {
       return;
     case 42220:
       return `https://celo-mainnet.infura.io/v3/${infuraApiKey}`;
+    case 42161:
+      return `https://arbitrum-mainnet.infura.io/v3/${infuraApiKey}`;
     case 421614:
       return `https://arbitrum-sepolia.infura.io/v3/${infuraApiKey}`;
     case 84532:
@@ -85,6 +92,8 @@ const drpcUrl = (chainId: number) => {
       return `https://lb.drpc.org/ogrpc?network=base&dkey=${drpcApiPkey}`;
     case 42220:
       return `https://lb.drpc.org/ogrpc?network=celo&dkey=${drpcApiPkey}`;
+    case 42161:
+      return `https://lb.drpc.org/ogrpc?network=arbitrum&dkey=${drpcApiPkey}`;
     case 421614:
       return `https://lb.drpc.org/ogrpc?network=arbitrum-sepolia&dkey=${drpcApiPkey}`;
     case 84532:

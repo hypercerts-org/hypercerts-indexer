@@ -92,6 +92,12 @@ const main = async () => {
   await supabase.from("contracts").upsert(
     [
       {
+        chain_id: 42161,
+        contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
+        start_block: 251729365,
+        contract_slug: minterContractSlug,
+      },
+      {
         chain_id: 421614,
         contract_address: "0x0A00a2f09cd37B24E7429c5238323bfebCfF3Ed9",
         start_block: 69066523,
@@ -174,22 +180,35 @@ const main = async () => {
     revocable: true,
   });
 
-  await supabase.from("supported_schemas").select("*");
+  const { data: supportedSchemas } = await supabase
+    .from("supported_schemas")
+    .select("*");
 
   // combine all contract_ids with the event_ids
   console.log("🕊️ Seeding contract_events...");
   const { data: events } = await supabase.from("events").select("*");
   const { data: contracts } = await supabase.from("contracts").select("*");
 
+  if (!supportedSchemas) {
+    console.error("No supported schemas found in the database");
+    process.exit();
+  }
+
+  console.log(`✅ Found ${supportedSchemas.length} supported schemas`);
+
   if (!events) {
     console.error("No events found in the database");
     process.exit();
   }
 
+  console.log(`✅ Found ${events.length} events`);
+
   if (!contracts) {
     console.error("No contracts found in the database");
     process.exit();
   }
+
+  console.log(`✅ Found ${contracts.length} contracts`);
 
   const contractEvents = events.map((event) => {
     const contractsWithMatchingSlug = contracts.filter(
@@ -215,6 +234,12 @@ const main = async () => {
     console.error("Error seeding contract events", error);
     process.exit();
   }
+
+  const { data: _contractEvents } = await supabase
+    .from("contract_events")
+    .select("*");
+
+  console.log(`✅ Found ${_contractEvents.length} contract events`);
   console.log("🚀 Database seeded successfully!");
   process.exit();
 };
