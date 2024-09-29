@@ -93,6 +93,36 @@ const main = async () => {
     [
       {
         chain_id: 42161,
+        contract_address: "0xcE8fa09562f07c23B9C21b5d0A29a293F8a8BC83",
+        start_block: 258720235,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
+        chain_id: 42161,
+        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        start_block: 258705973,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 10,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 126023023,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 8453,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 20427818,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 42220,
+        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        start_block: 27994577,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 42161,
         contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
         start_block: 251729365,
         contract_slug: minterContractSlug,
