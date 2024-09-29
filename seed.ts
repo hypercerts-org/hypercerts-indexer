@@ -93,6 +93,36 @@ const main = async () => {
     [
       {
         chain_id: 42161,
+        contract_address: "0xcE8fa09562f07c23B9C21b5d0A29a293F8a8BC83",
+        start_block: 258720235,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
+        chain_id: 42161,
+        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        start_block: 258705973,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 10,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 126023023,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 8453,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 20427818,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 42220,
+        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        start_block: 27994577,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 42161,
         contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
         start_block: 251729365,
         contract_slug: minterContractSlug,
@@ -171,14 +201,62 @@ const main = async () => {
   );
 
   console.log("🕊️ Seeding supported schemas...");
-  await supabase.from("supported_schemas").insert({
-    chain_id: 11155111,
-    uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-    schema:
-      "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
-    resolver: ZERO_ADDRESS,
-    revocable: true,
-  });
+  await supabase.from("supported_schemas").upsert(
+    [
+      {
+        chain_id: 11155111,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 84532,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 10,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 8453,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 42220,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 42161,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+    ],
+    {
+      onConflict: "uid, chain_id",
+      ignoreDuplicates: true,
+    },
+  );
 
   const { data: supportedSchemas } = await supabase
     .from("supported_schemas")
