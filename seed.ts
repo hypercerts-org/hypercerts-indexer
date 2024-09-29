@@ -171,14 +171,62 @@ const main = async () => {
   );
 
   console.log("🕊️ Seeding supported schemas...");
-  await supabase.from("supported_schemas").insert({
-    chain_id: 11155111,
-    uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-    schema:
-      "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
-    resolver: ZERO_ADDRESS,
-    revocable: true,
-  });
+  await supabase.from("supported_schemas").upsert(
+    [
+      {
+        chain_id: 11155111,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 84532,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 10,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 8453,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 42220,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 42161,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+    ],
+    {
+      onConflict: "uid, chain_id",
+      ignoreDuplicates: true,
+    },
+  );
 
   const { data: supportedSchemas } = await supabase
     .from("supported_schemas")
