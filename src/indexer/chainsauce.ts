@@ -3,7 +3,11 @@ import SchemaRegistryAbi from "@/abis/schemaRegistry.js";
 import HypercertMinterAbi from "@/abis/hypercertMinter.js";
 import HypercertExchangeAbi from "@/abis/hypercertExchange.js";
 import { processEvent } from "@/indexer/eventHandlers.js";
-import { localCachingDbUrl } from "@/utils/constants.js";
+import {
+  Environment,
+  environment,
+  localCachingDbUrl,
+} from "@/utils/constants.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
 import EasAbi from "@/abis/eas.js";
 import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
@@ -58,6 +62,7 @@ export const getIndexer = async ({
       id: chainId,
       maxBlockRange: 100000n,
       rpcClient: createHttpRpcClient({ url: rpcUrl }),
+      pollingInterval: environment === Environment.TEST ? 5000 : 2500,
     },
     contracts: MyContracts,
     context: {
