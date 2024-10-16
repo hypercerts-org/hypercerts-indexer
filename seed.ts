@@ -92,6 +92,12 @@ const main = async () => {
   await supabase.from("contracts").upsert(
     [
       {
+        chain_id: 314159,
+        contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
+        start_block: 2058128,
+        contract_slug: minterContractSlug,
+      },
+      {
         chain_id: 42161,
         contract_address: "0xcE8fa09562f07c23B9C21b5d0A29a293F8a8BC83",
         start_block: 258720235,

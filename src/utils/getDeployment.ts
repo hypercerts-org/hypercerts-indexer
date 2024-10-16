@@ -84,6 +84,14 @@ export const getDeployment = (
         schemaRegistryAddress: "",
         chainId,
       };
+    case 314159:
+      return {
+        ...DEPLOYMENTS["314159"],
+        startBlock: 2058128n,
+        easAddress: "",
+        schemaRegistryAddress: "",
+        chainId,
+      };
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }

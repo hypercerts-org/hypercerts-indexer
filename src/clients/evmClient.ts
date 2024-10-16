@@ -5,6 +5,7 @@ import {
   base,
   baseSepolia,
   celo,
+  filecoinCalibration,
   optimism,
   sepolia,
 } from "viem/chains";
@@ -17,7 +18,8 @@ import {
 } from "@/utils/constants.js";
 
 export const getSupportedChains = () => {
-  if (environment === Environment.TEST) return [11155111, 84532, 421614];
+  if (environment === Environment.TEST)
+    return [11155111, 84532, 421614, 314159];
   if (environment === Environment.PRODUCTION) return [10, 8453, 42220, 42161];
 };
 
@@ -37,6 +39,8 @@ const selectedNetwork = (chainId: number) => {
       return baseSepolia;
     case 11155111:
       return sepolia;
+    case 314159:
+      return filecoinCalibration;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
@@ -58,6 +62,8 @@ export const alchemyUrl = (chainId: number) => {
       return `https://base-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
     case 11155111:
       return `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
+    case 314159:
+      return;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
@@ -78,7 +84,9 @@ const infuraUrl = (chainId: number) => {
     case 84532:
       return;
     case 11155111:
-      return `https://sepolia.infura.io/v3/${infuraApiKey}`;
+      return;
+    case 314159:
+      return;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
   }
@@ -100,8 +108,19 @@ const drpcUrl = (chainId: number) => {
       return;
     case 11155111:
       return;
+    case 314159:
+      return;
     default:
       throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+};
+
+const glifUrl = (chainId: number) => {
+  switch (chainId) {
+    case 314159:
+      return `https://api.calibration.node.glif.io/rpc/v1`;
+    default:
+      return;
   }
 };
 
@@ -111,7 +130,8 @@ export const getRpcUrl = (chainId: number) => {
   const alchemy = alchemyUrl(chainId);
   const infura = infuraUrl(chainId);
   const drpc = drpcUrl(chainId);
-  return [alchemy, infura, drpc].filter((url) => url)[0];
+  const glif = glifUrl(chainId);
+  return [alchemy, infura, drpc, glif].filter((url) => url)[0];
 };
 
 const fallBackProvider = (chainId: number) => {
@@ -124,7 +144,10 @@ const fallBackProvider = (chainId: number) => {
   const drpc = drpcUrl(chainId)
     ? [http(drpcUrl(chainId), { timeout: rpc_timeout })]
     : [];
-  return fallback([...alchemy, ...drpc, ...infura], {
+  const glif = glifUrl(chainId)
+    ? [http(glifUrl(chainId), { timeout: rpc_timeout })]
+    : [];
+  return fallback([...alchemy, ...drpc, ...infura, ...glif], {
     retryCount: 5,
   });
 };

@@ -12,6 +12,8 @@ class Indexer {
 
     const supportedChains = getSupportedChains();
 
+    console.log(supportedChains);
+
     if (!supportedChains || supportedChains.length === 0) {
       throw new Error("No supported chains found.");
     }
