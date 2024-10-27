@@ -62,7 +62,7 @@ export const getIndexer = async ({
       id: chainId,
       maxBlockRange: 100000n,
       rpcClient: createHttpRpcClient({ url: rpcUrl }),
-      pollingInterval: environment === Environment.TEST ? 5000 : 2500,
+      pollingInterval: environment === Environment.TEST ? 10000 : 5000,
     },
     contracts: MyContracts,
     context: {
