@@ -92,9 +92,39 @@ const main = async () => {
   await supabase.from("contracts").upsert(
     [
       {
-        chain_id: 314159,
+        chain_id: 10,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 126023023,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 10,
         contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
-        start_block: 2058128,
+        start_block: 76066993,
+        contract_slug: minterContractSlug,
+      },
+      {
+        chain_id: 10,
+        contract_address: "0x2F7Ab1844594112E00708e18835ba2e731880Db1",
+        start_block: 124234816,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
+        chain_id: 8453,
+        contract_address: "0x4200000000000000000000000000000000000021",
+        start_block: 20427818,
+        contract_slug: easContractSlug,
+      },
+      {
+        chain_id: 8453,
+        contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
+        start_block: 6771210,
+        contract_slug: minterContractSlug,
+      },
+      {
+        chain_id: 42161,
+        contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
+        start_block: 251729365,
         contract_slug: minterContractSlug,
       },
       {
@@ -110,16 +140,10 @@ const main = async () => {
         contract_slug: easContractSlug,
       },
       {
-        chain_id: 10,
-        contract_address: "0x4200000000000000000000000000000000000021",
-        start_block: 126023023,
-        contract_slug: easContractSlug,
-      },
-      {
-        chain_id: 8453,
-        contract_address: "0x4200000000000000000000000000000000000021",
-        start_block: 20427818,
-        contract_slug: easContractSlug,
+        chain_id: 42220,
+        contract_address: "0x16bA53B74c234C870c61EFC04cD418B8f2865959",
+        start_block: 22079540,
+        contract_slug: minterContractSlug,
       },
       {
         chain_id: 42220,
@@ -128,9 +152,27 @@ const main = async () => {
         contract_slug: easContractSlug,
       },
       {
-        chain_id: 42161,
+        chain_id: 42220,
+        contract_address: "0xfB29FDb0677b1acB4b148F953DE5ee6ec5cBf717",
+        start_block: 28920720,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
+        chain_id: 84532,
+        contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
+        start_block: 6771210,
+        contract_slug: minterContractSlug,
+      },
+      {
+        chain_id: 84532,
+        contract_address: "0x5DD43eff9FCC6F70564794e997A47722fE315847",
+        start_block: 14121595,
+        contract_slug: marketplaceContractSlug,
+      },
+      {
+        chain_id: 314159,
         contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
-        start_block: 251729365,
+        start_block: 2058128,
         contract_slug: minterContractSlug,
       },
       {
@@ -146,46 +188,10 @@ const main = async () => {
         contract_slug: marketplaceContractSlug,
       },
       {
-        chain_id: 42220,
-        contract_address: "0x16bA53B74c234C870c61EFC04cD418B8f2865959",
-        start_block: 22079540,
-        contract_slug: minterContractSlug,
-      },
-      {
-        chain_id: 8453,
-        contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
-        start_block: 6771210,
-        contract_slug: minterContractSlug,
-      },
-      {
-        chain_id: 84532,
-        contract_address: "0xC2d179166bc9dbB00A03686a5b17eCe2224c2704",
-        start_block: 6771210,
-        contract_slug: minterContractSlug,
-      },
-      {
-        chain_id: 84532,
-        contract_address: "0x5DD43eff9FCC6F70564794e997A47722fE315847",
-        start_block: 14121595,
-        contract_slug: marketplaceContractSlug,
-      },
-      {
         chain_id: 11155111,
         contract_address: "0xa16DFb32Eb140a6f3F2AC68f41dAd8c7e83C4941",
         start_block: 4421945,
         contract_slug: minterContractSlug,
-      },
-      {
-        chain_id: 10,
-        contract_address: "0x822F17A9A5EeCFd66dBAFf7946a8071C265D1d07",
-        start_block: 76066993,
-        contract_slug: minterContractSlug,
-      },
-      {
-        chain_id: 10,
-        contract_address: "0x2F7Ab1844594112E00708e18835ba2e731880Db1",
-        start_block: 124234816,
-        contract_slug: marketplaceContractSlug,
       },
       {
         chain_id: 11155111,
@@ -210,22 +216,6 @@ const main = async () => {
   await supabase.from("supported_schemas").upsert(
     [
       {
-        chain_id: 11155111,
-        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-        schema:
-          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
-        resolver: ZERO_ADDRESS,
-        revocable: true,
-      },
-      {
-        chain_id: 84532,
-        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
-        schema:
-          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
-        resolver: ZERO_ADDRESS,
-        revocable: true,
-      },
-      {
         chain_id: 10,
         uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
         schema:
@@ -242,6 +232,14 @@ const main = async () => {
         revocable: true,
       },
       {
+        chain_id: 42161,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
         chain_id: 42220,
         uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
         schema:
@@ -250,7 +248,15 @@ const main = async () => {
         revocable: true,
       },
       {
-        chain_id: 42161,
+        chain_id: 84532,
+        uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
+        resolver: ZERO_ADDRESS,
+        revocable: true,
+      },
+      {
+        chain_id: 11155111,
         uid: "0x2f4f575d5df78ac52e8b124c4c900ec4c540f1d44f5b8825fac0af5308c91449",
         schema:
           "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",

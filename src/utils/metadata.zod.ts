@@ -52,6 +52,7 @@ export const HypercertMetadataValidator: z.ZodType<HypercertMetadata> =
           .object({
             trait_type: z.string().optional(),
             value: z.string().optional(),
+            data: z.string().optional(),
           })
           .and(z.record(z.string())),
       )
