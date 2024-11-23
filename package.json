@@ -53,7 +53,7 @@
     "prool": "^0.0.15",
     "rimraf": "^5.0.5",
     "sinon": "^17.0.1",
-    "supabase": "^1.191.3",
+    "supabase": "^1.223.10",
     "supertest": "^6.3.4",
     "ts-mockito": "^2.6.1",
     "tsx": "^4.7.1",
