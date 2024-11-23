@@ -1,8 +1,7 @@
 name: verify supabase types
 on:
   pull_request:
-    branches-ignore:
-      - main
+    branches:
       - develop
 
 env:
@@ -15,10 +14,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4      
+      
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 1.223.10
 
       - name: Start Supabase local development setup
         run: supabase start
