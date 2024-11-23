@@ -1,8 +1,7 @@
 name: verify supabase types
 on:
   pull_request:
-    branches-ignore:
-      - main
+    branches:
       - develop
 
 env:
