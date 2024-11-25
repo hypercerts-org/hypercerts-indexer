@@ -3,7 +3,7 @@ import { describe, vi, beforeEach, it, expect } from "vitest";
 import { getAddress } from "viem";
 import { faker } from "@faker-js/faker";
 import { Block } from "@hypercerts-org/chainsauce";
-import { chainId } from "../../src/utils/constants.js";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -17,6 +17,9 @@ vi.mock("../../src/fetching/fetchAttestationData", () => ({
 }));
 
 describe("parseAttestedEvent", () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),

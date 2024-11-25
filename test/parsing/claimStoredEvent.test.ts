@@ -1,13 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { parseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent.js";
 import { faker } from "@faker-js/faker";
-import { client } from "@/clients/evmClient.js";
 import { getAddress, GetTransactionReturnType } from "viem";
 import { generateClaimStoredEvent } from "../helpers/factories.js";
 import { Block } from "@hypercerts-org/chainsauce";
-import { chainId } from "../../src/utils/constants.js";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("claimStoredEvent", {}, () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),

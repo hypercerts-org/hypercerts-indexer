@@ -8,6 +8,8 @@ import { getSupportedSchemas } from "../../src/storage/getSupportedSchemas.js";
 import { getAddress } from "viem";
 
 describe("getSupportedSchemas", {}, async () => {
+  const chainId = 11155111;
+
   const mockSupportedSchema: Tables<"supported_schemas"> = {
     uid: "",
     resolver: getAddress(faker.finance.ethereumAddress()),
@@ -25,7 +27,7 @@ describe("getSupportedSchemas", {}, async () => {
       }),
     );
 
-    const supportedSchema = await getSupportedSchemas();
+    const supportedSchema = await getSupportedSchemas({ chainId });
 
     expect(supportedSchema).toBeDefined();
     expect(supportedSchema![0]).toEqual(mockSupportedSchema);
@@ -39,7 +41,7 @@ describe("getSupportedSchemas", {}, async () => {
     );
 
     await expect(
-      async () => await getSupportedSchemas(),
+      async () => await getSupportedSchemas({ chainId }),
     ).rejects.toThrowError();
   });
 });

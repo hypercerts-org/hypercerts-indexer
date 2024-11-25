@@ -1,16 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { parseTransferSingleEvent } from "@/parsing/parseTransferSingleEvent.js";
+import { parseTransferSingleEvent } from "../../src/parsing/parseTransferSingleEvent.js";
 import { faker } from "@faker-js/faker";
 import { http, HttpResponse } from "msw";
-import { client } from "@/clients/evmClient.js";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 import { server } from "../setup-env.js";
 
 import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
-import { chainId } from "../../src/utils/constants.js";
 
 describe("transferSingleEvent", {}, () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
