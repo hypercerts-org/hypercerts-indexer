@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 import { storeClaimStored } from "../../src/storage/storeClaimStored.js";
-import { chainId } from "../../src/utils/constants.js";
 import { generateClaim } from "../helpers/factories.js";
 import { Block } from "@hypercerts-org/chainsauce";
 import { faker } from "@faker-js/faker";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("storeHypercert", {}, async () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+  
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),

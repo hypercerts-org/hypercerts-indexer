@@ -3,14 +3,17 @@ import { parseLeafClaimedEvent } from "../../src/parsing/parseLeafClaimedEvent.j
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { client } from "../../src/clients/evmClient.js";
+import { getEvmClient } from "../../src/clients/evmClient.js";
+import { Block } from "@hypercerts-org/chainsauce";
 
 import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
-import { chainId } from "../../src/utils/constants.js";
 
 describe("leafClaimedEvent", {}, () => {
-  const block = {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
+  const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
     blockHash: faker.string.hexadecimal(64) as `0x${string}`,
