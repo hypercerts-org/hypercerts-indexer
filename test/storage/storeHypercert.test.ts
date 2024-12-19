@@ -7,7 +7,6 @@ import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("storeHypercert", {}, async () => {
   const chainId = 11155111;
-  const client = getEvmClient(chainId);
   
   const block: Block = {
     chainId,
@@ -26,13 +25,18 @@ describe("storeHypercert", {}, async () => {
 
   const claim = generateClaim();
 
-  it("store hypercert data  in DB", {}, async () => {
+  it("creates two query calls for a single claim", {}, async () => {
     const storedClaim = await storeClaimStored({
       data: [claim],
       context,
     });
 
-    expect(storedClaim.length).toBe(1);
+    expect(storedClaim.length).toBe(2);
+
+    // first request should be a insert into claims
+    expect(storedClaim[0].sql).toContain('insert into "claims"');
+    // second request should be a update table contract_events
+    expect(storedClaim[1].sql).toContain('update "contract_events"');
   });
 
   it("should throw an error if creator address is invalid", async () => {
