@@ -3,16 +3,20 @@ import { storeTransferSingle } from "../../src/storage/storeTransferSingle.js";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { chainId, supabaseUrl } from "../../src/utils/constants.js";
+import { supabaseUrl } from "../../src/utils/constants.js";
 import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("storeTransferSingleFraction", () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
     blockHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
-    timestamp: faker.number.bigInt(),
+    timestamp: faker.date.past().getTime(),
   };
 
   const context = {

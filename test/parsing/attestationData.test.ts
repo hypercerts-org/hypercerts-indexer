@@ -1,17 +1,18 @@
 import { expect, it, beforeEach, describe } from "vitest";
 import { parseAttestationData } from "../../src/parsing/parseAttestationData.js";
-import { Tables } from "@/types/database.types.js";
 import { faker } from "@faker-js/faker";
 import { Address, getAddress } from "viem";
-import { chainId } from "@/utils/constants.js";
 import {
   generateEasAttestation,
   generateParsedAttestedEvent,
   generateSupportedSchema,
 } from "../helpers/factories.js";
 import { EasAttestation } from "../../src/parsing/parseAttestedEvent.js";
+import { Tables } from "../../src/types/database.types.js";
 
 describe("decodeAttestationData", () => {
+  const chainId = 11155111;
+  
   let attester: Address;
   let recipient: Address;
   let event;
