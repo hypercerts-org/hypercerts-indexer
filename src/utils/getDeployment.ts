@@ -47,8 +47,8 @@ export const getDeployment = (
       return {
         ...DEPLOYMENTS["42220"],
         startBlock: 22079540n,
-        easAddress: "",
-        schemaRegistryAddress: "",
+        easAddress: "0x72E1d8ccf5299fb36fEfD8CC4394B8ef7e98Af92",
+        schemaRegistryAddress: "0x5ece93bE4BDCF293Ed61FA78698B594F2135AF34",
         chainId,
       };
     case 42161:
