@@ -147,7 +147,7 @@ const main = async () => {
       },
       {
         chain_id: 42220,
-        contract_address: "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
+        contract_address: "0x72E1d8ccf5299fb36fEfD8CC4394B8ef7e98Af92",
         start_block: 27994577,
         contract_slug: easContractSlug,
       },
