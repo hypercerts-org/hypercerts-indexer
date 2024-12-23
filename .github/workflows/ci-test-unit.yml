@@ -8,6 +8,7 @@ jobs:
     environment: test
 
     env:
+      ENVIRONMENT: "test"
       PORT: ${{ vars.PORT }}
       CHAIN_ID: ${{ vars.CHAIN_ID }}
       BATCH_SIZE: ${{ vars.BATCH_SIZE }}
