@@ -1,10 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
-import { parseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent.js";
 import { faker } from "@faker-js/faker";
-import { getAddress, GetTransactionReturnType } from "viem";
-import { generateClaimStoredEvent } from "../helpers/factories.js";
 import { Block } from "@hypercerts-org/chainsauce";
+import { http, HttpResponse } from "msw";
+import { getAddress } from "viem";
+import { describe, expect, it, vi } from "vitest";
 import { getEvmClient } from "../../src/clients/evmClient.js";
+import { parseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent.js";
+import { generateClaimStoredEvent } from "../helpers/factories.js";
+import { alchemyUrl } from "../resources/alchemyUrl.js";
+import { server } from "../setup-env.js";
 
 describe("claimStoredEvent", {}, () => {
   const chainId = 11155111;
@@ -13,7 +16,7 @@ describe("claimStoredEvent", {}, () => {
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
-    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    blockHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
     timestamp: faker.number.int(),
   };
 
@@ -25,21 +28,33 @@ describe("claimStoredEvent", {}, () => {
     contracts_id: faker.string.uuid(),
   };
 
+  vi.spyOn(client, "readContract").mockResolvedValue(
+    "0x0000000000000000000000000000000000000000",
+  );
+
   it("parses a claim stored event", {}, async () => {
-    const event = generateClaimStoredEvent();
-
     const from = getAddress(faker.finance.ethereumAddress());
-    const owner = getAddress(faker.finance.ethereumAddress());
-
-    vi.spyOn(client, "getTransaction").mockResolvedValue({
+    const event = {
+      event: "ClaimStored",
       from,
-    } as GetTransactionReturnType);
+      address: getAddress(faker.finance.ethereumAddress()),
+      transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
+      params: {
+        uri: faker.internet.url(),
+        claimID: faker.number.bigInt(),
+        totalUnits: faker.number.bigInt(),
+      },
+    };
 
-    vi.spyOn(client, "readContract").mockResolvedValue(owner);
+    server.use(
+      http.post(`${alchemyUrl}/*`, () => {
+        return HttpResponse.json({ result: event });
+      }),
+    );
 
-    const parsed = await parseClaimStoredEvent({ event, context });
+    const [claim] = await parseClaimStoredEvent({ event, context });
 
-    expect(parsed[0]).toEqual({
+    expect(claim).toEqual({
       contracts_id: context.contracts_id,
       creator_address: from,
       owner_address: "0x0000000000000000000000000000000000000000",

@@ -16,7 +16,7 @@ describe("leafClaimedEvent", {}, () => {
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
-    blockHash: faker.string.hexadecimal(64) as `0x${string}`,
+    blockHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
     timestamp: faker.number.int(),
   };
 
@@ -29,17 +29,14 @@ describe("leafClaimedEvent", {}, () => {
   };
 
   it("parses a leaf claimed event", {}, async () => {
-    server.use(
-      http.post(`${alchemyUrl}/*`, () => {
-        return HttpResponse.json(0);
-      }),
-    );
     const address = faker.finance.ethereumAddress();
     const tokenID = faker.number.bigInt();
     const leaf = faker.string.alphanumeric("10");
     const blockNumber = faker.number.bigInt();
+    const from = getAddress(faker.finance.ethereumAddress());
     const event = {
       event: "LeafClaimed",
+      from,
       address,
       blockNumber,
       transactionHash: "0x3e7d7e4c4f3d5a7f2b3d6c5",
@@ -48,16 +45,12 @@ describe("leafClaimedEvent", {}, () => {
         leaf,
       },
     };
-
-    const from = getAddress(faker.finance.ethereumAddress());
-    vi.spyOn(client, "getTransaction").mockImplementation(
-      async () =>
-        ({
-          from,
-        }) as any,
+    server.use(
+      http.post(`${alchemyUrl}/*`, () => {
+        return HttpResponse.json({ result: event });
+      }),
     );
 
-    const timestamp = 10n;
 
     const [claim] = await parseLeafClaimedEvent({ event, context });
 

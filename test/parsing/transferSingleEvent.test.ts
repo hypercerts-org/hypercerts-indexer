@@ -1,17 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parseTransferSingleEvent } from "../../src/parsing/parseTransferSingleEvent.js";
 import { faker } from "@faker-js/faker";
-import { http, HttpResponse } from "msw";
-import { getEvmClient } from "../../src/clients/evmClient.js";
-import { server } from "../setup-env.js";
-
-import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
 
 describe("transferSingleEvent", {}, () => {
   const chainId = 11155111;
-  const client = getEvmClient(chainId);
 
   const block: Block = {
     chainId,
@@ -28,8 +22,6 @@ describe("transferSingleEvent", {}, () => {
     contracts_id: faker.string.uuid(),
   };
 
-  const from = getAddress(faker.finance.ethereumAddress());
-  const timestamp = 10n;
   const contractAddress = getAddress(faker.finance.ethereumAddress());
   const operatorAddress = getAddress(faker.finance.ethereumAddress());
   const fromAddress = getAddress(faker.finance.ethereumAddress());
@@ -38,26 +30,6 @@ describe("transferSingleEvent", {}, () => {
   const blockNumber = 1n;
   const value = 3n;
 
-  beforeEach(() => {
-    server.use(
-      http.post(`${alchemyUrl}/*`, () => {
-        return HttpResponse.json(0);
-      }),
-    );
-  });
-  vi.spyOn(client, "getTransaction").mockImplementation(
-    async () =>
-      ({
-        from,
-      }) as any,
-  );
-
-  vi.spyOn(client, "getBlock").mockImplementation(
-    async () =>
-      ({
-        timestamp,
-      }) as any,
-  );
   it("parses a transfer single event", {}, async () => {
     const event = {
       event: "TransferSingle",
