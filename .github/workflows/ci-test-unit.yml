@@ -8,6 +8,9 @@ jobs:
     environment: test
 
     env:
+      ENVIRONMENT: "test"
+      LOCAL_CACHING_DB_URL: "postgresql://localhost/postgres"
+      DB_URL: "postgresql://postgres:postgres@127.0.0.1:54322/postgres"
       PORT: ${{ vars.PORT }}
       CHAIN_ID: ${{ vars.CHAIN_ID }}
       BATCH_SIZE: ${{ vars.BATCH_SIZE }}

@@ -3,13 +3,15 @@ import { faker } from "@faker-js/faker";
 import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
 import { parseValueTransferEvent } from "../../src/parsing/parseValueTransferEvent.js";
-import { client } from "@/clients/evmClient.js";
 import { alchemyUrl } from "../resources/alchemyUrl.js";
 import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
-import { chainId } from "../../src/utils/constants.js";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("valueTransferEvent", () => {
+  const chainId = 11155111;
+  const client = getEvmClient(chainId);
+
   const claimID = faker.number.bigInt();
   const fromTokenID = faker.number.bigInt();
   const toTokenID = faker.number.bigInt();

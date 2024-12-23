@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { storeClaimStored } from "../../src/storage/storeClaimStored.js";
-import { chainId } from "../../src/utils/constants.js";
 import { generateClaim } from "../helpers/factories.js";
 import { Block } from "@hypercerts-org/chainsauce";
 import { faker } from "@faker-js/faker";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("storeHypercert", {}, async () => {
+  const chainId = 11155111;
+  
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
@@ -23,13 +25,18 @@ describe("storeHypercert", {}, async () => {
 
   const claim = generateClaim();
 
-  it("store hypercert data  in DB", {}, async () => {
+  it("creates two query calls for a single claim", {}, async () => {
     const storedClaim = await storeClaimStored({
       data: [claim],
       context,
     });
 
-    expect(storedClaim.length).toBe(1);
+    expect(storedClaim.length).toBe(2);
+
+    // first request should be a insert into claims
+    expect(storedClaim[0].sql).toContain('insert into "claims"');
+    // second request should be a update table contract_events
+    expect(storedClaim[1].sql).toContain('update "contract_events"');
   });
 
   it("should throw an error if creator address is invalid", async () => {
