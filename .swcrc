@@ -18,10 +18,10 @@
     "transform": {
     			"legacyDecorator": true,
     			"decoratorMetadata": true
-    		},
+    		}
   },
   "module": {
-    "type": "nodenext",
+    "type": "es6"
   },
   "minify": true
 }
