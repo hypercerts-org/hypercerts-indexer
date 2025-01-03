@@ -67,6 +67,9 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
       `[parseUriEvent] Metadata validation failed`,
       res.error.message,
     );
+    for (const error of res.error.issues) {
+      console.log("error", error.message);
+    }
     return [{ metadata: { uri, parsed: false } }];
   }
 
