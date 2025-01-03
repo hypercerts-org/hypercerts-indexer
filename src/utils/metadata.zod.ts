@@ -41,20 +41,29 @@ export const HypercertMetadataValidator: z.ZodType<HypercertMetadata> =
   z.object({
     name: z.string({ message: "Name is required" }),
     description: z.string({ message: "Description is required" }),
-    external_url: z.string().optional(),
+    external_url: z
+      .string({ message: "External URL is not a string" })
+      .optional(),
     image: z.string({ message: "Image is required" }),
-    version: z.string().optional(),
-    ref: z.string().optional(),
-    allowList: z.string().optional(),
+    version: z.string({ message: "Version is not a string" }).optional(),
+    ref: z.string({ message: "Ref is not a string" }).optional(),
+    allowList: z.string({ message: "Allow List is not a string" }).optional(),
     properties: z
       .array(
         z
           .object({
-            trait_type: z.string().optional(),
-            value: z.string().optional(),
-            data: z.string().optional(),
+            trait_type: z
+              .string({ message: "Trait type is not a string" })
+              .optional(),
+            value: z.string({ message: "Value is not a string" }).optional(),
+            data: z.any().optional(),
           })
-          .and(z.record(z.string())),
+          .partial()
+          .and(
+            z.record(
+              z.string().or(z.number()).or(z.boolean()).or(z.any()).optional(),
+            ),
+          ),
       )
       .optional(),
     hypercert: claimData,
