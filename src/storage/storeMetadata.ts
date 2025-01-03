@@ -53,7 +53,10 @@ export const storeMetadata: StorageMethod<MetadataResult> = async ({
     requests.push(
       dbClient
         .insertInto("metadata")
-        .values(metadata.metadata)
+        .values({
+          ...metadata.metadata,
+          properties: metadata.metadata.properties ? JSON.stringify(metadata.metadata.properties) : null
+        })
         .onConflict((oc) => oc.columns(["uri"]).doNothing())
         .compile(),
     );
@@ -62,10 +65,13 @@ export const storeMetadata: StorageMethod<MetadataResult> = async ({
       // Store allow_list_data
       requests.push(
         dbClient
-          .insertInto("allow_list_data")
-          .values(metadata.allow_list)
-          .onConflict((oc) => oc.columns(["uri"]).doNothing())
-          .compile(),
+        .insertInto("allow_list_data")
+        .values({
+          ...metadata.allow_list,
+          data: JSON.stringify(metadata.allow_list.data)
+        })
+        .onConflict((oc) => oc.columns(["uri"]).doNothing())
+        .compile(),
       );
 
       // Store hypercert_allow_list_records
@@ -102,12 +108,14 @@ export const storeMetadata: StorageMethod<MetadataResult> = async ({
       }
 
       // Store hypercert_allow_lists as parsed
-      requests.push(
-        dbClient
-          .insertInto("hypercert_allow_lists")
-          .values(metadata.hypercert_allow_list)
-          .compile(),
-      );
+      if (metadata.hypercert_allow_list) {
+        requests.push(
+          dbClient
+            .insertInto("hypercert_allow_lists")
+            .values(metadata.hypercert_allow_list)
+            .compile(),
+        );
+      }
 
       requests.push(
         dbClient

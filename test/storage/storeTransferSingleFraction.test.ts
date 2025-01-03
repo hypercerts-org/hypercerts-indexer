@@ -3,16 +3,19 @@ import { storeTransferSingle } from "../../src/storage/storeTransferSingle.js";
 import { faker } from "@faker-js/faker";
 import { server } from "../setup-env.js";
 import { http, HttpResponse } from "msw";
-import { chainId, supabaseUrl } from "../../src/utils/constants.js";
+import { supabaseUrl } from "../../src/utils/constants.js";
 import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
+import { getEvmClient } from "../../src/clients/evmClient.js";
 
 describe("storeTransferSingleFraction", () => {
+  const chainId = 11155111;
+
   const block: Block = {
     chainId,
     blockNumber: faker.number.bigInt(),
     blockHash: faker.string.hexadecimal({ length: 64 }) as `0x${string}`,
-    timestamp: faker.number.bigInt(),
+    timestamp: faker.date.past().getTime(),
   };
 
   const context = {
@@ -52,12 +55,17 @@ describe("storeTransferSingleFraction", () => {
     );
   });
 
-  it("should store the fraction tokens", async () => {
+  it("should create two query calls for a single transfer", async () => {
     const requests = await storeTransferSingle({
       data: [transfer],
       context,
     });
 
-    expect(requests.length).toBe(1);
+    expect(requests.length).toBe(2);
+
+    // first request should be a insert into fractions
+    expect(requests[0].sql).toContain('insert into "fractions"');
+    // second request should be a update table contract_events
+    expect(requests[1].sql).toContain('update "contract_events"');
   });
 });
