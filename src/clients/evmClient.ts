@@ -14,6 +14,7 @@ import {
   drpcApiPkey,
   environment,
   Environment,
+  filecoinApiKey,
   infuraApiKey,
 } from "@/utils/constants.js";
 
@@ -118,7 +119,7 @@ const drpcUrl = (chainId: number) => {
 const glifUrl = (chainId: number) => {
   switch (chainId) {
     case 314159:
-      return `https://api.calibration.node.glif.io/rpc/v1`;
+      return `https://calibration.node.glif.io/archive/lotus/rpc/v1`;
     default:
       return;
   }
@@ -145,8 +146,18 @@ const fallBackProvider = (chainId: number) => {
     ? [http(drpcUrl(chainId), { timeout: rpc_timeout })]
     : [];
   const glif = glifUrl(chainId)
-    ? [http(glifUrl(chainId), { timeout: rpc_timeout })]
+    ? [
+        http(glifUrl(chainId), {
+          timeout: rpc_timeout,
+          fetchOptions: {
+            headers: {
+              Authorization: `Bearer ${filecoinApiKey}`,
+            },
+          },
+        }),
+      ]
     : [];
+
   return fallback([...alchemy, ...drpc, ...infura, ...glif], {
     retryCount: 5,
   });

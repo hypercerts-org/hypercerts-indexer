@@ -22,6 +22,11 @@ export const drpcApiPkey = assertExists(
   "dRPC API KEY",
 );
 
+export const filecoinApiKey = assertExists(
+  process.env.FILECOIN_API_KEY,
+  "Filecoin API KEY",
+);
+
 export const port = Number(assertExists(process.env.PORT, "Port"));
 
 export const supabaseApiKey = assertExists(
