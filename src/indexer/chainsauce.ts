@@ -6,6 +6,7 @@ import { processEvent } from "@/indexer/eventHandlers.js";
 import {
   Environment,
   environment,
+  filecoinApiKey,
   localCachingDbUrl,
 } from "@/utils/constants.js";
 import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
@@ -38,6 +39,18 @@ const MyContracts = {
   EAS: EasAbi,
 };
 
+const fetchWithAuth = (token: string) => {
+  return (url: string | URL | globalThis.Request, options: RequestInit = {}) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+  };
+};
+
 export const getIndexer = async ({
   chainId,
   requestQueue,
@@ -56,12 +69,14 @@ export const getIndexer = async ({
     schemaName: `cache_${chainId}`,
   });
 
+  const httpRpcClient = chainId === 314159 ? createHttpRpcClient({ url: rpcUrl, fetch: fetchWithAuth(filecoinApiKey) }) : createHttpRpcClient({ url: rpcUrl });
+
   const indexer = createIndexer({
     cache,
     chain: {
       id: chainId,
-      maxBlockRange: 100000n,
-      rpcClient: createHttpRpcClient({ url: rpcUrl }),
+      maxBlockRange: 60480n,
+      rpcClient: httpRpcClient,
       pollingInterval: environment === Environment.TEST ? 10000 : 5000,
     },
     contracts: MyContracts,

@@ -21,6 +21,7 @@ jobs:
       ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
       INFURA_API_KEY: ${{ secrets.INFURA_API_KEY }}
       DRPC_API_KEY: ${{ secrets.DRPC_API_KEY }}
+      FILECOIN_API_KEY: ${{ secrets.FILECOIN_API_KEY }}
       SUPABASE_DATA_DB_URL: ${{ vars.SUPABASE_DATA_DB_URL }}
       SUPABASE_DATA_SERVICE_API_KEY: ${{ secrets.SUPABASE_DATA_SERVICE_API_KEY }}
 
