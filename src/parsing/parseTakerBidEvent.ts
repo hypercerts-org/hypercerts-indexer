@@ -6,7 +6,7 @@ import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
-import { getHypercertTokenId } from "@/utils/tokenIds";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.
