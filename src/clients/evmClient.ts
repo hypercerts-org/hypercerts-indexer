@@ -1,23 +1,7 @@
-import { createPublicClient, fallback, http, Client, PublicClient } from "viem";
-import {
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  celo,
-  filecoin,
-  filecoinCalibration,
-  optimism,
-  sepolia,
-} from "viem/chains";
-import {
-  alchemyApiKey,
-  drpcApiPkey,
-  environment,
-  Environment,
-  filecoinApiKey,
-  infuraApiKey,
-} from "@/utils/constants.js";
+import { alchemyApiKey, drpcApiPkey, infuraApiKey } from "@/utils/constants.js";
+import { PublicClient } from "viem";
+import { ChainFactory } from "./chainFactory.js";
+import { UnifiedRpcClientFactory } from "./rpcClientFactory.js";
 
 interface RpcProvider {
   getUrl(chainId: number): string | undefined;
@@ -75,92 +59,34 @@ class GlifProvider implements RpcProvider {
   }
 }
 
-// Factory for Chain Configuration
-class ChainFactory {
-  static getChain(chainId: number) {
-    const chains: Record<number, any> = {
-      10: optimism,
-      8453: base,
-      42220: celo,
-      42161: arbitrum,
-      421614: arbitrumSepolia,
-      84532: baseSepolia,
-      11155111: sepolia,
-      314: filecoin,
-      314159: filecoinCalibration,
-    };
-
-    const chain = chains[chainId];
-    if (!chain) throw new Error(`Unsupported chain ID: ${chainId}`);
-    return chain;
-  }
-
-  static getSupportedChains(): number[] {
-    return environment === Environment.TEST
-      ? [11155111, 84532, 421614, 314159]
-      : [314];
-    // : [10, 8453, 42220, 42161, 314];
-  }
-}
-
-// Client Factory using Provider Strategy
-class EvmClientFactory {
+export class EvmClientFactory {
   private static readonly providers: RpcProvider[] = [
     new AlchemyProvider(),
     new InfuraProvider(),
     new DrpcProvider(),
     new GlifProvider(),
   ];
-  private static readonly RPC_TIMEOUT = 20_000;
-
-  private static createTransport(chainId: number) {
-    const transports = this.providers
-      .map((provider) => provider.getUrl(chainId))
-      .filter((url): url is string => !!url)
-      .map((url) => {
-        const options = { timeout: this.RPC_TIMEOUT };
-        if (chainId === 314159 || chainId === 314) {
-          return http(url, {
-            ...options,
-            fetchOptions: {
-              headers: { Authorization: `Bearer ${filecoinApiKey}` },
-            },
-          });
-        }
-        return http(url, options);
-      });
-
-    return fallback(transports, { retryCount: 5 });
-  }
 
   static createClient(chainId: number): PublicClient {
-    // @ts-expect-error viem types are not correctly infered
-    return createPublicClient({
-      chain: ChainFactory.getChain(chainId),
-      transport: EvmClientFactory.createTransport(chainId),
-    });
+    const url = this.getFirstAvailableUrl(chainId);
+    if (!url) throw new Error(`No RPC URL available for chain ${chainId}`);
+
+    return UnifiedRpcClientFactory.createViemClient(chainId, url);
+  }
+
+  static getFirstAvailableUrl(chainId: number): string | undefined {
+    return this.providers
+      .map((provider) => provider.getUrl(chainId))
+      .find((url) => url !== undefined);
   }
 }
 
 export const getRpcUrl = (chainId: number): string => {
-  // Use existing provider classes to get URLs
-  const providers = [
-    new AlchemyProvider(),
-    new InfuraProvider(),
-    new DrpcProvider(),
-    new GlifProvider(),
-  ];
-
-  // Return the first available URL
-  const url = providers
-    .map((provider) => provider.getUrl(chainId))
-    .find((url) => url !== undefined);
-
+  const url = EvmClientFactory.getFirstAvailableUrl(chainId);
   if (!url) throw new Error(`No RPC URL available for chain ${chainId}`);
   return url;
 };
 
 // Public API
-export { EvmClientFactory };
 export const getSupportedChains = ChainFactory.getSupportedChains;
 export const getEvmClient = EvmClientFactory.createClient;

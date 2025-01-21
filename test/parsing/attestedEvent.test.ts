@@ -5,6 +5,12 @@ import { faker } from "@faker-js/faker";
 import { Block } from "@hypercerts-org/chainsauce";
 import { getEvmClient } from "../../src/clients/evmClient.js";
 
+vi.mock("../../src/clients/evmClient.js", () => ({
+  getEvmClient: () => ({
+    readContract: vi.fn(),
+  }),
+}));
+
 const mocks = vi.hoisted(() => {
   return {
     fetchAttestationData: vi.fn(),
