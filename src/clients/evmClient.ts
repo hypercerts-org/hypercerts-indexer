@@ -1,5 +1,5 @@
 import { alchemyApiKey, drpcApiPkey, infuraApiKey } from "@/utils/constants.js";
-import { PublicClient } from "viem";
+import { PublicClient, createPublicClient, fallback } from "viem";
 import { ChainFactory } from "./chainFactory.js";
 import { UnifiedRpcClientFactory } from "./rpcClientFactory.js";
 
@@ -68,16 +68,29 @@ export class EvmClientFactory {
   ];
 
   static createClient(chainId: number): PublicClient {
-    const url = this.getFirstAvailableUrl(chainId);
-    if (!url) throw new Error(`No RPC URL available for chain ${chainId}`);
+    const urls = EvmClientFactory.getAllAvailableUrls(chainId);
+    if (urls.length === 0)
+      throw new Error(`No RPC URL available for chain ${chainId}`);
 
-    return UnifiedRpcClientFactory.createViemClient(chainId, url);
+    const transports = urls.map((url) =>
+      UnifiedRpcClientFactory.createViemTransport(chainId, url),
+    );
+
+    return createPublicClient({
+      chain: ChainFactory.getChain(chainId),
+      transport: fallback(transports),
+    });
   }
 
-  static getFirstAvailableUrl(chainId: number): string | undefined {
-    return this.providers
+  static getAllAvailableUrls(chainId: number): string[] {
+    return EvmClientFactory.providers
       .map((provider) => provider.getUrl(chainId))
-      .find((url) => url !== undefined);
+      .filter((url): url is string => url !== undefined);
+  }
+
+  // Keep this for backward compatibility
+  static getFirstAvailableUrl(chainId: number): string | undefined {
+    return EvmClientFactory.getAllAvailableUrls(chainId)[0];
   }
 }
 

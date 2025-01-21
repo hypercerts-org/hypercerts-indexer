@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { UnifiedRpcClientFactory } from "../../src/clients/rpcClientFactory.js";
+import * as viem from "viem";
+
 vi.mock("@/utils/constants", () => ({
   environment: "test",
   alchemyApiKey: "mock-alchemy-key",
@@ -11,7 +13,11 @@ vi.mock("@/utils/constants", () => ({
 
 vi.mock("@/clients/rpcClientFactory", () => ({
   UnifiedRpcClientFactory: {
-    createViemClient: vi.fn().mockReturnValue({ mock: "client" }),
+    createViemTransport: vi.fn().mockReturnValue({
+      request: vi.fn(),
+      retryCount: 3,
+      timeout: 20_000,
+    }),
   },
 }));
 
@@ -23,8 +29,8 @@ vi.mock("./chainFactory", () => ({
 
 vi.mock("viem", () => ({
   createPublicClient: vi.fn(),
-  http: vi.fn((url, options) => ({ url, ...options })),
   fallback: vi.fn((transports) => transports),
+  http: vi.fn((url) => ({ url })),
 }));
 
 import {
@@ -35,41 +41,64 @@ import {
 
 describe("EvmClient", () => {
   describe("EvmClientFactory", () => {
-    describe("getFirstAvailableUrl", () => {
-      it("should return first available URL for supported chain", () => {
-        const sepoliaUrl = EvmClientFactory.getFirstAvailableUrl(11155111);
-        console.log(sepoliaUrl);
-        expect(sepoliaUrl).toContain("alchemy.com");
-        expect(sepoliaUrl).toContain("mock-alchemy-key");
+    describe("getAllAvailableUrls", () => {
+      it("returns all available URLs for supported chain", () => {
+        const sepoliaUrls = EvmClientFactory.getAllAvailableUrls(11155111);
+        expect(sepoliaUrls).toHaveLength(1); // Alchemy for Optimism
+        expect(sepoliaUrls[0]).toContain("alchemy.com");
 
-        const celoUrl = EvmClientFactory.getFirstAvailableUrl(42220);
-        console.log(celoUrl);
-        expect(celoUrl).toContain("infura.io");
-        expect(celoUrl).toContain("mock-infura-key"); 
+        const opUrls = EvmClientFactory.getAllAvailableUrls(10);
+        expect(opUrls).toHaveLength(3); // Alchemy, Infura, DRPC for Optimism
+        expect(opUrls[0]).toContain("alchemy.com");
+        expect(opUrls[1]).toContain("infura.io");
+        expect(opUrls[2]).toContain("drpc.org");
       });
 
-      it("should return undefined for unsupported chain", () => {
-        const url = EvmClientFactory.getFirstAvailableUrl(999999);
-        expect(url).toBeUndefined();
+      it("returns empty array for unsupported chain", () => {
+        const urls = EvmClientFactory.getAllAvailableUrls(999999);
+        expect(urls).toHaveLength(0);
       });
     });
 
     describe("createClient", () => {
-      it("should create client for supported chain", () => {
-        const client = EvmClientFactory.createClient(11155111);
-        expect(client).toBeDefined();
+      it("creates client with fallback transport for supported chain", () => {
+        EvmClientFactory.createClient(10);
+
+        expect(viem.createPublicClient).toHaveBeenCalledWith({
+          chain: expect.any(Object),
+          transport: expect.any(Array),
+        });
+
         expect(
-          vi.mocked(UnifiedRpcClientFactory.createViemClient),
+          vi.mocked(UnifiedRpcClientFactory.createViemTransport),
         ).toHaveBeenCalledWith(
-          11155111,
+          10,
           expect.stringContaining("alchemy.com"),
         );
+        expect(
+          vi.mocked(UnifiedRpcClientFactory.createViemTransport),
+        ).toHaveBeenCalledWith(10, expect.stringContaining("infura.io"));
+        expect(
+          vi.mocked(UnifiedRpcClientFactory.createViemTransport),
+        ).toHaveBeenCalledWith(10, expect.stringContaining("drpc.org"));
       });
 
-      it("should throw error for unsupported chain", () => {
+      it("throws error for unsupported chain", () => {
         expect(() => EvmClientFactory.createClient(999999)).toThrow(
           "No RPC URL available for chain 999999",
         );
+      });
+    });
+
+    describe("getFirstAvailableUrl", () => {
+      it("returns first available URL for supported chain", () => {
+        const url = EvmClientFactory.getFirstAvailableUrl(11155111);
+        expect(url).toContain("alchemy.com");
+      });
+
+      it("returns undefined for unsupported chain", () => {
+        const url = EvmClientFactory.getFirstAvailableUrl(999999);
+        expect(url).toBeUndefined();
       });
     });
   });
@@ -98,10 +127,9 @@ describe("EvmClientFactory", () => {
     it("should create a client with correct configuration", () => {
       EvmClientFactory.createClient(11155111); // Sepolia testnet
 
-      expect(vi.mocked(UnifiedRpcClientFactory.createViemClient)).toHaveBeenCalledWith(
-          11155111,
-          expect.stringContaining("alchemy.com"),
-        );
+      expect(
+        vi.mocked(UnifiedRpcClientFactory.createViemTransport),
+      ).toHaveBeenCalledWith(11155111, expect.stringContaining("alchemy.com"));
     });
 
     it("should throw error for unsupported chain", () => {
