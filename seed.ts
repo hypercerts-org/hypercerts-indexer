@@ -205,6 +205,12 @@ const main = async () => {
         start_block: 6098991,
         contract_slug: easContractSlug,
       },
+      {
+        chain_id: 314,
+        contract_address: "0xc756B203cA9e13BAB3a93F1dA756bb19ac3C395b",
+        start_block: 4636224,
+        contract_slug: minterContractSlug,
+      },
     ],
     {
       onConflict: "contract_address, chain_id",

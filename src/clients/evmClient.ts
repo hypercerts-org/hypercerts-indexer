@@ -1,22 +1,7 @@
-import { createPublicClient, fallback, http, Client, PublicClient } from "viem";
-import {
-  arbitrum,
-  arbitrumSepolia,
-  base,
-  baseSepolia,
-  celo,
-  filecoinCalibration,
-  optimism,
-  sepolia,
-} from "viem/chains";
-import {
-  alchemyApiKey,
-  drpcApiPkey,
-  environment,
-  Environment,
-  filecoinApiKey,
-  infuraApiKey,
-} from "@/utils/constants.js";
+import { alchemyApiKey, drpcApiPkey, infuraApiKey } from "@/utils/constants.js";
+import { PublicClient, createPublicClient, fallback } from "viem";
+import { ChainFactory } from "./chainFactory.js";
+import { UnifiedRpcClientFactory } from "./rpcClientFactory.js";
 
 interface RpcProvider {
   getUrl(chainId: number): string | undefined;
@@ -66,96 +51,55 @@ class DrpcProvider implements RpcProvider {
 
 class GlifProvider implements RpcProvider {
   getUrl(chainId: number): string | undefined {
-    return chainId === 314159
-      ? `https://calibration.node.glif.io/archive/lotus/rpc/v1`
-      : undefined;
-  }
-}
-
-// Factory for Chain Configuration
-class ChainFactory {
-  static getChain(chainId: number) {
-    const chains: Record<number, any> = {
-      10: optimism,
-      8453: base,
-      42220: celo,
-      42161: arbitrum,
-      421614: arbitrumSepolia,
-      84532: baseSepolia,
-      11155111: sepolia,
-      314159: filecoinCalibration,
+    const urls: Record<number, string> = {
+      314: `https://node.glif.io/space07/lotus/rpc/v1`,
+      314159: `https://calibration.node.glif.io/archive/lotus/rpc/v1`,
     };
-
-    const chain = chains[chainId];
-    if (!chain) throw new Error(`Unsupported chain ID: ${chainId}`);
-    return chain;
-  }
-
-  static getSupportedChains(): number[] {
-    return environment === Environment.TEST
-      ? [11155111, 84532, 421614, 314159]
-      : [10, 8453, 42220, 42161];
+    return urls[chainId];
   }
 }
 
-// Client Factory using Provider Strategy
-class EvmClientFactory {
+export class EvmClientFactory {
   private static readonly providers: RpcProvider[] = [
     new AlchemyProvider(),
     new InfuraProvider(),
     new DrpcProvider(),
     new GlifProvider(),
   ];
-  private static readonly RPC_TIMEOUT = 20_000;
-
-  private static createTransport(chainId: number) {
-    const transports = this.providers
-      .map((provider) => provider.getUrl(chainId))
-      .filter((url): url is string => !!url)
-      .map((url) => {
-        const options = { timeout: this.RPC_TIMEOUT };
-        if (chainId === 314159) {
-          return http(url, {
-            ...options,
-            fetchOptions: {
-              headers: { Authorization: `Bearer ${filecoinApiKey}` },
-            },
-          });
-        }
-        return http(url, options);
-      });
-
-    return fallback(transports, { retryCount: 5 });
-  }
 
   static createClient(chainId: number): PublicClient {
-    // @ts-expect-error viem types are not correctly infered
+    const urls = EvmClientFactory.getAllAvailableUrls(chainId);
+    if (urls.length === 0)
+      throw new Error(`No RPC URL available for chain ${chainId}`);
+
+    const transports = urls.map((url) =>
+      UnifiedRpcClientFactory.createViemTransport(chainId, url),
+    );
+
     return createPublicClient({
       chain: ChainFactory.getChain(chainId),
-      transport: EvmClientFactory.createTransport(chainId),
+      transport: fallback(transports),
     });
+  }
+
+  static getAllAvailableUrls(chainId: number): string[] {
+    return EvmClientFactory.providers
+      .map((provider) => provider.getUrl(chainId))
+      .filter((url): url is string => url !== undefined);
+  }
+
+  // Keep this for backward compatibility
+  static getFirstAvailableUrl(chainId: number): string | undefined {
+    return EvmClientFactory.getAllAvailableUrls(chainId)[0];
   }
 }
 
 export const getRpcUrl = (chainId: number): string => {
-  // Use existing provider classes to get URLs
-  const providers = [
-    new AlchemyProvider(),
-    new InfuraProvider(),
-    new DrpcProvider(),
-    new GlifProvider(),
-  ];
-
-  // Return the first available URL
-  const url = providers
-    .map((provider) => provider.getUrl(chainId))
-    .find((url) => url !== undefined);
-
+  const url = EvmClientFactory.getFirstAvailableUrl(chainId);
   if (!url) throw new Error(`No RPC URL available for chain ${chainId}`);
   return url;
 };
 
 // Public API
-export { EvmClientFactory };
 export const getSupportedChains = ChainFactory.getSupportedChains;
 export const getEvmClient = EvmClientFactory.createClient;
