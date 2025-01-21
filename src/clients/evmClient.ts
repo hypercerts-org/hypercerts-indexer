@@ -5,6 +5,7 @@ import {
   base,
   baseSepolia,
   celo,
+  filecoin,
   filecoinCalibration,
   optimism,
   sepolia,
@@ -66,9 +67,11 @@ class DrpcProvider implements RpcProvider {
 
 class GlifProvider implements RpcProvider {
   getUrl(chainId: number): string | undefined {
-    return chainId === 314159
-      ? `https://calibration.node.glif.io/archive/lotus/rpc/v1`
-      : undefined;
+    const urls: Record<number, string> = {
+      314: `https://node.glif.io/space07/lotus/rpc/v1`,
+      314159: `https://calibration.node.glif.io/archive/lotus/rpc/v1`,
+    };
+    return urls[chainId];
   }
 }
 
@@ -83,6 +86,7 @@ class ChainFactory {
       421614: arbitrumSepolia,
       84532: baseSepolia,
       11155111: sepolia,
+      314: filecoin,
       314159: filecoinCalibration,
     };
 
@@ -94,7 +98,8 @@ class ChainFactory {
   static getSupportedChains(): number[] {
     return environment === Environment.TEST
       ? [11155111, 84532, 421614, 314159]
-      : [10, 8453, 42220, 42161];
+      : [314];
+    // : [10, 8453, 42220, 42161, 314];
   }
 }
 
@@ -114,7 +119,7 @@ class EvmClientFactory {
       .filter((url): url is string => !!url)
       .map((url) => {
         const options = { timeout: this.RPC_TIMEOUT };
-        if (chainId === 314159) {
+        if (chainId === 314159 || chainId === 314) {
           return http(url, {
             ...options,
             fetchOptions: {

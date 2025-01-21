@@ -69,7 +69,7 @@ export const getIndexer = async ({
     schemaName: `cache_${chainId}`,
   });
 
-  const httpRpcClient = chainId === 314159 ? createHttpRpcClient({ url: rpcUrl, fetch: fetchWithAuth(filecoinApiKey) }) : createHttpRpcClient({ url: rpcUrl });
+  const httpRpcClient = chainId === 314159 || chainId === 314 ? createHttpRpcClient({ url: rpcUrl, fetch: fetchWithAuth(filecoinApiKey) }) : createHttpRpcClient({ url: rpcUrl });
 
   const indexer = createIndexer({
     cache,
