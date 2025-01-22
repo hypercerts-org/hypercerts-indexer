@@ -6,6 +6,7 @@ import { HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
+import { getHypercertTokenId } from "@/utils/tokenIds.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.
@@ -93,14 +94,41 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
             addresses?.HypercertMinterUUPS?.toLowerCase(),
         );
       });
-    const batchValueTransferLog = parseEventLogs({
-      abi: HypercertMinterAbi,
-      logs: transactionLogs,
-      // @ts-expect-error eventName is missing in the type
-    }).find((log) => log.eventName === "BatchValueTransfer");
 
-    // @ts-expect-error args is missing in the type
-    const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${batchValueTransferLog?.args?.claimIDs[0]}`;
+      const parsedLogs = parseEventLogs({
+        abi: HypercertMinterAbi,
+        logs: transactionLogs,
+      });
+
+      // Look for both BatchValueTransfer and TransferSingle events
+      const batchValueTransferLog = parsedLogs.find(
+        // @ts-expect-error eventName is missing in the type
+        (log) => log.eventName === "BatchValueTransfer"
+      );
+      const transferSingleLog = parsedLogs.find(
+        // @ts-expect-error eventName is missing in the type
+        (log) => log.eventName === "TransferSingle"
+      );
+
+      // Get the claim ID from either event type
+      let claimId;
+      if (batchValueTransferLog?.args?.claimIDs?.[0]) {
+        // @ts-expect-error args is missing in the type
+        claimId = batchValueTransferLog.args.claimIDs[0];
+      } else if (transferSingleLog?.args?.id) {
+        // In this case, the ID from the transferSingleLog is a fraction token ID
+        // We need to get the claim ID from the fraction token ID
+        // @ts-expect-error args is missing in the type
+        claimId = getHypercertTokenId(transferSingleLog.args.id);
+      }
+  
+      if (!claimId) {
+        throw new Error(
+          "Failed to find claim ID in BatchValueTransfer or TransferSingle events"
+        );
+      }
+  
+      const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${claimId}`;
 
     return [
       TakerBid.parse({

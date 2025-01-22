@@ -8,6 +8,22 @@ import { getAddress } from "viem";
 import { Block } from "@hypercerts-org/chainsauce";
 import { getEvmClient } from "../../src/clients/evmClient.js";
 
+vi.mock("../../src/clients/evmClient.js", () => ({
+  getEvmClient: () => ({
+    getTransaction: () =>
+      Promise.resolve({
+        from: "0x1234567890123456789012345678901234567890",
+        to: "0x0987654321098765432109876543210987654321",
+      }),
+    getBlock: () =>
+      Promise.resolve({
+        timestamp: Date.now(),
+        number: 1234567,
+        hash: "0xabcdef1234567890",
+      }),
+  }),
+}));
+
 describe("valueTransferEvent", () => {
   const chainId = 11155111;
   const client = getEvmClient(chainId);

@@ -1,23 +1,19 @@
-import { getRpcUrl } from "@/clients/evmClient.js";
-import SchemaRegistryAbi from "@/abis/schemaRegistry.js";
-import HypercertMinterAbi from "@/abis/hypercertMinter.js";
+import EasAbi from "@/abis/eas.js";
 import HypercertExchangeAbi from "@/abis/hypercertExchange.js";
+import HypercertMinterAbi from "@/abis/hypercertMinter.js";
+import SchemaRegistryAbi from "@/abis/schemaRegistry.js";
+import { EvmClientFactory } from "@/clients/evmClient.js";
+import { UnifiedRpcClientFactory } from "@/clients/rpcClientFactory.js";
 import { processEvent } from "@/indexer/eventHandlers.js";
+import RequestQueue from "@/indexer/requestQueue.js";
+import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
+import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
 import {
   Environment,
   environment,
   localCachingDbUrl,
 } from "@/utils/constants.js";
-import { getContractEventsForChain } from "@/storage/getContractEventsForChain.js";
-import EasAbi from "@/abis/eas.js";
-import { getSupportedSchemas } from "@/storage/getSupportedSchemas.js";
-import { assertExists } from "@/utils/assertExists.js";
-import {
-  createHttpRpcClient,
-  createIndexer,
-  createPostgresCache,
-} from "@hypercerts-org/chainsauce";
-import RequestQueue from "@/indexer/requestQueue.js";
+import { createIndexer, createPostgresCache } from "@hypercerts-org/chainsauce";
 import pg from "pg";
 
 const { Pool } = pg;
@@ -49,20 +45,27 @@ export const getIndexer = async ({
   const supportedSchemas = await getSupportedSchemas({ chainId });
   const contractEvents = await getContractEventsForChain({ chainId });
 
-  const rpcUrl = assertExists(getRpcUrl(chainId), "rpcUrl");
+  // Use EvmClientFactory to get the URL - it handles provider fallbacks
+  const rpcUrl = EvmClientFactory.getFirstAvailableUrl(chainId);
+  if (!rpcUrl) throw new Error(`No RPC URL available for chain ${chainId}`);
 
   const cache = createPostgresCache({
     connectionPool: pool,
     schemaName: `cache_${chainId}`,
   });
 
+  const httpRpcClient = UnifiedRpcClientFactory.createChainsauceClient(
+    chainId,
+    rpcUrl,
+  );
+
   const indexer = createIndexer({
     cache,
     chain: {
       id: chainId,
-      maxBlockRange: 100000n,
-      rpcClient: createHttpRpcClient({ url: rpcUrl }),
-      pollingInterval: environment === Environment.TEST ? 10000 : 5000,
+      maxBlockRange: 60480n,
+      rpcClient: httpRpcClient,
+      pollingIntervalMs: environment === Environment.TEST ? 10_000 : 5_000,
     },
     contracts: MyContracts,
     context: {

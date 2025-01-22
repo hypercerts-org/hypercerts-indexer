@@ -1,17 +1,21 @@
-import { describe, expect, it, vi } from "vitest";
-import { parseLeafClaimedEvent } from "../../src/parsing/parseLeafClaimedEvent.js";
 import { faker } from "@faker-js/faker";
-import { server } from "../setup-env.js";
-import { http, HttpResponse } from "msw";
-import { getEvmClient } from "../../src/clients/evmClient.js";
-import { Block } from "@hypercerts-org/chainsauce";
+import { describe, expect, it, vi } from "vitest";
 
-import { alchemyUrl } from "../resources/alchemyUrl.js";
-import { getAddress } from "viem";
+vi.mock("../../src/clients/evmClient.js", () => ({
+  getEvmClient: () => ({
+    getTransaction: () =>
+      Promise.resolve({
+        from: "0x1234567890123456789012345678901234567890",
+      }),
+  }),
+}));
+
+import { Block } from "@hypercerts-org/chainsauce";
+import { parseLeafClaimedEvent } from "../../src/parsing/parseLeafClaimedEvent.js";
+
 
 describe("leafClaimedEvent", {}, () => {
   const chainId = 11155111;
-  const client = getEvmClient(chainId);
 
   const block: Block = {
     chainId,
@@ -33,7 +37,7 @@ describe("leafClaimedEvent", {}, () => {
     const tokenID = faker.number.bigInt();
     const leaf = faker.string.alphanumeric("10");
     const blockNumber = faker.number.bigInt();
-    const from = getAddress(faker.finance.ethereumAddress());
+    const from = "0x1234567890123456789012345678901234567890";
     const event = {
       event: "LeafClaimed",
       from,
@@ -45,12 +49,6 @@ describe("leafClaimedEvent", {}, () => {
         leaf,
       },
     };
-    server.use(
-      http.post(`${alchemyUrl}/*`, () => {
-        return HttpResponse.json({ result: event });
-      }),
-    );
-
 
     const [claim] = await parseLeafClaimedEvent({ event, context });
 

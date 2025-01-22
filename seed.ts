@@ -205,6 +205,12 @@ const main = async () => {
         start_block: 6098991,
         contract_slug: easContractSlug,
       },
+      {
+        chain_id: 314,
+        contract_address: "0xc756B203cA9e13BAB3a93F1dA756bb19ac3C395b",
+        start_block: 4636224,
+        contract_slug: minterContractSlug,
+      },
     ],
     {
       onConflict: "contract_address, chain_id",
@@ -262,6 +268,14 @@ const main = async () => {
           "uint256 chain_id,address contract_address,uint256 token_id,uint8 evaluate_basic,uint8 evaluate_work,uint8 evaluate_contributors,uint8 evaluate_properties,string comments,string[] tags",
         resolver: ZERO_ADDRESS,
         revocable: true,
+      },
+      {
+        chain_id: 11155111,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
       },
     ],
     {

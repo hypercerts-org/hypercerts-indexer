@@ -1,17 +1,24 @@
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("../../src/clients/evmClient.js", () => ({
+  getEvmClient: () => ({
+    readContract: () =>
+      Promise.resolve("0x0000000000000000000000000000000000000000"),
+    getTransaction: () =>
+      Promise.resolve({
+        from: "0x1234567890123456789012345678901234567890",
+      }),
+  }),
+}));
+
 import { faker } from "@faker-js/faker";
 import { Block } from "@hypercerts-org/chainsauce";
-import { http, HttpResponse } from "msw";
 import { getAddress } from "viem";
-import { describe, expect, it, vi } from "vitest";
-import { getEvmClient } from "../../src/clients/evmClient.js";
 import { parseClaimStoredEvent } from "../../src/parsing/parseClaimStoredEvent.js";
 import { generateClaimStoredEvent } from "../helpers/factories.js";
-import { alchemyUrl } from "../resources/alchemyUrl.js";
-import { server } from "../setup-env.js";
 
 describe("claimStoredEvent", {}, () => {
   const chainId = 11155111;
-  const client = getEvmClient(chainId);
 
   const block: Block = {
     chainId,
@@ -28,12 +35,8 @@ describe("claimStoredEvent", {}, () => {
     contracts_id: faker.string.uuid(),
   };
 
-  vi.spyOn(client, "readContract").mockResolvedValue(
-    "0x0000000000000000000000000000000000000000",
-  );
-
   it("parses a claim stored event", {}, async () => {
-    const from = getAddress(faker.finance.ethereumAddress());
+    const from = "0x1234567890123456789012345678901234567890";
     const event = {
       event: "ClaimStored",
       from,
@@ -45,12 +48,6 @@ describe("claimStoredEvent", {}, () => {
         totalUnits: faker.number.bigInt(),
       },
     };
-
-    server.use(
-      http.post(`${alchemyUrl}/*`, () => {
-        return HttpResponse.json({ result: event });
-      }),
-    );
 
     const [claim] = await parseClaimStoredEvent({ event, context });
 
