@@ -1,8 +1,14 @@
-import { getAddress, isAddress, parseEventLogs } from "viem";
+import {
+  erc20Abi,
+  getAddress,
+  isAddress,
+  parseEventLogs,
+  zeroAddress,
+} from "viem";
 import { z } from "zod";
 import { messages } from "@/utils/validation.js";
 import { getEvmClient } from "@/clients/evmClient.js";
-import { HypercertMinterAbi } from "@hypercerts-org/sdk";
+import { HypercertExchangeAbi, HypercertMinterAbi } from "@hypercerts-org/sdk";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
@@ -40,7 +46,7 @@ import { getHypercertTokenId } from "@/utils/tokenIds.js";
  * console.log(parsedEvent); // { bidUser: "0x5678", bidRecipient: "0x5678", strategyId: 1234n, ... }/
  **/
 
-const TakerBidEventSchema = z.object({
+export const TakerBidEventSchema = z.object({
   address: z.string().refine(isAddress, { message: messages.INVALID_ADDRESS }),
   params: z.object({
     nonceInvalidationParameters: z.object({
@@ -83,52 +89,95 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
     const bid = TakerBidEventSchema.parse(event);
 
     // parse logs to get claimID, contractAddress and cid
-    const transactionLogs = await client
-      .getTransactionReceipt({
+    const transactionReceipt = await client.getTransactionReceipt({
+      hash: bid.transactionHash as `0x${string}`,
+    });
+
+    // parse logs to get claimID, contractAddress and cid
+    const transactionLogsHypercertMinter = transactionReceipt.logs.filter(
+      (log) =>
+        log.address.toLowerCase() ===
+        addresses?.HypercertMinterUUPS?.toLowerCase(),
+    );
+
+    const parsedLogs = parseEventLogs({
+      abi: HypercertMinterAbi,
+      logs: transactionLogsHypercertMinter,
+    });
+
+    // Look for both BatchValueTransfer and TransferSingle events
+    const batchValueTransferLog = parsedLogs.find(
+      // @ts-expect-error eventName is missing in the type
+      (log) => log.eventName === "BatchValueTransfer",
+    );
+    const transferSingleLog = parsedLogs.find(
+      // @ts-expect-error eventName is missing in the type
+      (log) => log.eventName === "TransferSingle",
+    );
+
+    // Get the claim ID from either event type
+    let claimId;
+    // @ts-expect-error args is missing in the type
+    if (batchValueTransferLog?.args?.claimIDs?.[0]) {
+      // @ts-expect-error args is missing in the type
+      claimId = batchValueTransferLog.args.claimIDs[0];
+    // @ts-expect-error args is missing in the type
+    } else if (transferSingleLog?.args?.id) {
+      // In this case, the ID from the transferSingleLog is a fraction token ID
+      // We need to get the claim ID from the fraction token ID
+      // @ts-expect-error args is missing in the type
+      claimId = getHypercertTokenId(transferSingleLog.args.id);
+    }
+
+    if (!claimId) {
+      throw new Error(
+        "Failed to find claim ID in BatchValueTransfer or TransferSingle events",
+      );
+    }
+
+    const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${claimId}`;
+
+    let currencyAmount = 0n;
+    const currency = getAddress(bid.params.currency);
+    if (currency === zeroAddress) {
+      // Get value of the transaction
+      const transaction = await client.getTransaction({
         hash: bid.transactionHash as `0x${string}`,
-      })
-      .then((res) => {
-        return res.logs.filter(
-          (log) =>
-            log.address.toLowerCase() ===
-            addresses?.HypercertMinterUUPS?.toLowerCase(),
-        );
       });
-
-      const parsedLogs = parseEventLogs({
-        abi: HypercertMinterAbi,
-        logs: transactionLogs,
+      currencyAmount = transaction.value;
+    } else {
+      const currencyLogs = transactionReceipt.logs.filter(
+        (log) => log.address.toLowerCase() === currency.toLowerCase(),
+      );
+      const parsedCurrencyLogs = parseEventLogs({
+        abi: erc20Abi,
+        logs: currencyLogs,
       });
-
-      // Look for both BatchValueTransfer and TransferSingle events
-      const batchValueTransferLog = parsedLogs.find(
-        // @ts-expect-error eventName is missing in the type
-        (log) => log.eventName === "BatchValueTransfer"
+      const transferLogs = parsedCurrencyLogs.filter(
+        (log) => log.eventName === "Transfer",
       );
-      const transferSingleLog = parsedLogs.find(
-        // @ts-expect-error eventName is missing in the type
-        (log) => log.eventName === "TransferSingle"
+      currencyAmount = transferLogs.reduce(
+        (acc, transferLog) => acc + (transferLog?.args?.value ?? 0n),
+        0n,
       );
+    }
 
-      // Get the claim ID from either event type
-      let claimId;
-      if (batchValueTransferLog?.args?.claimIDs?.[0]) {
-        // @ts-expect-error args is missing in the type
-        claimId = batchValueTransferLog.args.claimIDs[0];
-      } else if (transferSingleLog?.args?.id) {
-        // In this case, the ID from the transferSingleLog is a fraction token ID
-        // We need to get the claim ID from the fraction token ID
-        // @ts-expect-error args is missing in the type
-        claimId = getHypercertTokenId(transferSingleLog.args.id);
-      }
-  
-      if (!claimId) {
-        throw new Error(
-          "Failed to find claim ID in BatchValueTransfer or TransferSingle events"
-        );
-      }
-  
-      const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${claimId}`;
+    const exchangeLogs = transactionReceipt.logs.filter(
+      (log) =>
+        log.address.toLowerCase() ===
+        addresses?.HypercertExchange?.toLowerCase(),
+    );
+
+    const parsedExchangeLog = parseEventLogs({
+      abi: HypercertExchangeAbi,
+      logs: exchangeLogs,
+      // @ts-expect-error eventName is missing in the type
+    }).find((log) => log.eventName === "TakerBid");
+
+    // @ts-expect-error args is missing in the type
+    const fee_amounts = parsedExchangeLog?.args?.feeAmounts;
+    // @ts-expect-error args is missing in the type
+    const fee_recipients = parsedExchangeLog?.args?.feeRecipients;
 
     return [
       TakerBid.parse({
@@ -141,6 +190,9 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
         strategy_id: bid.params.strategyId,
         hypercert_id: hypercertId,
         transaction_hash: bid.transactionHash,
+        currency_amount: currencyAmount,
+        fee_amounts: fee_amounts,
+        fee_recipients: fee_recipients,
       }),
     ];
   } catch (e) {
