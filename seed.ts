@@ -277,6 +277,46 @@ const main = async () => {
         resolver: ZERO_ADDRESS,
         revocable: false,
       },
+      {
+        chain_id: 42161,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
+      },
+      {
+        chain_id: 10,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
+      },
+      {
+        chain_id: 8453,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
+      },
+      {
+        chain_id: 84532,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
+      },
+      {
+        chain_id: 42220,
+        uid: "0x48e3e1be1e08084b408a7035ac889f2a840b440bbf10758d14fb722831a200c3",
+        schema:
+          "uint256 chain_id,address contract_address,uint256 token_id,string title,string description,string[] sources",
+        resolver: ZERO_ADDRESS,
+        revocable: false,
+      },
     ],
     {
       onConflict: "uid, chain_id",
