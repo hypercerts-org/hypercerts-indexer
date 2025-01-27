@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { ParserMethod } from "@/indexer/LogParser.js";
-import { Metadata } from "@/utils/metadata.zod.js";
 import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 import { StandardMerkleTreeData } from "@openzeppelin/merkle-tree/dist/standard.js";
 import { Tables } from "@/types/database.types.js";
@@ -33,7 +32,7 @@ export type AllowListData = {
 };
 
 export type MetadataResult = {
-  metadata: Partial<Metadata & { uri: string; parsed: boolean }>;
+  metadata: Partial<HypercertMetadata & { uri: string; parsed: boolean }>;
   allow_list?: AllowListData;
   hypercert_allow_list?: Tables<"hypercert_allow_lists">;
 };
