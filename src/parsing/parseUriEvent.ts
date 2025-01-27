@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { ParserMethod } from "@/indexer/LogParser.js";
-import { HypercertMetadataValidator, Metadata } from "@/utils/metadata.zod.js";
 import { parseToOzMerkleTree } from "@/utils/parseToOzMerkleTree.js";
 import { StandardMerkleTreeData } from "@openzeppelin/merkle-tree/dist/standard.js";
 import { Tables } from "@/types/database.types.js";
 import { supabase } from "@/clients/supabaseClient.js";
 import { getAddress, isAddress } from "viem";
 import { messages } from "@/utils/validation.js";
+import { HypercertMetadata, validateMetaData } from "@hypercerts-org/sdk";
 
 const DO_NOT_PARSE = [
   "ipfs://null",
@@ -32,7 +32,7 @@ export type AllowListData = {
 };
 
 export type MetadataResult = {
-  metadata: Partial<Metadata & { uri: string; parsed: boolean }>;
+  metadata: Partial<HypercertMetadata & { uri: string; parsed: boolean }>;
   allow_list?: AllowListData;
   hypercert_allow_list?: Tables<"hypercert_allow_lists">;
 };
@@ -55,57 +55,61 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
   }
 
   // Get and validate metadata
-  const data = await getData({ uri });
-  if (!data) {
+  const ipfsData = await getData({ uri });
+  if (!ipfsData) {
     console.warn(`[parseUriEvent] Metadata fetching failed. [uri: ${uri}]`);
     return [{ metadata: { uri, parsed: false } }];
   }
-  const res = HypercertMetadataValidator.safeParse(data);
+  const { valid, data, errors } = validateMetaData(ipfsData);
 
-  if (!res.success) {
-    console.warn(
-      `[parseUriEvent] Metadata validation failed`,
-      res.error.message,
-    );
-    for (const error of res.error.issues) {
-      console.log("error", error.message);
+  if (!valid) {
+    console.warn(`[parseUriEvent] Metadata validation failed`, errors);
+    if (errors) {
+      Object.values(errors).forEach((error) => {
+        console.log("error", error);
+      });
     }
     return [{ metadata: { uri, parsed: false } }];
   }
 
+  const fetchedMetadata = data as HypercertMetadata;
+
   const metadata = {
-    name: res.data.name,
-    description: res.data.description,
-    external_url: res.data.external_url,
-    image: res.data.image,
-    properties: res.data.properties,
-    contributors: res.data.hypercert?.contributors.value,
-    impact_scope: res.data.hypercert?.impact_scope.value,
-    impact_timeframe_from: res.data.hypercert?.impact_timeframe?.value?.[0],
-    impact_timeframe_to: res.data.hypercert?.impact_timeframe?.value?.[1],
-    work_scope: res.data.hypercert?.work_scope.value,
-    work_timeframe_from: res.data.hypercert?.work_timeframe?.value?.[0],
-    work_timeframe_to: res.data.hypercert?.work_timeframe?.value?.[1],
-    rights: res.data.hypercert?.rights?.value,
-    allow_list_uri: res.data.allowList,
+    name: fetchedMetadata.name,
+    description: fetchedMetadata.description,
+    external_url: fetchedMetadata.external_url,
+    image: fetchedMetadata.image,
+    properties: fetchedMetadata.properties,
+    contributors: fetchedMetadata.hypercert?.contributors.value,
+    impact_scope: fetchedMetadata.hypercert?.impact_scope.value,
+    impact_timeframe_from:
+      fetchedMetadata.hypercert?.impact_timeframe?.value?.[0],
+    impact_timeframe_to:
+      fetchedMetadata.hypercert?.impact_timeframe?.value?.[1],
+    work_scope: fetchedMetadata.hypercert?.work_scope.value,
+    work_timeframe_from: fetchedMetadata.hypercert?.work_timeframe?.value?.[0],
+    work_timeframe_to: fetchedMetadata.hypercert?.work_timeframe?.value?.[1],
+    rights: fetchedMetadata.hypercert?.rights?.value,
+    allow_list_uri: fetchedMetadata.allowList,
     parsed: true,
     uri,
   };
 
   // If allowlist is present, fetch and parse it
   if (metadata.allow_list_uri) {
+    const uri = metadata.allow_list_uri;
     const res = await getData({
-      uri: metadata.allow_list_uri,
+      uri,
     });
 
     if (res) {
-      const tree = parseToOzMerkleTree(res, metadata.allow_list_uri);
+      const tree = parseToOzMerkleTree(res, uri);
 
       if (tree) {
         allow_list = {
           data: tree.dump(),
           root: tree.root,
-          uri: metadata.allow_list_uri,
+          uri,
           parsed: true,
         };
 
@@ -124,7 +128,7 @@ export const parseUriEvent: ParserMethod<MetadataResult> = async ({
         hypercert_allow_list = {
           id: crypto.randomUUID(),
           claims_id: claim_id,
-          allow_list_data_uri: metadata.allow_list_uri,
+          allow_list_data_uri: uri,
           parsed: true,
         };
       }
