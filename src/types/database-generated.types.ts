@@ -466,6 +466,9 @@ export type Database = {
           creation_block_number: number
           creation_block_timestamp: number
           currency: string
+          currency_amount: number
+          fee_amounts: number[]
+          fee_recipients: string[]
           hypercert_id: string
           id: string
           item_ids: number[]
@@ -480,6 +483,9 @@ export type Database = {
           creation_block_number: number
           creation_block_timestamp: number
           currency: string
+          currency_amount?: number
+          fee_amounts?: number[]
+          fee_recipients?: string[]
           hypercert_id: string
           id?: string
           item_ids: number[]
@@ -494,6 +500,9 @@ export type Database = {
           creation_block_number?: number
           creation_block_timestamp?: number
           currency?: string
+          currency_amount?: number
+          fee_amounts?: number[]
+          fee_recipients?: string[]
           hypercert_id?: string
           id?: string
           item_ids?: number[]

@@ -25,6 +25,9 @@ export const TakerBid = z.object({
   hypercert_id: z.string(),
   amounts: z.array(z.bigint()),
   transaction_hash: z.string(),
+  currency_amount: z.bigint(),
+  fee_amounts: z.array(z.bigint()),
+  fee_recipients: z.array(z.string().refine(isAddress, { message: "Invalid fee recipient address" })),
 });
 
 export type TakerBid = z.infer<typeof TakerBid>;
@@ -100,7 +103,6 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
     const rpcUrl = getRpcUrl(Number(chain_id));
     const hypercertsExchange = new HypercertExchangeClient(
       Number(chain_id),
-      // @ts-expect-error - No types available
       new ethers.JsonRpcProvider(rpcUrl),
     );
 
