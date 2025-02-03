@@ -1,19 +1,9 @@
-import { decodeAbiParameters, isAddress } from "viem";
+import { EasAttestation } from "@/parsing/parseAttestedEvent.js";
 import { Tables } from "@/types/database.types.js";
 import { parseSchemaToABI } from "@/utils/parseSchemaToAbi.js";
+import { ValidatorFactory } from "@hypercerts-org/sdk";
+import { decodeAbiParameters } from "viem";
 import { z } from "zod";
-import { EasAttestation } from "@/parsing/parseAttestedEvent.js";
-
-const HypercertAttestationSchema = z.object(
-  {
-    chain_id: z.coerce.bigint(),
-    contract_address: z.string().refine(isAddress, {
-      message: `[decodeAttestationData] Invalid contract address in attestation data`,
-    }),
-    token_id: z.coerce.bigint(),
-  },
-  { message: `[decodeAttestationData] Invalid hypercert attestation data` },
-);
 
 const DecodedAttestationSchema = z.object({
   attester: z.string(),
@@ -81,6 +71,7 @@ export const parseAttestationData = ({
     );
   }
 
+  const validator = ValidatorFactory.createAttestationValidator();
   const { attester, recipient, data, uid } = attestation;
   let _attestation: { [key: string]: unknown } = {};
 
@@ -104,8 +95,15 @@ export const parseAttestationData = ({
   }
 
   try {
-    const { chain_id, contract_address, token_id } =
-      HypercertAttestationSchema.parse(_attestation);
+    const validationResult = validator.validate(_attestation);
+
+    if (!validationResult.isValid) {
+      console.error(
+        "[DecodeAttestationData] Attestation data is invalid: ",
+        validationResult,
+      );
+      throw new Error("Invalid attestation data");
+    }
 
     return DecodedAttestationSchema.parse({
       attester,
@@ -114,9 +112,9 @@ export const parseAttestationData = ({
       supported_schemas_id: schema.id,
       attestation: attestation,
       data: _attestation,
-      chain_id,
-      contract_address,
-      token_id,
+      chain_id: validationResult.data?.chain_id,
+      contract_address: validationResult.data?.contract_address,
+      token_id: validationResult.data?.token_id,
     });
   } catch (error) {
     console.error(

@@ -1,3 +1,9 @@
+import { getEvmClient } from "@/clients/evmClient.js";
+import { ParserMethod } from "@/indexer/LogParser.js";
+import { TakerBid } from "@/storage/storeTakerBid.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { messages } from "@/utils/validation.js";
+import { HypercertExchangeAbi, HypercertMinterAbi, getHypercertTokenId } from "@hypercerts-org/sdk";
 import {
   erc20Abi,
   getAddress,
@@ -6,13 +12,6 @@ import {
   zeroAddress,
 } from "viem";
 import { z } from "zod";
-import { messages } from "@/utils/validation.js";
-import { getEvmClient } from "@/clients/evmClient.js";
-import { HypercertExchangeAbi, HypercertMinterAbi } from "@hypercerts-org/sdk";
-import { getDeployment } from "@/utils/getDeployment.js";
-import { TakerBid } from "@/storage/storeTakerBid.js";
-import { ParserMethod } from "@/indexer/LogParser.js";
-import { getHypercertTokenId } from "@/utils/tokenIds.js";
 
 /**
  * Parses an event object to extract the details of a TakerBid event.

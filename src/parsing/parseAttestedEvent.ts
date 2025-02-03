@@ -1,12 +1,12 @@
-import { getAddress, isAddress, isHex } from "viem";
-import { getDeployment } from "@/utils/getDeployment.js";
-import { z } from "zod";
-import { messages } from "@/utils/validation.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 import {
-  parseAttestationData,
   DecodedAttestation,
+  parseAttestationData,
 } from "@/parsing/parseAttestationData.js";
+import { getDeployment } from "@/utils/getDeployment.js";
+import { messages } from "@/utils/validation.js";
+import { getAddress, isAddress, isHex } from "viem";
+import { z } from "zod";
 
 export const AttestationSchema = z.object({
   uid: z.string(),

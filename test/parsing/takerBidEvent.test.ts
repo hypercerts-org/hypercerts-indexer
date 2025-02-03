@@ -1,10 +1,9 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { parseTakerBidEvent } from "../../src/parsing/parseTakerBidEvent.js";
 import { faker } from "@faker-js/faker";
 import { Block } from "@hypercerts-org/chainsauce";
+import { getHypercertTokenId } from "@hypercerts-org/sdk";
 import { getAddress, zeroAddress } from "viem";
-import { getEvmClient } from "../../src/clients/evmClient.js";
-import { getHypercertTokenId } from "../../src/utils/tokenIds.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { parseTakerBidEvent } from "../../src/parsing/parseTakerBidEvent.js";
 
 const mocks = vi.hoisted(() => ({
   getTransactionReceipt: vi.fn(),
