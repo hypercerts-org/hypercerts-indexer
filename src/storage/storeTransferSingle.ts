@@ -1,9 +1,9 @@
-import { supabase } from "@/clients/supabaseClient.js";
-import { getHypercertTokenId } from "@/utils/tokenIds.js";
-import { getAddress } from "viem";
-import { ParsedTransferSingle } from "@/parsing/parseTransferSingleEvent.js";
-import { StorageMethod } from "@/indexer/LogParser.js";
 import { dbClient } from "@/clients/dbClient.js";
+import { supabase } from "@/clients/supabaseClient.js";
+import { StorageMethod } from "@/indexer/LogParser.js";
+import { ParsedTransferSingle } from "@/parsing/parseTransferSingleEvent.js";
+import { getHypercertTokenId } from "@hypercerts-org/sdk";
+import { getAddress } from "viem";
 
 /* 
     This function stores the hypercert token and the ownership of the token in the database.

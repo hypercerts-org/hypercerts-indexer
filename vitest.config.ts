@@ -22,8 +22,8 @@ export default defineConfig({
       reportOnFailure: true,
       thresholds: {
         lines: 26,
-        branches: 72,
-        functions: 70,
+        branches: 73,
+        functions: 69,
         statements: 26,
       },
       include: ["src/**/*.ts"],

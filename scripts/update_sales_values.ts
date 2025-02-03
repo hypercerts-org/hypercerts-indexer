@@ -1,9 +1,8 @@
 import "dotenv/config";
 
+import { HypercertExchangeAbi, getHypercertTokenId, parseClaimOrFractionId } from "@hypercerts-org/sdk";
 import { createClient } from "@supabase/supabase-js";
-import { parseClaimOrFractionId } from "@hypercerts-org/sdk";
-import { createPublicClient, erc20Abi, zeroAddress } from "viem";
-import { http } from "viem";
+import { Chain, erc20Abi, getAddress, parseEventLogs, zeroAddress } from "viem";
 import {
   arbitrum,
   arbitrumSepolia,
@@ -13,17 +12,11 @@ import {
   filecoin,
   filecoinCalibration,
   optimism,
+  sepolia,
 } from "viem/chains";
-import { Chain } from "viem";
-import { sepolia } from "viem/chains";
-import { HypercertMinterAbi } from "@hypercerts-org/sdk";
-import { parseEventLogs } from "viem";
-import { TakerBid } from "../src/storage/storeTakerBid.js";
-import { getAddress } from "viem";
-import { getDeployment } from "../src/utils/getDeployment.js";
-import { getHypercertTokenId } from "../src/utils/tokenIds.js";
-import { HypercertExchangeAbi } from "@hypercerts-org/sdk";
 import { EvmClientFactory } from "../src/clients/evmClient.js";
+import { TakerBid } from "../src/storage/storeTakerBid.js";
+import { getDeployment } from "../src/utils/getDeployment.js";
 
 const getChain = (chainId: number) => {
   const chains: Record<number, Chain> = {
