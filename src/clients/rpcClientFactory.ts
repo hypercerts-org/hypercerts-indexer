@@ -55,6 +55,7 @@ export class UnifiedRpcClientFactory {
       return createHttpRpcClient({
         url: config.url,
         fetch: customFetch,
+        retryDelayMs: 1000,
       });
     }
 
