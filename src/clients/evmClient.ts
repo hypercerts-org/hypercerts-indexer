@@ -21,6 +21,15 @@ class AlchemyProvider implements RpcProvider {
   }
 }
 
+class AnkrProvider implements RpcProvider {
+  getUrl(chainId: number): string | undefined {
+    const urls: Record<number, string> = {
+      42220: `https://rpc.ankr.com/celo`,
+    };
+    return urls[chainId];
+  }
+}
+
 class InfuraProvider implements RpcProvider {
   getUrl(chainId: number): string | undefined {
     const urls: Record<number, string> = {
@@ -62,6 +71,7 @@ class GlifProvider implements RpcProvider {
 export class EvmClientFactory {
   private static readonly providers: RpcProvider[] = [
     new AlchemyProvider(),
+    new AnkrProvider(),
     new InfuraProvider(),
     new DrpcProvider(),
     new GlifProvider(),
