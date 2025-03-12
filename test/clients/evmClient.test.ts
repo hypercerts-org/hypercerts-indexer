@@ -71,10 +71,7 @@ describe("EvmClient", () => {
 
         expect(
           vi.mocked(UnifiedRpcClientFactory.createViemTransport),
-        ).toHaveBeenCalledWith(
-          10,
-          expect.stringContaining("alchemy.com"),
-        );
+        ).toHaveBeenCalledWith(10, expect.stringContaining("alchemy.com"));
         expect(
           vi.mocked(UnifiedRpcClientFactory.createViemTransport),
         ).toHaveBeenCalledWith(10, expect.stringContaining("infura.io"));
@@ -158,10 +155,9 @@ describe("RPC Providers", () => {
       expect(url).toContain("alchemy-key");
     });
 
-    it("should return Infura URL when Alchemy is not available", () => {
+    it("should return Ankr URL when Alchemy is not available", () => {
       const url = getRpcUrl(42220); // Celo
-      expect(url).toContain("infura.io");
-      expect(url).toContain("infura-key");
+      expect(url).toContain("ankr.com");
     });
 
     it("should return Glif URL for Filecoin", () => {
