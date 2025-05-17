@@ -12,11 +12,6 @@ export const alchemyApiKey = assertExists(
   "Alchemy API key",
 );
 
-export const infuraApiKey = assertExists(
-  process.env.INFURA_API_KEY,
-  "Infura API key",
-);
-
 export const drpcApiPkey = assertExists(
   process.env.DRPC_API_KEY,
   "dRPC API KEY",
