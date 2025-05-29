@@ -5,7 +5,6 @@ import * as viem from "viem";
 vi.mock("@/utils/constants", () => ({
   environment: "test",
   alchemyApiKey: "mock-alchemy-key",
-  infuraApiKey: "mock-infura-key",
   drpcApiPkey: "mock-drpc-key",
   filecoinApiKey: "mock-filecoin-key",
   Environment: { TEST: "test", PROD: "prod" },
@@ -48,10 +47,9 @@ describe("EvmClient", () => {
         expect(sepoliaUrls[0]).toContain("alchemy.com");
 
         const opUrls = EvmClientFactory.getAllAvailableUrls(10);
-        expect(opUrls).toHaveLength(3); // Alchemy, Infura, DRPC for Optimism
+        expect(opUrls).toHaveLength(2); // Alchemy, DRPC for Optimism
         expect(opUrls[0]).toContain("alchemy.com");
-        expect(opUrls[1]).toContain("infura.io");
-        expect(opUrls[2]).toContain("drpc.org");
+        expect(opUrls[1]).toContain("drpc.org");
       });
 
       it("returns empty array for unsupported chain", () => {
@@ -72,9 +70,6 @@ describe("EvmClient", () => {
         expect(
           vi.mocked(UnifiedRpcClientFactory.createViemTransport),
         ).toHaveBeenCalledWith(10, expect.stringContaining("alchemy.com"));
-        expect(
-          vi.mocked(UnifiedRpcClientFactory.createViemTransport),
-        ).toHaveBeenCalledWith(10, expect.stringContaining("infura.io"));
         expect(
           vi.mocked(UnifiedRpcClientFactory.createViemTransport),
         ).toHaveBeenCalledWith(10, expect.stringContaining("drpc.org"));
@@ -153,11 +148,6 @@ describe("RPC Providers", () => {
       const url = getRpcUrl(11155111); // Sepolia
       expect(url).toContain("alchemy.com");
       expect(url).toContain("alchemy-key");
-    });
-
-    it("should return Ankr URL when Alchemy is not available", () => {
-      const url = getRpcUrl(42220); // Celo
-      expect(url).toContain("ankr.com");
     });
 
     it("should return Glif URL for Filecoin", () => {
