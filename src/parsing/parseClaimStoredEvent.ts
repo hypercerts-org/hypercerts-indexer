@@ -1,9 +1,10 @@
-import { isAddress, isHex } from "viem";
+import { isAddress, isHex, parseEventLogs } from "viem";
 import { z } from "zod";
 import { Claim, ClaimSchema } from "@/storage/storeClaimStored.js";
 import { ParserMethod } from "@/indexer/LogParser.js";
 import { ZERO_ADDRESS } from "@/utils/constants.js";
 import { getEvmClient } from "@/clients/evmClient.js";
+import { HypercertMinterAbi } from "@hypercerts-org/contracts";
 
 export const ClaimStoredEventSchema = z.object({
   address: z.string().refine(isAddress, {
@@ -32,18 +33,33 @@ export const parseClaimStoredEvent: ParserMethod<Claim> = async ({
   context: { chain_id, contracts_id },
 }) => {
   const { params, transactionHash } = ClaimStoredEventSchema.parse(event);
-  const client = getEvmClient(chain_id);
+  const client = getEvmClient(Number(chain_id));
 
   try {
-    const transaction = await client.getTransaction({
+    // get the operator from the transferSingle event, this is necessary for safe support
+    // otherwise transaction.from is the address of the last signer in safe
+    const receipt = await client.getTransactionReceipt({
       hash: transactionHash,
     });
+    const parsedLogs = parseEventLogs({
+      abi: HypercertMinterAbi,
+      logs: receipt.logs,
+    });
+    const transferSingleEvent = parsedLogs.find(
+      // @ts-expect-error eventName is missing in the type
+      (log) => log.eventName === "TransferSingle",
+    );
+    if (!transferSingleEvent) {
+      throw new Error("TransferSingle event not found");
+    }
+    // @ts-expect-error args is missing in the type
+    const operator = transferSingleEvent.args.operator;
 
     return [
       ClaimSchema.parse({
         contracts_id: contracts_id,
         owner_address: ZERO_ADDRESS,
-        creator_address: transaction.from,
+        creator_address: operator,
         token_id: params.claimID,
         uri: params.uri,
         units: params.totalUnits,
