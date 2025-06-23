@@ -81,20 +81,26 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
     if (!readContract) throw new Error("readContract is not defined");
 
     if (from_token_id !== 0n) {
+      // @ts-expect-error incorrect typing of readContract
+      const current_units_for_from_token = (await readContract({
+        address: contract_address,
+        contract: "HypercertMinter",
+        functionName: "unitsOf",
+        args: [from_token_id],
+      })) as unknown as bigint;
+
+      const burned = current_units_for_from_token === 0n && to_token_id === 0n;
+
       fromToken = {
         claims_id,
         token_id: from_token_id.toString(),
         fraction_id: `${chain_id}-${getAddress(contract_address)}-${from_token_id}`,
-        units: (await readContract({
-          address: contract_address,
-          contract: "HypercertMinter",
-          functionName: "unitsOf",
-          args: [from_token_id],
-        })) as unknown as bigint,
+        units: current_units_for_from_token,
         last_update_block_timestamp: block.timestamp.toString(),
         last_update_block_number: block.blockNumber,
         creation_block_number: block.blockNumber,
         creation_block_timestamp: block.timestamp.toString(),
+        burned,
       };
     }
 
@@ -103,6 +109,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
         claims_id,
         token_id: to_token_id.toString(),
         fraction_id: `${chain_id}-${getAddress(contract_address)}-${to_token_id}`,
+        // @ts-expect-error incorrect typing of readContract
         units: (await readContract({
           address: contract_address,
           contract: "HypercertMinter",
@@ -146,6 +153,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
               last_update_block_timestamp: eb.ref(
                 "excluded.last_update_block_timestamp",
               ),
+              burned: eb.ref("excluded.burned"),
             })),
           )
           .compile(),
