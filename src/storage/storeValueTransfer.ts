@@ -121,50 +121,50 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
         creation_block_number: block.blockNumber,
         creation_block_timestamp: block.timestamp.toString(),
       };
-
-      const filteredTokens = [fromToken, toToken].filter(
-        (token) => token !== undefined,
-      );
-
-      const parsedTokens = filteredTokens.map((token) => {
-        return {
-          ...token,
-          claims_id,
-          token_id: token.token_id.toString(),
-          units: token.units.toString(),
-          creation_block_number: block.blockNumber.toString(),
-          creation_block_timestamp: block.timestamp.toString(),
-          last_update_block_number: block.blockNumber.toString(),
-          last_update_block_timestamp: block.timestamp.toString(),
-        };
-      });
-
-      requests.push(
-        dbClient
-          .insertInto("fractions")
-          .values(parsedTokens)
-          .onConflict((oc) =>
-            oc.columns(["claims_id", "token_id"]).doUpdateSet((eb) => ({
-              units: eb.ref("excluded.units"),
-              fraction_id: eb.ref("excluded.fraction_id"),
-              last_update_block_number: eb.ref(
-                "excluded.last_update_block_number",
-              ),
-              last_update_block_timestamp: eb.ref(
-                "excluded.last_update_block_timestamp",
-              ),
-              burned: eb.ref("excluded.burned"),
-            })),
-          )
-          .compile(),
-        dbClient
-          .updateTable("contract_events")
-          .set({ last_block_indexed: block.blockNumber })
-          .where("contracts_id", "=", contracts_id)
-          .where("events_id", "=", events_id)
-          .compile(),
-      );
     }
+
+    const filteredTokens = [fromToken, toToken].filter(
+      (token) => token !== undefined,
+    );
+
+    const parsedTokens = filteredTokens.map((token) => {
+      return {
+        ...token,
+        claims_id,
+        token_id: token.token_id.toString(),
+        units: token.units.toString(),
+        creation_block_number: block.blockNumber.toString(),
+        creation_block_timestamp: block.timestamp.toString(),
+        last_update_block_number: block.blockNumber.toString(),
+        last_update_block_timestamp: block.timestamp.toString(),
+      };
+    });
+
+    requests.push(
+      dbClient
+        .insertInto("fractions")
+        .values(parsedTokens)
+        .onConflict((oc) =>
+          oc.columns(["claims_id", "token_id"]).doUpdateSet((eb) => ({
+            units: eb.ref("excluded.units"),
+            fraction_id: eb.ref("excluded.fraction_id"),
+            last_update_block_number: eb.ref(
+              "excluded.last_update_block_number",
+            ),
+            last_update_block_timestamp: eb.ref(
+              "excluded.last_update_block_timestamp",
+            ),
+            burned: eb.ref("excluded.burned"),
+          })),
+        )
+        .compile(),
+      dbClient
+        .updateTable("contract_events")
+        .set({ last_block_indexed: block.blockNumber })
+        .where("contracts_id", "=", contracts_id)
+        .where("events_id", "=", events_id)
+        .compile(),
+    );
   }
 
   return requests;
