@@ -81,20 +81,26 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
     if (!readContract) throw new Error("readContract is not defined");
 
     if (from_token_id !== 0n) {
+      // @ts-expect-error incorrect typing of readContract
+      const current_units_for_from_token = (await readContract({
+        address: contract_address,
+        contract: "HypercertMinter",
+        functionName: "unitsOf",
+        args: [from_token_id],
+      })) as unknown as bigint;
+
+      const burned = current_units_for_from_token === 0n && to_token_id === 0n;
+
       fromToken = {
         claims_id,
         token_id: from_token_id.toString(),
         fraction_id: `${chain_id}-${getAddress(contract_address)}-${from_token_id}`,
-        units: (await readContract({
-          address: contract_address,
-          contract: "HypercertMinter",
-          functionName: "unitsOf",
-          args: [from_token_id],
-        })) as unknown as bigint,
+        units: current_units_for_from_token,
         last_update_block_timestamp: block.timestamp.toString(),
         last_update_block_number: block.blockNumber,
         creation_block_number: block.blockNumber,
         creation_block_timestamp: block.timestamp.toString(),
+        burned,
       };
     }
 
@@ -103,6 +109,7 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
         claims_id,
         token_id: to_token_id.toString(),
         fraction_id: `${chain_id}-${getAddress(contract_address)}-${to_token_id}`,
+        // @ts-expect-error incorrect typing of readContract
         units: (await readContract({
           address: contract_address,
           contract: "HypercertMinter",
@@ -114,49 +121,50 @@ export const storeValueTransfer: StorageMethod<ParsedValueTransfer> = async ({
         creation_block_number: block.blockNumber,
         creation_block_timestamp: block.timestamp.toString(),
       };
-
-      const filteredTokens = [fromToken, toToken].filter(
-        (token) => token !== undefined,
-      );
-
-      const parsedTokens = filteredTokens.map((token) => {
-        return {
-          ...token,
-          claims_id,
-          token_id: token.token_id.toString(),
-          units: token.units.toString(),
-          creation_block_number: block.blockNumber.toString(),
-          creation_block_timestamp: block.timestamp.toString(),
-          last_update_block_number: block.blockNumber.toString(),
-          last_update_block_timestamp: block.timestamp.toString(),
-        };
-      });
-
-      requests.push(
-        dbClient
-          .insertInto("fractions")
-          .values(parsedTokens)
-          .onConflict((oc) =>
-            oc.columns(["claims_id", "token_id"]).doUpdateSet((eb) => ({
-              units: eb.ref("excluded.units"),
-              fraction_id: eb.ref("excluded.fraction_id"),
-              last_update_block_number: eb.ref(
-                "excluded.last_update_block_number",
-              ),
-              last_update_block_timestamp: eb.ref(
-                "excluded.last_update_block_timestamp",
-              ),
-            })),
-          )
-          .compile(),
-        dbClient
-          .updateTable("contract_events")
-          .set({ last_block_indexed: block.blockNumber })
-          .where("contracts_id", "=", contracts_id)
-          .where("events_id", "=", events_id)
-          .compile(),
-      );
     }
+
+    const filteredTokens = [fromToken, toToken].filter(
+      (token) => token !== undefined,
+    );
+
+    const parsedTokens = filteredTokens.map((token) => {
+      return {
+        ...token,
+        claims_id,
+        token_id: token.token_id.toString(),
+        units: token.units.toString(),
+        creation_block_number: block.blockNumber.toString(),
+        creation_block_timestamp: block.timestamp.toString(),
+        last_update_block_number: block.blockNumber.toString(),
+        last_update_block_timestamp: block.timestamp.toString(),
+      };
+    });
+
+    requests.push(
+      dbClient
+        .insertInto("fractions")
+        .values(parsedTokens)
+        .onConflict((oc) =>
+          oc.columns(["claims_id", "token_id"]).doUpdateSet((eb) => ({
+            units: eb.ref("excluded.units"),
+            fraction_id: eb.ref("excluded.fraction_id"),
+            last_update_block_number: eb.ref(
+              "excluded.last_update_block_number",
+            ),
+            last_update_block_timestamp: eb.ref(
+              "excluded.last_update_block_timestamp",
+            ),
+            burned: eb.ref("excluded.burned"),
+          })),
+        )
+        .compile(),
+      dbClient
+        .updateTable("contract_events")
+        .set({ last_block_indexed: block.blockNumber })
+        .where("contracts_id", "=", contracts_id)
+        .where("events_id", "=", events_id)
+        .compile(),
+    );
   }
 
   return requests;

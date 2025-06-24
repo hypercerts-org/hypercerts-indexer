@@ -119,6 +119,13 @@ export type Database = {
             foreignKeyName: "attestations_claims_id_fkey"
             columns: ["claims_id"]
             isOneToOne: false
+            referencedRelation: "claims_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attestations_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
             referencedRelation: "hypercert_allowlists_with_claim"
             referencedColumns: ["claim_id"]
           },
@@ -274,6 +281,7 @@ export type Database = {
       }
       fractions: {
         Row: {
+          burned: boolean
           claims_id: string
           creation_block_number: number
           creation_block_timestamp: number
@@ -287,6 +295,7 @@ export type Database = {
           value: number | null
         }
         Insert: {
+          burned?: boolean
           claims_id: string
           creation_block_number: number
           creation_block_timestamp: number
@@ -300,6 +309,7 @@ export type Database = {
           value?: number | null
         }
         Update: {
+          burned?: boolean
           claims_id?: string
           creation_block_number?: number
           creation_block_timestamp?: number
@@ -318,6 +328,13 @@ export type Database = {
             columns: ["claims_id"]
             isOneToOne: false
             referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims_view"
             referencedColumns: ["id"]
           },
           {
@@ -387,6 +404,13 @@ export type Database = {
             columns: ["claims_id"]
             isOneToOne: false
             referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hypercert_allow_lists_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims_view"
             referencedColumns: ["id"]
           },
           {
@@ -559,8 +583,38 @@ export type Database = {
         }
         Relationships: []
       }
+      claims_view: {
+        Row: {
+          attestations_count: number | null
+          burned: boolean | null
+          contracts_id: string | null
+          creation_block_number: number | null
+          creation_block_timestamp: number | null
+          creator_address: string | null
+          hypercert_id: string | null
+          id: string | null
+          last_update_block_number: number | null
+          last_update_block_timestamp: number | null
+          owner_address: string | null
+          sales_count: number | null
+          token_id: number | null
+          units: number | null
+          uri: string | null
+          value: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_contracts_id_fkey"
+            columns: ["contracts_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fractions_view: {
         Row: {
+          burned: boolean | null
           claims_id: string | null
           creation_block_number: number | null
           creation_block_timestamp: number | null
@@ -580,6 +634,13 @@ export type Database = {
             columns: ["claims_id"]
             isOneToOne: false
             referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fractions_claims_id_fkey"
+            columns: ["claims_id"]
+            isOneToOne: false
+            referencedRelation: "claims_view"
             referencedColumns: ["id"]
           },
           {
