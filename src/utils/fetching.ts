@@ -52,10 +52,13 @@ const getFromIPFSGateways = async (
     axios.get(getNftStorageGatewayUri(pointer), { timeout }),
     axios.get(getWeb3UpGatewayUri(pointer), { timeout }),
   ]).catch((err) => {
-    console.error(`Failed to get ${cidOrIpfsUri} from any gateway`, {
-      error: err,
-      path: cidOrIpfsUri,
-    });
+    console.error(
+      `Failed to get ${cidOrIpfsUri} from any gateway`,
+      JSON.stringify({
+        error: err,
+        path: cidOrIpfsUri,
+      }),
+    );
   });
 };
 

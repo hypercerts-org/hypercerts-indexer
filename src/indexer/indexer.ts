@@ -1,6 +1,7 @@
 import { getIndexer } from "@/indexer/chainsauce.js";
 import RequestQueue from "@/indexer/requestQueue.js";
 import { getSupportedChains } from "@/clients/evmClient.js";
+import { sepolia } from "viem/chains";
 
 class Indexer {
   running = false;
@@ -20,9 +21,9 @@ class Indexer {
 
     const requestQueue = new RequestQueue();
 
-    const chainsToIndex = supportedChains.map((chainId) =>
-      getIndexer({ chainId, requestQueue }),
-    );
+    const chainsToIndex = supportedChains
+      .filter((chainId) => chainId === sepolia.id)
+      .map((chainId) => getIndexer({ chainId, requestQueue }));
 
     await Promise.all(chainsToIndex);
   }

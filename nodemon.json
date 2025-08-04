@@ -12,5 +12,5 @@
     "./src"
   ],
   "ext": "ts",
-  "exec": "pnpm supabase:seed && pnpm run build && pnpm run start"
+  "exec": "pnpm run build && pnpm run start"
 }

@@ -29,7 +29,8 @@ export default class RequestQueue {
       try {
         await dbClient.transaction().execute(async (trx) => {
           for (const request of requests) {
-            await trx.executeQuery(request);
+            // await trx.executeQuery(request);
+            console.log(request);
           }
         });
       } catch (error) {

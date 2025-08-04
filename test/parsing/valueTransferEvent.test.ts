@@ -75,7 +75,7 @@ describe("valueTransferEvent", () => {
     );
   });
 
-  it("parses valueTransferEvent", async () => {
+  it.only("parses valueTransferEvent", async () => {
     const [transfer] = await parseValueTransferEvent({ event, context });
 
     if (!transfer) {

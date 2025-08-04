@@ -60,10 +60,10 @@ export const getIndexer = async ({
   );
 
   const indexer = createIndexer({
-    cache,
+    // cache,
     chain: {
       id: chainId,
-      maxBlockRange: 60480n,
+      maxBlockRange: 1n,
       rpcClient: httpRpcClient,
       pollingIntervalMs: environment === Environment.TEST ? 10_000 : 5_000,
     },
@@ -87,65 +87,65 @@ export const getIndexer = async ({
     return contractEvent;
   };
 
-  indexer.on(
-    "HypercertMinter:ClaimStored",
-    async ({ event, getBlock, getData, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:ClaimStored",
+  //   async ({ event, getBlock, getData, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "HypercertMinter:URI",
-    async ({ event, getBlock, getData, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:URI",
+  //   async ({ event, getBlock, getData, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
   indexer.on(
     "HypercertMinter:ValueTransfer",
@@ -177,206 +177,216 @@ export const getIndexer = async ({
     },
   );
 
-  indexer.on(
-    "HypercertMinter:BatchValueTransfer",
-    async ({ event, getData, getBlock, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:BatchValueTransfer",
+  //   async ({ event, getData, getBlock, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "HypercertMinter:TransferSingle",
-    async ({ event, getData, getBlock, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:TransferSingle",
+  //   async ({ event, getData, getBlock, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "HypercertMinter:TransferBatch",
-    async ({ event, getData, getBlock, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:TransferBatch",
+  //   async ({ event, getData, getBlock, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const block = await getBlock();
+  //     console.log("the actual block", block);
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "HypercertMinter:LeafClaimed",
-    async ({ event, getData, getBlock, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertMinter:LeafClaimed",
+  //   async ({ event, getData, getBlock, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: await getBlock(),
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "HypercertExchange:TakerBid",
-    async ({ event, getData, getBlock, readContract }) => {
-      const contractEvent = await getContractEvent(event.name);
-      if (!contractEvent) return;
+  // indexer.on(
+  //   "HypercertExchange:TakerBid",
+  //   async ({ event, getData, getBlock, readContract }) => {
+  //     const contractEvent = await getContractEvent(event.name);
+  //     const block = await getBlock();
+  //     console.log("the actual block", block);
+  //     if (!contractEvent) return;
 
-      const { contracts_id, events_id } = contractEvent;
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block: await getBlock(),
-        getData,
-        readContract,
-      };
+  //     const { contracts_id, events_id } = contractEvent;
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block: {
+  //         chainId: celo.id,
+  //         blockNumber: 31797751n,
+  //         // blockHash: "0x123" as `0x${string}`,
+  //         timestamp: 1712121212121,
+  //       },
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     console.log("requests", JSON.stringify(requests, null, 2));
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
-  indexer.on(
-    "EAS:Attested",
-    async ({
-      event,
-      getData,
-      getBlock,
-      context: { supportedSchemas },
-      readContract,
-    }) => {
-      const contractEvent = await getContractEvent(event.name);
+  // indexer.on(
+  //   "EAS:Attested",
+  //   async ({
+  //     event,
+  //     getData,
+  //     getBlock,
+  //     context: { supportedSchemas },
+  //     readContract,
+  //   }) => {
+  //     const contractEvent = await getContractEvent(event.name);
 
-      if (!contractEvent || !supportedSchemas) {
-        return;
-      }
+  //     if (!contractEvent || !supportedSchemas) {
+  //       return;
+  //     }
 
-      const { params } = event;
-      const schema = supportedSchemas.find(
-        (schema) => schema.uid === params.schema,
-      );
+  //     const { params } = event;
+  //     const schema = supportedSchemas.find(
+  //       (schema) => schema.uid === params.schema,
+  //     );
 
-      if (!schema) {
-        return;
-      }
+  //     if (!schema) {
+  //       return;
+  //     }
 
-      const block = await getBlock();
-      const { contracts_id, events_id } = contractEvent;
+  //     const block = await getBlock();
+  //     const { contracts_id, events_id } = contractEvent;
 
-      const context = {
-        event_name: event.name,
-        chain_id: chainId,
-        contracts_id,
-        events_id,
-        block,
-        schema,
-        getData,
-        readContract,
-      };
+  //     const context = {
+  //       event_name: event.name,
+  //       chain_id: chainId,
+  //       contracts_id,
+  //       events_id,
+  //       block,
+  //       schema,
+  //       getData,
+  //       readContract,
+  //     };
 
-      const requests = await processEvent({
-        event,
-        context,
-      });
+  //     const requests = await processEvent({
+  //       event,
+  //       context,
+  //     });
 
-      if (!requests || requests?.length === 0) return;
+  //     if (!requests || requests?.length === 0) return;
 
-      requestQueue.addRequests({
-        requests,
-      });
-    },
-  );
+  //     requestQueue.addRequests({
+  //       requests,
+  //     });
+  //   },
+  // );
 
   // -- Subscribe to deployed contracts based on contract events
   const slugToContractName = (slug: string) => {
@@ -402,13 +412,12 @@ export const getIndexer = async ({
         continue;
       }
 
+      const block = 8613600n;
+
       indexer.subscribeToContract({
         contract,
         address: event.contract_address,
-        fromBlock:
-          event.last_block_indexed > event.start_block
-            ? event.last_block_indexed
-            : event.start_block,
+        fromBlock: block - 2n,
         toBlock: "latest",
       });
     }

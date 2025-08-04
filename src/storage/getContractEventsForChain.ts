@@ -34,20 +34,12 @@ export const getContractEventsForChain = async ({
       event_name: contractEvent.event.name,
       // @ts-expect-error incorrect typing as array
       abi: contractEvent.event.abi,
-      last_block_indexed: contractEvent.last_block_indexed
-        ? BigInt(contractEvent.last_block_indexed)
-        : // @ts-expect-error incorrect typing as array
-          contractEvent.contract.start_block
-          ? // @ts-expect-error incorrect typing as array
-            BigInt(contractEvent.contract.start_block)
-          : 0n,
+      last_block_indexed: 0n,
       // @ts-expect-error incorrect typing as array
       contract_slug: contractEvent.contract.contract_slug,
       // @ts-expect-error incorrect typing as array
-      start_block: contractEvent.contract.start_block
-        ? // @ts-expect-error incorrect typing as array
-          BigInt(contractEvent.contract.start_block)
-        : 0n,
+      // start_block: 31807828n - 1n,
+      start_block: 0n,
     }));
   } catch (error) {
     console.error(
