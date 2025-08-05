@@ -27,7 +27,9 @@ export const TakerBid = z.object({
   transaction_hash: z.string(),
   currency_amount: z.bigint(),
   fee_amounts: z.array(z.bigint()),
-  fee_recipients: z.array(z.string().refine(isAddress, { message: "Invalid fee recipient address" })),
+  fee_recipients: z.array(
+    z.string().refine(isAddress, { message: "Invalid fee recipient address" }),
+  ),
 });
 
 export type TakerBid = z.infer<typeof TakerBid>;
@@ -145,8 +147,10 @@ export const storeTakerBid: StorageMethod<TakerBid> = async ({
       })
       .filter((x) => x !== null);
 
-    console.log("[IndexTakerBid] Deleting invalid orders", ordersToUpdate);
-    await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
+    if (ordersToUpdate.length > 0) {
+      console.log("[IndexTakerBid] Deleting invalid orders", ordersToUpdate);
+      await supabaseData.from("marketplace_orders").upsert(ordersToUpdate);
+    }
   }
 
   return [
