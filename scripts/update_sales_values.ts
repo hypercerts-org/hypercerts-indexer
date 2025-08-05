@@ -1,6 +1,10 @@
 import "dotenv/config";
 
-import { HypercertExchangeAbi, getHypercertTokenId, parseClaimOrFractionId } from "@hypercerts-org/sdk";
+import {
+  HypercertExchangeAbi,
+  getHypercertTokenId,
+  parseClaimOrFractionId,
+} from "@hypercerts-org/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { Chain, erc20Abi, getAddress, parseEventLogs, zeroAddress } from "viem";
 import {
@@ -37,6 +41,10 @@ const getChain = (chainId: number) => {
 };
 
 const main = async () => {
+  // This scripts has been deprecated as the transaction_hash is no longer unique for each sale
+  // since we introduced batching of sales
+  throw new Error("This script is deprecated");
+
   console.log("update_sales_values");
   // Get all sales rows
   // Create supabase client
@@ -166,7 +174,6 @@ const main = async () => {
       fee_amounts: result.fee_amounts.map((amount) => amount.toString()),
     };
   });
-
 
   // Upsert rows
   console.log("Upserting rows");
