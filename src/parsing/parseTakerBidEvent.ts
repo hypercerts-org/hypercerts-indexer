@@ -3,7 +3,11 @@ import { ParserMethod } from "@/indexer/LogParser.js";
 import { TakerBid } from "@/storage/storeTakerBid.js";
 import { getDeployment } from "@/utils/getDeployment.js";
 import { messages } from "@/utils/validation.js";
-import { HypercertExchangeAbi, HypercertMinterAbi, getHypercertTokenId } from "@hypercerts-org/sdk";
+import {
+  HypercertExchangeAbi,
+  HypercertMinterAbi,
+  getHypercertTokenId,
+} from "@hypercerts-org/sdk";
 import {
   erc20Abi,
   getAddress,
@@ -75,6 +79,7 @@ export const TakerBidEventSchema = z.object({
   }),
   blockNumber: z.coerce.bigint(),
   transactionHash: z.string(),
+  logIndex: z.number().int(),
 });
 
 export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
@@ -83,7 +88,6 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
 }) => {
   const { addresses } = getDeployment(Number(chain_id));
   const client = getEvmClient(Number(chain_id));
-
   try {
     const bid = TakerBidEventSchema.parse(event);
 
@@ -114,19 +118,7 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
       (log) => log.eventName === "TransferSingle",
     );
 
-    // Get the claim ID from either event type
-    let claimId;
-    // @ts-expect-error args is missing in the type
-    if (batchValueTransferLog?.args?.claimIDs?.[0]) {
-      // @ts-expect-error args is missing in the type
-      claimId = batchValueTransferLog.args.claimIDs[0];
-    // @ts-expect-error args is missing in the type
-    } else if (transferSingleLog?.args?.id) {
-      // In this case, the ID from the transferSingleLog is a fraction token ID
-      // We need to get the claim ID from the fraction token ID
-      // @ts-expect-error args is missing in the type
-      claimId = getHypercertTokenId(transferSingleLog.args.id);
-    }
+    const claimId = getHypercertTokenId(bid.params.itemIds[0]);
 
     if (!claimId) {
       throw new Error(
@@ -136,30 +128,9 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
 
     const hypercertId = `${chain_id}-${getAddress(bid.params?.collection)}-${claimId}`;
 
-    let currencyAmount = 0n;
-    const currency = getAddress(bid.params.currency);
-    if (currency === zeroAddress) {
-      // Get value of the transaction
-      const transaction = await client.getTransaction({
-        hash: bid.transactionHash as `0x${string}`,
-      });
-      currencyAmount = transaction.value;
-    } else {
-      const currencyLogs = transactionReceipt.logs.filter(
-        (log) => log.address.toLowerCase() === currency.toLowerCase(),
-      );
-      const parsedCurrencyLogs = parseEventLogs({
-        abi: erc20Abi,
-        logs: currencyLogs,
-      });
-      const transferLogs = parsedCurrencyLogs.filter(
-        (log) => log.eventName === "Transfer",
-      );
-      currencyAmount = transferLogs.reduce(
-        (acc, transferLog) => acc + (transferLog?.args?.value ?? 0n),
-        0n,
-      );
-    }
+    const currencyAmount = bid.params.feeAmounts.reduce((acc, amount) => {
+      return acc + amount;
+    }, 0n);
 
     const exchangeLogs = transactionReceipt.logs.filter(
       (log) =>
@@ -192,6 +163,7 @@ export const parseTakerBidEvent: ParserMethod<TakerBid> = async ({
         currency_amount: currencyAmount,
         fee_amounts: fee_amounts,
         fee_recipients: fee_recipients,
+        log_index: bid.logIndex,
       }),
     ];
   } catch (e) {
