@@ -1,0 +1,1 @@
+alter table sales alter column log_index set not null;
