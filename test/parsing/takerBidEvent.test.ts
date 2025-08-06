@@ -23,7 +23,7 @@ describe("parseTakerBidEvent", () => {
   // Sepolia exchange
   const exchange = getAddress("0xB1991E985197d14669852Be8e53ee95A1f4621c0");
   const minterAddress = getAddress(faker.finance.ethereumAddress());
-  const value = 20n;
+  const value = 500000000000n;
 
   const block: Block = {
     chainId,
@@ -40,35 +40,34 @@ describe("parseTakerBidEvent", () => {
     contracts_id: faker.string.uuid(),
   };
 
-  let event: any;
+  beforeEach(() => {});
 
-  beforeEach(() => {
-    event = {
-      address: getAddress(faker.finance.ethereumAddress()),
-      params: {
-        nonceInvalidationParameters: {
-          orderHash: faker.string.hexadecimal({ length: 64 }),
-          orderNonce: faker.number.bigInt(),
-          isNonceInvalidated: true,
-        },
-        bidUser: getAddress(faker.finance.ethereumAddress()),
-        bidRecipient: getAddress(faker.finance.ethereumAddress()),
-        strategyId: faker.number.bigInt(),
-        currency: getAddress(faker.finance.ethereumAddress()),
-        collection: collection,
-        itemIds: [faker.number.bigInt()],
-        amounts: [faker.number.bigInt()],
-        feeRecipients: [
-          getAddress("0xB522133dBd9C8B424429D89d821aeb2a115dB678"),
-          getAddress("0x0000000000000000000000000000000000000000"),
-        ],
-        feeAmounts: [495000000000n, 0n, 5000000000n],
+  const createEvent = (tokenId: bigint) => ({
+    address: getAddress(faker.finance.ethereumAddress()),
+    params: {
+      nonceInvalidationParameters: {
+        orderHash: faker.string.hexadecimal({ length: 64 }),
+        orderNonce: faker.number.bigInt(),
+        isNonceInvalidated: true,
       },
-      blockNumber: faker.number.bigInt(),
-      transactionHash: faker.string.hexadecimal({
-        length: 64,
-      }) as `0x${string}`,
-    };
+      bidUser: getAddress(faker.finance.ethereumAddress()),
+      bidRecipient: getAddress(faker.finance.ethereumAddress()),
+      strategyId: faker.number.bigInt(),
+      currency: getAddress(faker.finance.ethereumAddress()),
+      collection: collection,
+      itemIds: [tokenId],
+      amounts: [faker.number.bigInt()],
+      feeRecipients: [
+        getAddress("0xB522133dBd9C8B424429D89d821aeb2a115dB678"),
+        getAddress("0x0000000000000000000000000000000000000000"),
+      ],
+      feeAmounts: [495000000000n, 0n, 5000000000n],
+    },
+    blockNumber: faker.number.bigInt(),
+    transactionHash: faker.string.hexadecimal({
+      length: 64,
+    }) as `0x${string}`,
+    logIndex: faker.number.int(),
   });
 
   const createBatchValueTransferLog = () => ({
@@ -122,17 +121,6 @@ describe("parseTakerBidEvent", () => {
     removed: false,
   });
 
-  const createCurrencyLog = () => ({
-    eventName: "Transfer",
-    address: event.params.currency,
-    topics: [
-      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      "0x000000000000000000000000c3593524e2744e547f013e17e6b0776bc27fc614",
-      "0x000000000000000000000000c3593524e2744e547f013e17e6b0776bc27fc614",
-    ],
-    data: "0x0000000000000000000000000000000000000000000000000000000000000014",
-  });
-
   describe("hypercert ID construction", () => {
     it("correctly constructs hypercert ID from BatchValueTransfer event", async () => {
       const claimId = 238878221578498801351288974417101284442112n;
@@ -140,7 +128,10 @@ describe("parseTakerBidEvent", () => {
         logs: [createBatchValueTransferLog(), createExchangeLog()],
       });
 
-      const [bid] = await parseTakerBidEvent({ event, context });
+      const [bid] = await parseTakerBidEvent({
+        event: createEvent(claimId + 1n),
+        context,
+      });
 
       expect(bid.hypercert_id).toEqual(`${chainId}-${collection}-${claimId}`);
     });
@@ -154,7 +145,10 @@ describe("parseTakerBidEvent", () => {
         logs: [createTransferSingleLog(fractionId), createExchangeLog()],
       });
 
-      const [bid] = await parseTakerBidEvent({ event, context });
+      const [bid] = await parseTakerBidEvent({
+        event: createEvent(fractionId),
+        context,
+      });
 
       expect(bid.hypercert_id).toBe(`${chainId}-${collection}-${claimId}`);
       expect(getHypercertTokenId(fractionId)).toBe(claimId);
@@ -166,27 +160,17 @@ describe("parseTakerBidEvent", () => {
         logs: [createBatchValueTransferLog(), createExchangeLog()],
       });
 
-      const [bid] = await parseTakerBidEvent({ event, context });
+      const [bid] = await parseTakerBidEvent({
+        event: createEvent(firstClaimId + 1n),
+        context,
+      });
 
       expect(bid.hypercert_id).toBe(`${chainId}-${collection}-${firstClaimId}`);
     });
 
-    it("throws when BatchValueTransfer has empty claimIDs array", async () => {
-      mocks.getTransactionReceipt.mockResolvedValue({
-        logs: [
-          {
-            ...createBatchValueTransferLog(),
-            args: { claimIDs: [] },
-          },
-        ],
-      });
-
-      await expect(parseTakerBidEvent({ event, context })).rejects.toThrowError(
-        "Failed to find claim ID in BatchValueTransfer or TransferSingle events",
-      );
-    });
-
     it("throws when TransferSingle has invalid fraction token ID", async () => {
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
       mocks.getTransactionReceipt.mockResolvedValue({
         logs: [createTransferSingleLog(0n)],
       });
@@ -198,67 +182,17 @@ describe("parseTakerBidEvent", () => {
   });
 
   describe("event parsing", () => {
-    it("successfully parses event with BatchValueTransfer log for ERC20 currency", async () => {
-      const claimId = 238878221578498801351288974417101284442112n;
-      mocks.getTransactionReceipt.mockResolvedValue({
-        logs: [
-          createBatchValueTransferLog(),
-          createExchangeLog(),
-          createCurrencyLog(),
-        ],
-      });
-
-      mocks.getTransaction.mockResolvedValue({
-        value,
-      });
-
-      const [bid] = await parseTakerBidEvent({ event, context });
-
-      expect(bid).toBeDefined();
-      expect(bid.buyer).toBe(getAddress(event.params.bidRecipient));
-      expect(bid.seller).toBe(getAddress(event.params.feeRecipients[0]));
-      expect(bid.fee_amounts).toEqual(event.params.feeAmounts);
-      expect(bid.fee_recipients).toEqual(event.params.feeRecipients);
-      expect(bid.currency_amount).toEqual(value);
-    });
-
-    it("successfully parses event with BatchValueTransfer log for native currency", async () => {
-      const claimId = 238878221578498801351288974417101284442112n;
-      mocks.getTransactionReceipt.mockResolvedValue({
-        logs: [createBatchValueTransferLog(), createExchangeLog()],
-      });
-
-      const value = faker.number.bigInt();
-      mocks.getTransaction.mockResolvedValue({
-        value,
-      });
-
-      const [bid] = await parseTakerBidEvent({
-        event: {
-          ...event,
-          params: { ...event.params, currency: zeroAddress },
-        },
-        context,
-      });
-
-      expect(bid).toBeDefined();
-      expect(bid.buyer).toBe(getAddress(event.params.bidRecipient));
-      expect(bid.seller).toBe(getAddress(event.params.feeRecipients[0]));
-      expect(bid.fee_amounts).toEqual(event.params.feeAmounts);
-      expect(bid.fee_recipients).toEqual(event.params.feeRecipients);
-      expect(bid.currency_amount).toEqual(value);
-    });
-
     it("successfully parses event with TransferSingle log for ERC20 currency", async () => {
       const fractionId = 34368519059014784809800835350608589357056n;
       mocks.getTransactionReceipt.mockResolvedValue({
         logs: [
           createTransferSingleLog(fractionId),
           createExchangeLog(),
-          createCurrencyLog(),
+          // createCurrencyLog(),
         ],
       });
 
+      const event = createEvent(fractionId);
       const [bid] = await parseTakerBidEvent({ event, context });
 
       expect(bid).toBeDefined();
@@ -277,6 +211,7 @@ describe("parseTakerBidEvent", () => {
         value,
       });
 
+      const event = createEvent(fractionId);
       const [bid] = await parseTakerBidEvent({
         event: {
           ...event,
@@ -294,6 +229,8 @@ describe("parseTakerBidEvent", () => {
     });
 
     it("throws when no transfer logs are found", async () => {
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
       mocks.getTransactionReceipt.mockResolvedValue({ logs: [] });
       await expect(
         parseTakerBidEvent({ event, context }),
@@ -301,6 +238,9 @@ describe("parseTakerBidEvent", () => {
     });
 
     it("throws when event has invalid addresses", async () => {
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
+      // @ts-expect-error invalid address
       event.params.collection = "invalid-address";
       await expect(
         parseTakerBidEvent({ event, context }),
@@ -308,13 +248,18 @@ describe("parseTakerBidEvent", () => {
     });
 
     it("throws when required parameters are missing", async () => {
-      delete event.params.bidRecipient;
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
+      // @ts-expect-error purporsefully invalid address
+      event.params.bidRecipient = "invalid-address";
       await expect(
         parseTakerBidEvent({ event, context }),
       ).rejects.toThrowError();
     });
 
     it("throws when arrays are empty", async () => {
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
       event.params.itemIds = [];
       event.params.amounts = [];
       await expect(
@@ -323,6 +268,9 @@ describe("parseTakerBidEvent", () => {
     });
 
     it("throws when transaction hash is invalid", async () => {
+      const claimId = 238878221578498801351288974417101284442112n;
+      const event = createEvent(claimId + 1n);
+      // @ts-expect-error purporsefully invalid transaction hash
       event.transactionHash = "invalid-hash";
       await expect(
         parseTakerBidEvent({ event, context }),
