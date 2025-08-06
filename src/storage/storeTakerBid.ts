@@ -30,6 +30,7 @@ export const TakerBid = z.object({
   fee_recipients: z.array(
     z.string().refine(isAddress, { message: "Invalid fee recipient address" }),
   ),
+  log_index: z.number().int(),
 });
 
 export type TakerBid = z.infer<typeof TakerBid>;
